@@ -1,0 +1,56 @@
+{
+  "name": "@JacksonChen/dsh-devops",
+  "version": "0.1.0",
+  "description": "GitLab + K8s DevOps monitoring plugin for DeepSeek Harness",
+  "type": "module",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "slots",
+        "locale",
+        "sidebarRightTabs"
+      ],
+      "platform": "web"
+    }
+  },
+  "peerDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "react": "^18.2.0"
+  },
+  "dependencies": {
+    "yaml": "^2.4.0"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "*",
+    "@types/node": "^22.0.0",
+    "@types/react": "^18.3.0",
+    "react": "^18.2.0",
+    "typescript": "*",
+    "tsdown": "^0.12.0",
+    "vitest": "^3.0.0",
+    "tsx": "^4.0.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "tsdown && node scripts/postbuild.js",
+    "test": "vitest run",
+    "test:e2e": "vitest run tests/e2e/ --reporter=verbose",
+    "dev": "tsx src/index.ts",
+    "clean": "rimraf lib"
+  }
+}

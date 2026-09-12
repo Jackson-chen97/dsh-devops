@@ -1,0 +1,6 @@
+# dsh-devops bundle patch: declares the plugin row in the cordis tree.
+# Configuration is supplied by the user's profile cordis.patch.yml or
+# inlined in the row's `config` field. See examples/cordis-full.yml.
+- insert:
+    - id: dsh-devops
+      name: '@JacksonChen/dsh-devops'

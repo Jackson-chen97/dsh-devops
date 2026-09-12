@@ -1,0 +1,17 @@
+# 依赖与本地缓存（体积大，绝不入库）
+node_modules/
+.pnpm-store/
+.npm-cache/
+
+# 调试用临时脚本（非交付物）
+scripts/_*.cjs
+scripts/_probe.js
+
+# 本地环境
+.env
+*.log
+.DS_Store
+Thumbs.db
+.zcode/
+PROGRESS.md
+.vscode/
