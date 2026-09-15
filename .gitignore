@@ -18,3 +18,8 @@ Thumbs.db
 .zcode/
 PROGRESS.md
 .vscode/
+
+# IDE / scratch (local only)
+.trae/
+jobs.md
+pnpm-workspace.yaml

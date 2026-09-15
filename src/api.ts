@@ -456,6 +456,35 @@ async function gitlabPipelineJobs(params: { baseUrl: string; token: string; proj
   }
 }
 
+/** Strip ANSI escape codes and gitlab-runner control lines from a raw job trace, leaving plain text. */
+function cleanJobLog(s: string): string {
+  return s
+    .replace(/\u001b\[[0-9;?]*[a-zA-Z]/g, '')
+    .split('\n')
+    .filter((l) => !/^section_(start|end):/.test(l) && !/^get:job:/.test(l))
+    .join('\n')
+}
+
+/** Get the build log of a single GitLab pipeline job. Tries /log (GitLab ≥12), falls back to /trace (GitLab 11.x). */
+async function gitlabJobLog(params: { baseUrl: string; token: string; projectPath: string; jobId: number }): Promise<any> {
+  const { baseUrl, token, projectPath, jobId } = params
+  if (!baseUrl || !token || !projectPath || !jobId) return { ok: false, logs: '', message: 'Missing params' }
+  const jobUrl = `${baseUrl.replace(/\/+$/, '')}/projects/${projectPath}/jobs/${jobId}`
+  const apiBase = `${baseUrl.replace(/\/+$/, '')}/api/v4/projects/${encodeURIComponent(projectPath)}/jobs/${jobId}`
+  const authed = { headers: { 'PRIVATE-TOKEN': token } }
+  try {
+    let res = await fetchWithTimeout(`${apiBase}/log`, authed, 15000)
+    if (res.status === 404) res = await fetchWithTimeout(`${apiBase}/trace`, authed, 15000)
+    if (res.status === 404) return { ok: false, logs: '', message: '未获取到日志（该 GitLab 版本无可用的日志接口），请通过 GitLab 页面查看', jobUrl }
+    if (res.status === 202) return { ok: false, logs: '', message: 'Job 仍在运行，日志暂不可用，请稍后重试', jobUrl }
+    if (!res.ok) return { ok: false, logs: '', message: `GitLab API error: ${res.status}`, jobUrl }
+    return { ok: true, logs: cleanJobLog(await res.text()) }
+  } catch (err: any) {
+    if (err.name === 'AbortError') return { ok: false, logs: '', message: 'Timed out', jobUrl }
+    return { ok: false, logs: '', message: err.message, jobUrl }
+  }
+}
+
 /** List pods in a K8s namespace. */
 async function k8sPods(params: { kubeconfigPath: string; context?: string; namespace: string }): Promise<any> {
   const { kubeconfigPath, context, namespace } = params
@@ -893,7 +922,13 @@ function readLogs(params: Record<string, any>): any {
 function saveConfig(params: Record<string, any>): any {
   try {
     ensureConfigDir()
-    writeFileSync(CONFIG_FILE, JSON.stringify(params, null, 2), 'utf8')
+    // 浅合并：本次请求未带的段（如只保存了 k8s）保留原值，避免误删其他配置段
+    let existing: Record<string, any> = {}
+    if (existsSync(CONFIG_FILE)) {
+      try { existing = JSON.parse(readFileSync(CONFIG_FILE, 'utf8')) } catch { existing = {} }
+    }
+    if (!existing || typeof existing !== 'object' || Array.isArray(existing)) existing = {}
+    writeFileSync(CONFIG_FILE, JSON.stringify({ ...existing, ...params }, null, 2), 'utf8')
     writeLog('info', 'save-config', 'config written')
     return { ok: true, message: '配置已保存' }
   } catch (err: any) {
@@ -958,6 +993,7 @@ export function registerDevopsApi(ctx: any): void {
         'gitlab-mr-approve': gitlabMrApprove,
         'gitlab-mr-action': gitlabMrAction,
         'gitlab-pipeline-jobs': gitlabPipelineJobs,
+        'gitlab-job-log': gitlabJobLog,
         'k8s-set-image': k8sSetImage,
         'k8s-restart': k8sRestartDeployment,
         'test-k8s': testK8s,

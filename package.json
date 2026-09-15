@@ -1,5 +1,5 @@
 {
-  "name": "@JacksonChen/dsh-devops",
+  "name": "@jacksonchen/dsh-devops",
   "version": "0.1.0",
   "description": "GitLab + K8s DevOps monitoring plugin for DeepSeek Harness",
   "type": "module",

@@ -3,4 +3,4 @@
 # inlined in the row's `config` field. See examples/cordis-full.yml.
 - insert:
     - id: dsh-devops
-      name: '@JacksonChen/dsh-devops'
+      name: '@jacksonchen/dsh-devops'

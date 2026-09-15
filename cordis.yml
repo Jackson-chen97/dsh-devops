@@ -1,4 +1,4 @@
 - id: dsh-devops
-  name: '@JacksonChen/dsh-devops'
+  name: '@jacksonchen/dsh-devops'
   # config is injected from user's cordis.patch.yml or environment
   # See examples/cordis-full.yml for a complete configuration

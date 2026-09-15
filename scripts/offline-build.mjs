@@ -70,7 +70,7 @@ console.log(`  transpiled ${ok} file(s), ${failed} failed`);
 const dts = join(libDir, 'index.d.ts');
 writeFileSync(dts, [
   '/**',
-  ' * Public entry types for @JacksonChen/dsh-devops.',
+  ' * Public entry types for @jacksonchen/dsh-devops.',
   ' *',
   ' * Emitted by scripts/offline-build.mjs (a no-registry build using Node\'s',
   ' * built-in TypeScript type stripping). Declares the runtime value exports',
