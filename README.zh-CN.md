@@ -30,16 +30,22 @@
 
 ```sh
 # 从 npm 安装（发布后）
-cd ~/.dsh/profiles/web
-pnpm add @JacksonChen/dsh-devops
+dsh plugin --profile web add @JacksonChen/dsh-devops
 
 # 从 GitHub 安装
-cd ~/.dsh/profiles/web
-pnpm add https://github.com/Jackson-chen97/dsh-devops.git
+dsh plugin --profile web add https://github.com/Jackson-chen97/dsh-devops.git
 
 # 从本地目录安装（开发模式）
+dsh plugin --profile web add "D:/path/to/dsh-devops"
+```
+
+等价的 pnpm 命令（如果偏好直接在 profile 目录操作）：
+
+```sh
 cd ~/.dsh/profiles/web
-pnpm add "D:/path/to/dsh-devops"
+pnpm add @JacksonChen/dsh-devops       # npm（发布后）
+pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
+pnpm add "D:/path/to/dsh-devops"       # 本地路径
 ```
 
 然后在 profile 的补丁层 `~/.dsh/profiles/web/cordis.patch.yml` 中声明插件（必须——加了这个插件才会被加载）：
@@ -51,6 +57,36 @@ pnpm add "D:/path/to/dsh-devops"
 ```
 
 重启 DSH，打开 设置 → DevOps 完成配置。
+
+## 从预构建产物安装（无需构建、无需 registry）
+
+`lib/` 里是完整可运行的构建产物，并且**已提交到仓库**——因此安装时**无需构建步骤、无需包管理器**，适合受限或离线环境。直接 `git clone` 即可。
+
+```sh
+# 1) 克隆到任意目录
+git clone https://github.com/Jackson-chen97/dsh-devops
+
+# 2) 把预构建 bundle 拷到 profile 的共享 node_modules
+#    （Windows 上 ~/.dsh 即 %USERPROFILE%\.dsh）
+DEST=~/.dsh/profiles/node_modules/@JacksonChen/dsh-devops
+mkdir -p "$DEST"
+cp -R dsh-devops/lib dsh-devops/package.json dsh-devops/cordis.patch.yml "$DEST"/
+
+# 3) 注册 bundle：把 "@JacksonChen/dsh-devops" 加进
+#    ~/.dsh/profiles/web/package.json 的 `dsh.profile.bundles`。这和加载
+#    @deepseek-ai/dsh-base、dsh-web-app 用的是同一份列表；bundle 会通过
+#    自带的 cordis.patch.yml 自我注册。例如：
+#    "dsh": { "profile": { "bundles": [
+#      "@deepseek-ai/dsh-base",
+#      "@deepseek-ai/dsh-web-app",
+#      "@JacksonChen/dsh-devops"
+#    ] } }
+
+# 4) 重启 DSH，打开 设置 → DevOps。
+```
+
+> 离线产物只含 `lib/*.js`；`.d.ts` 类型文件由正常的 `pnpm run build`（tsdown）生成，
+> 预构建 bundle 仅提供运行时。
 
 ## 快速开始
 
@@ -143,6 +179,7 @@ pnpm add "D:/path/to/dsh-devops"
 pnpm install
 pnpm run typecheck   # TypeScript 类型检查
 pnpm run build       # 使用 tsdown 构建（输出到 lib/）
+node scripts/offline-build.mjs   # 离线重建 lib/（Node >= 22.13，无需 registry）
 pnpm run test        # 运行单元测试
 ```
 
@@ -153,12 +190,14 @@ src/
 ├── index.ts          # 插件入口：apply(ctx) 编排
 ├── config.ts         # 统一配置解析与校验
 ├── types.ts          # 公共类型定义
+├── api.ts            # 本地 HTTP 路由（设置向导连通性测试）
+├── runtime-config.ts # 运行时配置（~/.dsh-devops/config.json）
 ├── gitlab/           # GitLab API 客户端 + 多项目路由
 ├── k8s/              # K8s API 客户端 + kubeconfig 解析 + 多集群路由
 ├── tools/            # 工具注册（gitlab_*、k8s_*）
 ├── webhook/          # GitLab Webhook → followup 处理
 ├── monitor/          # 后台轮询告警引擎 + 节流
-└── ui/               # 监控台面板（可选，DSH UI 扩展）
+└── runtime/          # 惰性服务包装（lazy.ts）
 ```
 
 ## 环境要求

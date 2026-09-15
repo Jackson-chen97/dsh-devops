@@ -30,16 +30,22 @@ The `dsh plugin` command forwards to pnpm inside the profile directory, so any p
 
 ```sh
 # From npm (once published)
-cd ~/.dsh/profiles/web
-pnpm add @JacksonChen/dsh-devops
+dsh plugin --profile web add @JacksonChen/dsh-devops
 
 # From GitHub
-cd ~/.dsh/profiles/web
-pnpm add https://github.com/Jackson-chen97/dsh-devops.git
+dsh plugin --profile web add https://github.com/Jackson-chen97/dsh-devops.git
 
 # From a local checkout (development)
+dsh plugin --profile web add "D:/path/to/dsh-devops"
+```
+
+Equivalent pnpm commands (if you prefer to work directly in the profile dir):
+
+```sh
 cd ~/.dsh/profiles/web
-pnpm add "D:/path/to/dsh-devops"
+pnpm add @JacksonChen/dsh-devops       # npm (once published)
+pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
+pnpm add "D:/path/to/dsh-devops"       # local path
 ```
 
 Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis.patch.yml` (required — the plugin is only loaded after this step):
@@ -51,6 +57,38 @@ Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis
 ```
 
 Restart DSH, then open Settings → DevOps to configure.
+
+## Install from prebuilt artifacts (no build, no registry)
+
+`lib/` ships a complete, runnable bundle and is **committed to the repo**, so
+you can install with no build step and no package registry — ideal for
+locked-down or offline machines. A plain `git clone` is enough.
+
+```sh
+# 1) Clone anywhere you like
+git clone https://github.com/Jackson-chen97/dsh-devops
+
+# 2) Copy the prebuilt bundle into the profile's shared node_modules
+#    (~/.dsh is %USERPROFILE%\.dsh on Windows)
+DEST=~/.dsh/profiles/node_modules/@JacksonChen/dsh-devops
+mkdir -p "$DEST"
+cp -R dsh-devops/lib dsh-devops/package.json dsh-devops/cordis.patch.yml "$DEST"/
+
+# 3) Register the bundle: add "@JacksonChen/dsh-devops" to
+#    `dsh.profile.bundles` in ~/.dsh/profiles/web/package.json. This is the
+#    same list that loads @deepseek-ai/dsh-base and dsh-web-app; the bundle then
+#    self-registers through its own cordis.patch.yml. e.g.
+#    "dsh": { "profile": { "bundles": [
+#      "@deepseek-ai/dsh-base",
+#      "@deepseek-ai/dsh-web-app",
+#      "@JacksonChen/dsh-devops"
+#    ] } }
+
+# 4) Restart DSH, then open Settings → DevOps.
+```
+
+> The offline artifact is `lib/*.js` only. The `.d.ts` type files come from the
+> normal `pnpm run build` (tsdown); the prebuilt bundle is runtime-only.
 
 ## Quick Start
 
@@ -143,6 +181,7 @@ An explicit `config:` block in the cordis patch entry still works as an override
 pnpm install
 pnpm run typecheck   # TypeScript check
 pnpm run build       # Build with tsdown (output in lib/)
+node scripts/offline-build.mjs   # no-registry rebuild of lib/ (Node >= 22.13)
 pnpm run test        # Run unit tests
 ```
 
@@ -153,12 +192,14 @@ src/
 ├── index.ts          # Plugin entry: apply(ctx) orchestrator
 ├── config.ts         # Unified config parsing + validation
 ├── types.ts          # Shared public types
+├── api.ts            # Local HTTP routes (settings wizard connectivity test)
+├── runtime-config.ts # Runtime config loader (~/.dsh-devops/config.json)
 ├── gitlab/           # GitLab API client + multi-project router
 ├── k8s/              # K8s API client + kubeconfig parser + multi-cluster router
 ├── tools/            # Tool registration (gitlab_*, k8s_*)
 ├── webhook/          # GitLab webhook → followup handler
 ├── monitor/          # Background polling alert engine + throttle
-└── ui/               # Dashboard panel (optional, DSH UI extension)
+└── runtime/          # Lazy service wrappers (lazy.ts)
 ```
 
 ## Requirements

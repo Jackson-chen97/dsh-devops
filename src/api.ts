@@ -20,14 +20,35 @@ function writeJson(res: any, status: number, body: unknown): void {
 }
 
 function readBody(req: any): Promise<any> {
+  // If the framework has already parsed the body (common with DSH webServer),
+  // return it immediately instead of trying to listen on a consumed stream.
+  if (req.body && typeof req.body === 'object') {
+    return Promise.resolve(req.body)
+  }
+  // If the stream is no longer readable (already consumed by a middleware),
+  // there are no more 'data'/'end' events — resolve with whatever we have.
+  if (req.readable === false || req.readable === undefined && req._readableState?.readable === false) {
+    return Promise.resolve(req.body ?? {})
+  }
   return new Promise((resolve, reject) => {
     let data = ''
+    let settled = false
+    const finish = (val: any) => { if (!settled) { settled = true; resolve(val) } }
+    const fail = (err: Error) => { if (!settled) { settled = true; reject(err) } }
     req.on('data', (chunk: string) => { data += chunk })
     req.on('end', () => {
-      try { resolve(data ? JSON.parse(data) : {}) }
-      catch { resolve({}) }
+      try { finish(data ? JSON.parse(data) : {}) }
+      catch { finish({}) }
     })
-    req.on('error', reject)
+    req.on('error', fail)
+    // Safety net: if neither 'data' nor 'end' ever fires (stream already
+    // consumed upstream), this resolves after 1s instead of hanging forever.
+    setTimeout(() => {
+      if (!settled) {
+        try { finish(data ? JSON.parse(data) : {}) }
+        catch { finish({}) }
+      }
+    }, 1000).unref()
   })
 }
 
@@ -914,7 +935,13 @@ export function registerDevopsApi(ctx: any): void {
       }
 
       const pathname = new URL(req.url ?? '/', 'http://dsh.internal').pathname
-      const method = pathname.startsWith('/devops/api/') ? pathname.slice(12) : ''
+      // The prefix may or may not have been stripped by the DSH router, so
+      // try both forms. Also accept a bare '/method' if the prefix was stripped.
+      const method = pathname.startsWith('/devops/api/')
+        ? pathname.slice('/devops/api/'.length)
+        : pathname.startsWith('/')
+          ? pathname.slice(1)
+          : ''
 
       const handlers: Record<string, (p: any) => Promise<any>> = {
         'test-gitlab': testGitLab,

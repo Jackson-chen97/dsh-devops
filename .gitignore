@@ -3,6 +3,9 @@ node_modules/
 .pnpm-store/
 .npm-cache/
 
+# 预构建产物：lib/ 随仓库发布，可直接离线安装（无需构建、无需 registry）。
+# 请勿将其忽略；重新生成用 `node scripts/offline-build.mjs`（或 `pnpm run build`）。
+
 # 调试用临时脚本（非交付物）
 scripts/_*.cjs
 scripts/_probe.js
