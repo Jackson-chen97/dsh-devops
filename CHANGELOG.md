@@ -1,6 +1,6 @@
 # 变更记录 / Changelog
 
-## Unreleased（v0.1.0 之后）
+## v0.1.1
 
 ### 新增
 - **Job 日志接口**：新增 `gitlab-job-log`（`/log` 优先，404 时回退 `/trace`，兼容 GitLab 11.x 如 11.11.7）；自动剥离 ANSI 转义码与 gitlab-runner 控制行。
