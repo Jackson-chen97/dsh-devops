@@ -1,5 +1,5 @@
 /**
- * @JacksonChen/dsh-devops — Plugin entry point.
+ * @jacksonchen/dsh-devops — Plugin entry point.
  *
  * A single unified DSH plugin providing GitLab + K8s DevOps monitoring.
  * All modules are activated on-demand based on configuration:
