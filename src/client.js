@@ -1,5 +1,5 @@
 window.__ModuleLoader__.load({
-  id: "@jacksonchen/dsh-devops",
+  id: "@JacksonChen/dsh-devops",
   factory: (require) => {
     const React = require("react");
     const h = React.createElement;
@@ -70,7 +70,7 @@ window.__ModuleLoader__.load({
       nameGlPh: "e.g. Company GitLab", nameK8sPh: "e.g. Production cluster",
       project: "Project", refresh: "Refresh", testGlFirst: "Test the GitLab connection first",
       searchProjPh: "Search projects...", search: "Search", testFirst: "Test connection first",
-      loading: "Loading...", noProjects: "No projects", selProject: "Select project...", searchPh: "Search...", noMatch: "No matches",
+      loading: "Loading...", noProjects: "No projects", selProject: "Select project...",
       branch: "Branch", selProjFirst: "Select a project first", searchBrPh: "Search branches...",
       loadingBr: "Loading branches...", noBranches: "No branches", selBranch: "Select branch...",
       brFail: "Failed to fetch branches", delGl: "🗑 Delete this GitLab config",
@@ -83,16 +83,16 @@ window.__ModuleLoader__.load({
       justNow: "just now", minAgo: "{n} min ago", hourAgo: "{n} h ago", dayAgo: "{n} d ago",
       detecting: "Checking...", notConfigured: "Not configured", server: "Server", configFile: "Config file",
       glNotCfg: "GitLab not configured", loadingProjects: "Loading projects...", ctxPh: "context...", nsPh: "namespace...",
-      logs: "Logs", noMrs: "No open MRs", pending: "{n} pending", mergeable: "�?Mergeable",
-      openInGl: "Open in GitLab", descPh: "Describe the changes...", createMr: "�?Create MR", cancel: "Cancel",
+      logs: "Logs", noMrs: "No open MRs", pending: "{n} pending", mergeable: "✓ Mergeable",
+      openInGl: "Open in GitLab", descPh: "Describe the changes...", createMr: "✓ Create MR", cancel: "Cancel",
       noTags: "No tags", pickHist: "Pick a tag to prefill...", selRef: "Select ref...",
-      releasePh: "Release notes", createTag: "�?Create Tag", noPips: "No pipelines",
+      releasePh: "Release notes", createTag: "✓ Create Tag", noPips: "No pipelines",
       loadingJobs: "Loading jobs...", noJobs: "No jobs", noDeps: "No deployments",
-      setImage: "Image", restart: "Restart", apply: "�?Apply", noPods: "No running pods",
+      setImage: "Image", restart: "Restart", apply: "✓ Apply", noPods: "No running pods",
       close: "Close", loadingLogs: "Loading logs...", noLogs: "(no logs)", noEvents: "No events",
       noActivity: "No activity", noLogsText: "No logs", glNotCfg2: "GitLab not configured",
       k8sNotCfg2: "K8s not configured", loadingShort: "Loading...", notCfgBig: "DevOps services not configured",
-      goCfgHint: "Finish the GitLab / K8s setup directly below (same form as Settings �?DevOps).", goCfg: "Configure",
+      goCfgHint: "Go to Settings → DevOps to finish the GitLab / K8s setup.", goCfg: "Configure",
       fillMr: "Fill in Source / Target / Title", mrFail: "Failed to create MR", createFail: "Creation failed",
       fillTag: "Fill in Tag Name / Ref", tagFail: "Failed to create tag", approveFail: "Approval failed",
       actionFail: "Action failed", closeFail: "Failed to close", imgFail: "Failed to set image",
@@ -105,7 +105,7 @@ window.__ModuleLoader__.load({
       statMrsTitle: "Open MRs", statPipsTitle: "Pipelines", statDepsTitle: "Deployments", statPodsTitle: "Unhealthy Pods",
       secMrs: "Merge Requests", secTags: "Tags", secPips: "Pipelines", secDeps: "Deployments", secEvents: "Recent Events",
       tabActivity: "Activity", newBtn: "+ New", newMrBtn: "+ New MR", newTagBtn: "+ New Tag",
-      approve: "�?Approve", retry: "Retry", runningBadge: "Running", issueN: "{n} issue", ready: "ready",
+      approve: "✓ Approve", retry: "Retry", runningBadge: "Running", issueN: "{n} issue", ready: "ready",
       titleLabel: "Title", descLabel: "Description", msgLabel: "Message", tagNameLabel: "Tag Name",
       serverLabel: "Server", projectLabel: "Project", configFileLabel: "Config file",
       statMrsSub: "{p} pending · {r} pipeline(s) running", statPipSub: "{r} running · {o} ok · {f} failed",
@@ -115,75 +115,69 @@ window.__ModuleLoader__.load({
       remaining: " · {n} left", pipAction: "Pipeline #{id} {action}", mrClosed: "MR !{iid} closed",
       imageUpdated: "{name} image updated to {image}, rolling out...", restarting: "Restarting {name} (rolling rebuild)",
       pipCanceled: "cancelled", pipRetried: "retried", restartsN: "{n} restarts",
-      autoTitleSuffix: " ({s} �?{t})", descHead: "## Changes", descCommit: "## Latest commit",
-      descSource: "## Source", descBranch: "- Branch: `{s}` �?`{t}`", editingWhat: "Edit: {name}",
-      mrModalTitle: "New Merge Request", tagModalTitle: "New Tag", restartModalTitle: "Restart Deployment",
-      restartConfirm: "Restart {name}? All of its pods will be rolling-recreated.",
-      curImage: "Current image", newImage: "New image", confirm: "Confirm",
+      autoTitleSuffix: " ({s} → {t})", descHead: "## Changes", descCommit: "## Latest commit",
+      descSource: "## Source", descBranch: "- Branch: `{s}` → `{t}`", editingWhat: "Edit: {name}",
     };
     // 中文即源文案
     const I18N_ZH = {
-      select: "选择...", testConn: "测试连接", restored: "已恢复已保存的配�?, restoreFail: "恢复项目列表失败",
-      k8sFail: "K8s 连接失败", fillGl: "请填�?Base URL �?Token", connecting: "连接�?..",
-      fillKc: "请填�?kubeconfig 路径", completeOne: "请至少完成一个服务的配置",
-      saved: "配置已保�?, saveFailed: "保存失败", notCfgYet: "⚠️ 尚未配置 DevOps 服务",
-      fillGlOrK8s: "请填�?GitLab �?Kubernetes 连接信息后保存�?,
-      connected: "已连�?, connectFailed: "连接失败", glServers: "GitLab 服务�?,
-      unnamed: "未命�?, noUrl: "未填�?URL", noPath: "未填写路�?, editing: "编辑�?,
-      addServer: "+ 添加服务�?, addKc: "+ 添加配置文件", name: "名称",
+      select: "选择...", testConn: "测试连接", restored: "已恢复已保存的配置", restoreFail: "恢复项目列表失败",
+      k8sFail: "K8s 连接失败", fillGl: "请填写 Base URL 和 Token", connecting: "连接中...",
+      fillKc: "请填写 kubeconfig 路径", completeOne: "请至少完成一个服务的配置",
+      saved: "配置已保存", saveFailed: "保存失败", notCfgYet: "⚠️ 尚未配置 DevOps 服务",
+      fillGlOrK8s: "请填写 GitLab 或 Kubernetes 连接信息后保存。",
+      connected: "已连接", connectFailed: "连接失败", glServers: "GitLab 服务器",
+      unnamed: "未命名", noUrl: "未填写 URL", noPath: "未填写路径", editing: "编辑中",
+      addServer: "+ 添加服务器", addKc: "+ 添加配置文件", name: "名称",
       nameGlPh: "如：公司内网 GitLab", nameK8sPh: "如：生产集群",
       project: "项目", refresh: "刷新", testGlFirst: "请先测试连接 GitLab",
       searchProjPh: "搜索项目...", search: "搜索", testFirst: "请先测试连接",
-      loading: "加载�?..", noProjects: "暂无项目", selProject: "选择项目...", searchPh: "搜索...", noMatch: "无匹�?,
+      loading: "加载中...", noProjects: "暂无项目", selProject: "选择项目...",
       branch: "分支", selProjFirst: "请先选择项目", searchBrPh: "搜索分支...",
       loadingBr: "正在加载分支...", noBranches: "暂无分支", selBranch: "选择分支...",
       brFail: "获取分支失败", delGl: "🗑 删除这套 GitLab 配置",
       kcConfig: "Kubeconfig 配置", kcPath: "Kubeconfig 路径", browse: "浏览...",
       testK8sFirst: "请先测试连接 K8s", selCtx: "选择 context...",
       selCtxFirst: "请先选择 Context", loadingNs: "正在加载...", noNs: "集群中无 namespace",
-      selNs: "从集群选择...", manualNs: "或手动输�?namespace",
-      nsHint: "自动取自 kubeconfig 上下�?/ 从集群下拉选择 / 手动输入（无列表权限时）",
+      selNs: "从集群选择...", manualNs: "或手动输入 namespace",
+      nsHint: "自动取自 kubeconfig 上下文 / 从集群下拉选择 / 手动输入（无列表权限时）",
       delK8s: "🗑 删除这套 K8s 配置", saveConfig: "保存配置",
-      justNow: "刚刚", minAgo: "{n} 分钟�?, hourAgo: "{n} 小时�?, dayAgo: "{n} 天前",
-      detecting: "检测中...", notConfigured: "未配�?, server: "服务�?, configFile: "配置文件",
-      glNotCfg: "未配�?GitLab", loadingProjects: "加载项目列表...", ctxPh: "context...", nsPh: "namespace...",
-      logs: "日志", noMrs: "暂无 Open MR", pending: "{n} 待审�?, mergeable: "�?可合�?,
-      openInGl: "�?GitLab 打开", descPh: "变更说明...", createMr: "�?创建 MR", cancel: "取消",
-      noTags: "暂无 Tag", pickHist: "选择历史 Tag，快速填�?..", selRef: "选择 ref...",
-      releasePh: "发布说明", createTag: "�?创建 Tag", noPips: "暂无 Pipeline 数据",
-      loadingJobs: "加载 jobs...", noJobs: "�?job 数据", noDeps: "暂无 Deployment",
-      setImage: "换镜�?, restart: "重启", apply: "�?应用", noPods: "无运行中�?Pod",
-      close: "关闭", loadingLogs: "加载日志�?..", noLogs: "(无日�?", noEvents: "暂无事件",
-      noActivity: "暂无动�?, noLogsText: "暂无日志", glNotCfg2: "GitLab 未配�?,
-      k8sNotCfg2: "K8s 未配�?, loadingShort: "加载...", notCfgBig: "未配�?DevOps 服务",
-      goCfgHint: "请在下方直接完成配置（与「设�?�?DevOps」为同一表单）�?, goCfg: "去配�?,
-      fillMr: "请至少填�?Source / Target / Title", mrFail: "创建 MR 失败", createFail: "创建失败",
-      fillTag: "请至少填�?Tag Name / Ref", tagFail: "创建 Tag 失败", approveFail: "审批失败",
+      justNow: "刚刚", minAgo: "{n} 分钟前", hourAgo: "{n} 小时前", dayAgo: "{n} 天前",
+      detecting: "检测中...", notConfigured: "未配置", server: "服务器", configFile: "配置文件",
+      glNotCfg: "未配置 GitLab", loadingProjects: "加载项目列表...", ctxPh: "context...", nsPh: "namespace...",
+      logs: "日志", noMrs: "暂无 Open MR", pending: "{n} 待审批", mergeable: "✓ 可合并",
+      openInGl: "在 GitLab 打开", descPh: "变更说明...", createMr: "✓ 创建 MR", cancel: "取消",
+      noTags: "暂无 Tag", pickHist: "选择历史 Tag，快速填充...", selRef: "选择 ref...",
+      releasePh: "发布说明", createTag: "✓ 创建 Tag", noPips: "暂无 Pipeline 数据",
+      loadingJobs: "加载 jobs...", noJobs: "无 job 数据", noDeps: "暂无 Deployment",
+      setImage: "换镜像", restart: "重启", apply: "✓ 应用", noPods: "无运行中的 Pod",
+      close: "关闭", loadingLogs: "加载日志中...", noLogs: "(无日志)", noEvents: "暂无事件",
+      noActivity: "暂无动态", noLogsText: "暂无日志", glNotCfg2: "GitLab 未配置",
+      k8sNotCfg2: "K8s 未配置", loadingShort: "加载...", notCfgBig: "未配置 DevOps 服务",
+      goCfgHint: "请前往 设置 → DevOps 完成 GitLab / K8s 配置。", goCfg: "去配置",
+      fillMr: "请至少填写 Source / Target / Title", mrFail: "创建 MR 失败", createFail: "创建失败",
+      fillTag: "请至少填写 Tag Name / Ref", tagFail: "创建 Tag 失败", approveFail: "审批失败",
       actionFail: "操作失败", closeFail: "关闭失败", imgFail: "更换镜像失败",
       restartFail: "重启失败", logsFail: "获取日志失败", k8sCfg: "K8s 配置",
-      loadingMem: "成员加载�?..", noMem: "无可选成�?, selReviewer: "+ 选择 Reviewer...",
-      histTag: "从历�?Tag 快速创建（自动生成新版本号填入 Tag Name�?,
-      refLabel: "Ref（分支或已有 Tag�?,
+      loadingMem: "成员加载中...", noMem: "无可选成员", selReviewer: "+ 选择 Reviewer...",
+      histTag: "从历史 Tag 快速创建（自动生成新版本号填入 Tag Name）",
+      refLabel: "Ref（分支或已有 Tag）",
       reviewersLabel: "Reviewers（从项目成员下拉选择，可多选）",
-      sourceBranch: "源分�?, targetBranch: "目标分支",
-      statMrsTitle: "开�?MR", statPipsTitle: "流水�?, statDepsTitle: "部署", statPodsTitle: "异常 Pod",
-      secMrs: "合并请求", secTags: "标签", secPips: "流水�?, secDeps: "部署", secEvents: "最近事�?,
-      tabActivity: "动�?, newBtn: "+ 新建", newMrBtn: "+ 新建 MR", newTagBtn: "+ 新建 Tag",
-      approve: "�?审批", retry: "重试", runningBadge: "运行�?, issueN: "{n} 异常", ready: "就绪",
+      sourceBranch: "源分支", targetBranch: "目标分支",
+      statMrsTitle: "开放 MR", statPipsTitle: "流水线", statDepsTitle: "部署", statPodsTitle: "异常 Pod",
+      secMrs: "合并请求", secTags: "标签", secPips: "流水线", secDeps: "部署", secEvents: "最近事件",
+      tabActivity: "动态", newBtn: "+ 新建", newMrBtn: "+ 新建 MR", newTagBtn: "+ 新建 Tag",
+      approve: "✓ 审批", retry: "重试", runningBadge: "运行中", issueN: "{n} 异常", ready: "就绪",
       titleLabel: "标题", descLabel: "描述", msgLabel: "说明", tagNameLabel: "Tag 名称",
-      serverLabel: "服务�?, projectLabel: "项目", configFileLabel: "配置文件",
-      statMrsSub: "{p} 待审�?· {r} pipeline 运行�?, statPipSub: "{r} running · {o} ok · {f} failed",
+      serverLabel: "服务器", projectLabel: "项目", configFileLabel: "配置文件",
+      statMrsSub: "{p} 待审批 · {r} pipeline 运行中", statPipSub: "{r} running · {o} ok · {f} failed",
       statDepSub: "{f} failure · {p} progressing", statPodSub: "{c} crash · {p} pending",
-      defaultSuffix: "（默认）", logsLast: "~/.dsh-devops/devops.log · 最�?{n} �?,
-      mrCreated: "MR !{iid} 已创�?, tagCreated: "Tag {name} 已创�?, approved: "已为 !{iid} 投票审批",
-      remaining: " · 剩余 {n}", pipAction: "Pipeline #{id} {action}", mrClosed: "MR !{iid} 已关�?,
-      imageUpdated: "{name} 镜像已更新为 {image}，滚动更新中...", restarting: "{name} 重启中（滚动重建 pods�?,
-      pipCanceled: "已取�?, pipRetried: "已重�?, restartsN: "{n} 次重�?,
-      autoTitleSuffix: "（{s} �?{t}�?, descHead: "## 变更说明", descCommit: "## 最新提�?,
-      descSource: "## 来源", descBranch: "- 分支：`{s}` �?`{t}`", editingWhat: "编辑：{name}", editingWhat: "编辑：{name}",
-      mrModalTitle: "新建 MR", tagModalTitle: "新建 Tag", restartModalTitle: "重启 Deployment",
-      restartConfirm: "确定重启 {name}？将滚动重建�?Deployment 的所�?Pod�?,
-      curImage: "当前镜像", newImage: "新镜�?, confirm: "确定",
+      defaultSuffix: "（默认）", logsLast: "~/.dsh-devops/devops.log · 最近 {n} 条",
+      mrCreated: "MR !{iid} 已创建", tagCreated: "Tag {name} 已创建", approved: "已为 !{iid} 投票审批",
+      remaining: " · 剩余 {n}", pipAction: "Pipeline #{id} {action}", mrClosed: "MR !{iid} 已关闭",
+      imageUpdated: "{name} 镜像已更新为 {image}，滚动更新中...", restarting: "{name} 重启中（滚动重建 pods）",
+      pipCanceled: "已取消", pipRetried: "已重试", restartsN: "{n} 次重启",
+      autoTitleSuffix: "（{s} → {t}）", descHead: "## 变更说明", descCommit: "## 最新提交",
+      descSource: "## 来源", descBranch: "- 分支：`{s}` → `{t}`", editingWhat: "编辑：{name}", editingWhat: "编辑：{name}",
     };
     const I18N = { zh: I18N_ZH, en: I18N_EN };
 
@@ -229,19 +223,18 @@ window.__ModuleLoader__.load({
       return h("input", { style: S.input, ...props });
     }
 
-    // 唯一 id 生成：Date.now() 在连续快速点击（同毫秒）下会碰撞�?    // 导致新增的多个配置项 id 相同、互相覆盖。加自增序号保证唯一�?    let __uidSeq = 0;
-    function uid(prefix) {
-      __uidSeq = (__uidSeq + 1) % 1296;
-      return prefix + Date.now().toString(36) + __uidSeq.toString(36);
-    }
-
-    function Select({ options, value, onChange, disabled, placeholder, style }) {
+    function Select({ options, value, onChange, disabled, placeholder, style, name }) {
+      if (name) useEffect(() => {
+        console.log("[devops-sel:" + name + "] MOUNT");
+        return () => console.log("[devops-sel:" + name + "] UNMOUNT");
+      }, [name]);
       const validOpts = (options || []).filter((opt) => opt != null);
       return h("select", {
         style: { ...S.select, opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "pointer", ...style },
         value: value || "",
         onChange: (e) => onChange(e.target.value),
         disabled,
+        onMouseDown: name ? () => console.log("[devops-sel:" + name + "] mousedown disabled=" + !!disabled) : undefined,
       }, [
         h("option", { key: "__ph", value: "", disabled: !!disabled }, placeholder || t("select")),
         ...validOpts.map((opt) => {
@@ -252,73 +245,6 @@ window.__ModuleLoader__.load({
           return h("option", { key: val, value: val, disabled: optDisabled }, lbl);
         }).filter(Boolean),
       ]);
-    }
-
-    // 可搜索下拉：触发按钮 + 浮动面板（顶部搜索框 + 选项列表）�?    // 搜索框为 uncontrolled input（规�?slot 面板层输入拦截），过滤状态由 onChange 驱动�?    function SearchSelect({ options, value, onChange, disabled, placeholder, style, searchPlaceholder }) {
-      const [open, setOpen] = useState(false);
-      const [q, setQ] = useState("");
-      const boxRef = useRef(null);
-      const inputRef = useRef(null);
-      useEffect(() => {
-        if (!open) return;
-        const onDoc = (e) => { if (boxRef.current && !boxRef.current.contains(e.target)) setOpen(false); };
-        document.addEventListener("mousedown", onDoc);
-        const tm = setTimeout(() => { if (inputRef.current) { inputRef.current.value = ""; inputRef.current.focus(); } }, 0);
-        return () => { document.removeEventListener("mousedown", onDoc); clearTimeout(tm); };
-      }, [open]);
-      const validOpts = (options || []).filter((o) => o != null);
-      const optVal = (o) => (typeof o === "string" ? o : (o.value != null ? o.value : null));
-      const optLbl = (o) => (typeof o === "string" ? o : (o.label != null ? o.label : optVal(o)));
-      const sel = value || "";
-      const selOpt = validOpts.find((o) => optVal(o) === sel);
-      const selLbl = sel ? (selOpt ? optLbl(selOpt) : sel) : "";
-      const shown = q ? validOpts.filter((o) => optLbl(o).toLowerCase().includes(q.toLowerCase())) : validOpts;
-      const pick = (v) => { if (inputRef.current) inputRef.current.value = ""; setQ(""); setOpen(false); onChange(v); };
-      return h("div", { ref: boxRef, style: { position: "relative", minWidth: 0, ...style } },
-        h("button", {
-          type: "button",
-          onClick: () => { if (!disabled) setOpen((o) => !o); },
-          style: {
-            ...S.select, ...style, display: "flex", alignItems: "center", gap: 4, textAlign: "left",
-            opacity: disabled ? 0.5 : 1, cursor: disabled ? "not-allowed" : "pointer",
-          },
-        },
-          h("span", { style: { flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: sel ? "inherit" : "#666" } }, sel ? selLbl : (placeholder || t("select"))),
-          h("span", { style: { color: "#888", fontSize: 10, flexShrink: 0 } }, "�?),
-        ),
-        open && !disabled && h("div", {
-          style: {
-            position: "absolute", top: "100%", left: 0, width: "max-content", minWidth: "100%", maxWidth: 340, zIndex: 60, marginTop: 3,
-            background: "var(--ds-alias-surface-inset, #1c1c1c)", border: "1px solid var(--ds-alias-border, #3a3a3a)",
-            borderRadius: 6, boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
-            display: "flex", flexDirection: "column", overflow: "hidden",
-          },
-        },
-          h("input", {
-            ref: inputRef,
-            style: { ...S.input, border: "none", borderRadius: 0, borderBottom: "1px solid var(--ds-alias-border, #333)", padding: "7px 10px", fontSize: 12, flexShrink: 0 },
-            placeholder: searchPlaceholder || t("searchPh"),
-            onChange: (e) => setQ(e.target.value),
-          }),
-          h("div", { style: { maxHeight: 220, overflowY: "auto" } },
-            shown.length === 0
-              ? h("div", { style: { padding: "8px 10px", fontSize: 11, color: "#666" } }, t("noMatch"))
-              : shown.map((o) => {
-                  const v = optVal(o);
-                  if (v == null) return null;
-                  return h("button", {
-                    key: v, type: "button",
-                    onClick: () => pick(v),
-                    style: {
-                      display: "block", width: "100%", textAlign: "left", padding: "6px 10px", fontSize: 12,
-                      border: "none", cursor: "pointer", background: v === sel ? "rgba(74,158,255,0.22)" : "transparent",
-                      color: v === sel ? "#fff" : "#ccc", whiteSpace: "nowrap",
-                    },
-                  }, optLbl(o));
-                }),
-          ),
-        ),
-      );
     }
 
     function Btn({ children, onClick, disabled, tone = "primary", variant = "solid", small }) {
@@ -333,38 +259,11 @@ window.__ModuleLoader__.load({
       return h("button", { style, onClick: disabled ? undefined : onClick, disabled }, children);
     }
 
-    // Modal：居中弹框。点遮罩 / Esc / × 均可关闭�?    // position: fixed 的包含块为主容器（主容器�?backdrop-filter），恰好覆盖整个面板�?    function Modal({ open, title, onClose, width = 480, children }) {
-      useEffect(() => {
-        if (!open) return;
-        const onKey = (e) => { if (e.key === "Escape" && onClose) onClose(); };
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-      }, [open, onClose]);
-      if (!open) return null;
-      return h("div", {
-        style: { position: "fixed", inset: 0, zIndex: 100, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "flex-start", justifyContent: "center", overflowY: "auto", padding: "6vh 16px 24px" },
-        onMouseDown: (e) => { if (e.target === e.currentTarget && onClose) onClose(); },
-      },
-        h("div", {
-          style: {
-            width, maxWidth: "100%", background: "var(--ds-alias-surface, #1e1e1e)",
-            border: "1px solid var(--ds-alias-border, #3a3a3a)", borderRadius: 10, boxShadow: "0 16px 48px rgba(0,0,0,0.55)",
-          },
-        },
-          h("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 14px", borderBottom: "1px solid var(--ds-alias-border, #333)" } },
-            h("span", { style: { fontWeight: 600, fontSize: 13 } }, title),
-            h("span", { style: { cursor: "pointer", color: "#888", fontSize: 16, lineHeight: "16px", padding: "0 4px", userSelect: "none" }, onClick: () => onClose && onClose() }, "×"),
-          ),
-          h("div", { style: { padding: 14, display: "flex", flexDirection: "column", gap: 10 } }, children),
-        ),
-      );
-    }
-
     function Status({ status, msg }) {
       if (!status) return null;
       const color = status === "ok" ? "#34c759" : status === "error" ? "#ff453a" : "#888";
       return h("div", { style: { fontSize: 12, marginTop: 4, color, display: "flex", alignItems: "center", gap: 6 } },
-        h("span", { style: { fontSize: 14 } }, status === "ok" ? "�? : status === "error" ? "�? : "�?),
+        h("span", { style: { fontSize: 14 } }, status === "ok" ? "✓" : status === "error" ? "✗" : "⏳"),
         h("span", null, msg || ""),
       );
     }
@@ -394,7 +293,7 @@ window.__ModuleLoader__.load({
           icon ? h("span", null, icon) : null,
           h("span", null, title),
         ),
-        h("div", { style: { fontSize: 16, fontWeight: 600, color } }, value || "�?),
+        h("div", { style: { fontSize: 16, fontWeight: 600, color } }, value || "—"),
       );
     }
 
@@ -478,17 +377,13 @@ window.__ModuleLoader__.load({
           const c = migrateConfig(r.config);
           if (JSON.stringify(c) !== JSON.stringify(r.config)) apiCall("save-config", c).catch(() => {});
 
-          // ── 数据一次性回显（两侧列表 + 选中项都是本地数据，不等网络）──────────
+          // ── GitLab: server list + active server fields ─────────────────────
           const gl = c.gitlab || {};
           const glServer = resolveGlServer(c);
-          const k8s = c.k8s || {};
-          const kc = resolveK8sKc(c);
           setState((s) => ({
             ...s,
             glServers: gl.servers || [],
             glServerId: gl.activeServerId || "",
-            kcList: k8s.kubeconfigs || [],
-            kcId: k8s.activeKubeconfigId || "",
             hasSavedConfig: true,
             ...(glServer ? {
               gitlabLabel: glServer.label || "",
@@ -497,10 +392,87 @@ window.__ModuleLoader__.load({
               selectedProjectPath: glServer.projectPath || "",
               selectedProjectBranch: glServer.branch || "",
             } : {}),
-            ...(kc ? { k8sLabel: kc.label || "", k8sPath: kc.path || "", k8sContext: kc.context || "", k8sNamespace: kc.namespace || "" } : {}),
           }));
 
-          // 挂载不发连通性请求：保存值直接回显，下拉里注入已选项保证可见�?          // 连接验证 / 项目 / 分支 / 命名空间列表由用户手动点「测试连接」触发�?        })();
+          // Re-verify the connection + repopulate the project dropdown so the
+          // saved selection actually shows. A successful fetch doubles as the
+          // connection check, so only then do we mark the section connected.
+          if (glServer?.baseUrl && glServer?.token) {
+            try {
+              const pr = await apiCall("gitlab-projects", { baseUrl: glServer.baseUrl, token: glServer.token });
+              if (pr.ok && pr.projects) {
+                const known = !!(glServer.projectPath && pr.projects.some((p) => p.path === glServer.projectPath));
+                setState((s) => ({
+                  ...s,
+                  gitlabTestStatus: "ok",
+                  gitlabTestMsg: t("restored"),
+                  gitlabProjects: pr.projects,
+                  glStatus: { ...s.glStatus, [glServer.id]: "ok" },
+                  selectedProjectPath: known ? glServer.projectPath : s.selectedProjectPath,
+                  selectedProjectId: known ? (pr.projects.find((p) => p.path === glServer.projectPath)?.id || "") : s.selectedProjectId,
+                }));
+                if (known && glServer.projectPath) {
+                  try {
+                    const br = await apiCall("gitlab-branches", { baseUrl: glServer.baseUrl, path: glServer.projectPath, token: glServer.token });
+                    if (br.ok && br.branches) {
+                      const names = br.branches.map((b) => b.name);
+                      setState((s) => ({
+                        ...s,
+                        projectBranches: names,
+                        projectBranchesAll: names,
+                        selectedProjectBranch: names.includes(s.selectedProjectBranch) ? s.selectedProjectBranch : (names[0] || ""),
+                      }));
+                    }
+                  } catch { /* branch list is best-effort */ }
+                }
+              } else {
+                setState((s) => ({ ...s, gitlabTestStatus: "error", gitlabTestMsg: pr.message || t("restoreFail"), glStatus: { ...s.glStatus, [glServer.id]: "err" } }));
+              }
+            } catch {
+              setState((s) => ({ ...s, gitlabTestStatus: "error", gitlabTestMsg: t("restoreFail"), glStatus: { ...s.glStatus, [glServer.id]: "err" } }));
+            }
+          }
+
+          // ── K8s: kubeconfig list + active entry ────────────────────────────
+          const k8s = c.k8s || {};
+          const kc = resolveK8sKc(c);
+          setState((s) => ({
+            ...s,
+            kcList: k8s.kubeconfigs || [],
+            kcId: k8s.activeKubeconfigId || "",
+            ...(kc ? { k8sLabel: kc.label || "", k8sPath: kc.path || "", k8sContext: kc.context || "", k8sNamespace: kc.namespace || "" } : {}),
+          }));
+          if (kc?.path) {
+            // test-k8s hits /version (the real connection check) and returns the
+            // context list, so one call both verifies and populates the dropdown.
+            try {
+              const tk = await apiCall("test-k8s", { kubeconfigPath: kc.path, context: kc.context || undefined });
+              if (tk.ok) {
+                setState((s) => ({
+                  ...s,
+                  k8sTestStatus: "ok",
+                  k8sTestMsg: tk.message,
+                  kcStatus: { ...s.kcStatus, [kc.id]: "ok" },
+                  k8sContexts: tk.contexts || [],
+                }));
+                // Namespace list is best-effort: the user may lack RBAC to list
+                // namespaces, and the free-text input still works without it.
+                if (kc.context) {
+                  try {
+                    const nr = await apiCall("k8s-namespaces", { kubeconfigPath: kc.path, context: kc.context });
+                    if (nr.ok && nr.namespaces) {
+                      setState((s) => ({ ...s, k8sNamespaces: nr.namespaces }));
+                    }
+                  } catch { /* ignore — custom namespace still usable */ }
+                }
+              } else {
+                setState((s) => ({ ...s, k8sTestStatus: "error", k8sTestMsg: tk.message || t("k8sFail"), kcStatus: { ...s.kcStatus, [kc.id]: "err" } }));
+              }
+            } catch {
+              setState((s) => ({ ...s, k8sTestStatus: "error", k8sTestMsg: t("k8sFail"), kcStatus: { ...s.kcStatus, [kc.id]: "err" } }));
+            }
+          }
+        })();
       }, []);
 
       // ─── Multi-server / multi-kubeconfig management ──────────────────────────
@@ -519,7 +491,7 @@ window.__ModuleLoader__.load({
         });
       }
       function addGlServer() {
-        const id = uid("s");
+        const id = `s${Date.now()}`;
         const label = `GitLab ${state.glServers.length + 1}`;
         const next = [...state.glServers, { id, label, baseUrl: "", token: "", projectPath: "", branch: "" }];
         set({
@@ -531,7 +503,8 @@ window.__ModuleLoader__.load({
         });
       }
       function removeGlServer() {
-        // 允许删到 0：section 可选，保存时没�?server 就不�?gitlab 段（只配 k8s�?        const next = state.glServers.filter((s) => s.id !== state.glServerId);
+        if (state.glServers.length <= 1) return;
+        const next = state.glServers.filter((s) => s.id !== state.glServerId);
         const newId = next[0]?.id || "";
         const srv = next.find((s) => s.id === newId);
         set({
@@ -552,7 +525,7 @@ window.__ModuleLoader__.load({
         });
       }
       function addKc() {
-        const id = uid("k");
+        const id = `k${Date.now()}`;
         const label = `K8s ${state.kcList.length + 1}`;
         set({
           kcList: [...state.kcList, { id, label, path: "", context: "", namespace: "" }],
@@ -561,7 +534,8 @@ window.__ModuleLoader__.load({
         });
       }
       function removeKc() {
-        // 允许删到 0：section 可选，保存时没�?kubeconfig 就不�?k8s 段（只配 gitlab�?        const next = state.kcList.filter((k) => k.id !== state.kcId);
+        if (state.kcList.length <= 1) return;
+        const next = state.kcList.filter((k) => k.id !== state.kcId);
         const newId = next[0]?.id || "";
         const kc = next.find((k) => k.id === newId);
         set({
@@ -587,22 +561,6 @@ window.__ModuleLoader__.load({
             const pr = await apiCall("gitlab-projects", { baseUrl: gitlabBaseUrl, token: gitlabToken });
             if (pr.ok && pr.projects) {
               set({ gitlabProjects: pr.projects, projectFetching: false });
-              // 测试成功后恢复已保存项目的选中�?+ 拉分支列表（挂载不再自动做，显式测试时补上）
-              const known = state.selectedProjectPath ? pr.projects.find((p) => p.path === state.selectedProjectPath) : null;
-              if (known) {
-                set({ selectedProjectId: known.id, selectedProjectPath: known.path });
-                try {
-                  const br = await apiCall("gitlab-branches", { baseUrl: gitlabBaseUrl, path: known.path, token: gitlabToken });
-                  if (br.ok && br.branches) {
-                    const names = br.branches.map((b) => b.name);
-                    set((s) => ({
-                      projectBranches: names,
-                      projectBranchesAll: names,
-                      selectedProjectBranch: s.selectedProjectBranch && names.includes(s.selectedProjectBranch) ? s.selectedProjectBranch : (names[0] || ""),
-                    }));
-                  }
-                } catch { /* branch list is best-effort */ }
-              }
             } else {
               set({ projectFetching: false });
             }
@@ -635,7 +593,7 @@ window.__ModuleLoader__.load({
       async function handleSearchProjects() {
         const keyword = (searchInputRef.current?.value || "").trim().toLowerCase();
         if (!keyword) {
-          // Empty keyword �?full refresh (server-side, no filter)
+          // Empty keyword → full refresh (server-side, no filter)
           handleRefreshProjects();
           return;
         }
@@ -646,7 +604,7 @@ window.__ModuleLoader__.load({
         if (filtered.length > 0) {
           set({ gitlabProjects: filtered });
         } else {
-          // No local match �?try server-side search
+          // No local match → try server-side search
           set({ projectFetching: true });
           try {
             const pr = await apiCall("gitlab-projects", { baseUrl: state.gitlabBaseUrl, token: state.gitlabToken, search: keyword });
@@ -661,7 +619,7 @@ window.__ModuleLoader__.load({
         }
       }
 
-      // ─── GitLab: Project change �?fetch branches ──────────────────────────────
+      // ─── GitLab: Project change → fetch branches ──────────────────────────────
 
       async function handleProjectChange(path) {
         const proj = state.gitlabProjects.find((p) => p.path === path);
@@ -780,10 +738,9 @@ window.__ModuleLoader__.load({
 
       async function handleSave() {
         const config = {};
-        let servers = null, kubeconfigs = null;
-        // GitLab：把当前表单字段写回选中 server，整体保�?servers 列表
+        // GitLab：把当前表单字段写回选中 server，整体保存 servers 列表
         if (state.glServers.length > 0 && state.glServerId) {
-          servers = state.glServers.map((s) =>
+          const servers = state.glServers.map((s) =>
             s.id === state.glServerId
               ? {
                   ...s,
@@ -802,8 +759,9 @@ window.__ModuleLoader__.load({
         const nsValue =
           (typeof nsInputRef.current?.value === "string" ? nsInputRef.current.value.trim() : "") ||
           state.k8sNamespace || "";
-        // K8s：把当前表单字段写回选中 kubeconfig，整体保存列�?        if (state.kcList.length > 0 && state.kcId) {
-          kubeconfigs = state.kcList.map((k) =>
+        // K8s：把当前表单字段写回选中 kubeconfig，整体保存列表
+        if (state.kcList.length > 0 && state.kcId) {
+          const kubeconfigs = state.kcList.map((k) =>
             k.id === state.kcId
               ? {
                   ...k,
@@ -823,12 +781,7 @@ window.__ModuleLoader__.load({
         try {
           const r = await apiCall("save-config", config);
           if (r.ok) {
-            // 回写内存列表：让配置列表行立即显示刚保存的名称（否则行内仍是�?label�?            set({
-              saveStatus: "ok", saveMsg: t("saved"), hasSavedConfig: true,
-              ...(servers ? { glServers: servers } : {}),
-              ...(kubeconfigs ? { kcList: kubeconfigs } : {}),
-            });
-            // 通知仪表盘（同窗口）重新拉取配置，下�?列表立即回显新增�?            window.dispatchEvent(new CustomEvent("dsh-devops:config-changed"));
+            set({ saveStatus: "ok", saveMsg: t("saved"), hasSavedConfig: true });
           } else {
             set({ saveStatus: "error", saveMsg: r.message || t("saveFailed") });
           }
@@ -855,7 +808,8 @@ window.__ModuleLoader__.load({
             )
           : null,
 
-        // ══�?GitLab ══�?        h(Section, { title: "GitLab", badge: gitlabConnected ? t("connected") : undefined },
+        // ═══ GitLab ═══
+        h(Section, { title: "GitLab", badge: gitlabConnected ? t("connected") : undefined },
 
           // ── 服务器列表（点击切换编辑对象，每行是一套完整配置）──
           h("div", null,
@@ -885,7 +839,7 @@ window.__ModuleLoader__.load({
             ),
           ),
 
-          // ── 编辑�?──
+          // ── 编辑区 ──
           h("div", { style: { borderTop: "1px solid var(--ds-alias-border,#2a2a2a)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 10 } },
             h("div", { style: { fontSize: 12, fontWeight: 600, color: "#ccc" } },
               t("editingWhat", { name: state.gitlabLabel || state.gitlabBaseUrl || t("unnamed") })),
@@ -931,12 +885,7 @@ window.__ModuleLoader__.load({
               h(Btn, { onClick: handleSearchProjects, small: true, variant: "outline" }, t("search")),
             ),
             h(Select, {
-              options: (() => {
-                const paths = state.gitlabProjects.map((p) => p.path).filter(Boolean);
-                // 未测试连通性时仍回显已保存的项目（不可选，仅显示）
-                if (state.selectedProjectPath && !paths.includes(state.selectedProjectPath)) paths.push(state.selectedProjectPath);
-                return paths;
-              })(),
+              options: state.gitlabProjects.map((p) => p.path).filter(Boolean),
               value: state.selectedProjectPath,
               onChange: handleProjectChange,
               disabled: !gitlabConnected || state.projectFetching || state.gitlabProjects.length === 0,
@@ -944,12 +893,12 @@ window.__ModuleLoader__.load({
             }),
           ),
 
-          // Branch select �?ALWAYS visible
+          // Branch select — ALWAYS visible
           h("div", null,
             h(Label, null, t("branch")),
             !state.selectedProjectId && h("div", { style: S.hint }, t("selProjFirst")),
             // Branch error surfacing
-            state.projectBranchesError && h("div", { style: { fontSize: 12, color: "#ff453a", marginBottom: 6 } }, `�?${state.projectBranchesError}`),
+            state.projectBranchesError && h("div", { style: { fontSize: 12, color: "#ff453a", marginBottom: 6 } }, `⚠ ${state.projectBranchesError}`),
             // Branch search input + button (client-side filter)
             state.selectedProjectId && !state.projectBranchesLoading && h("div", { style: { display: "flex", gap: 6, marginBottom: 8 } },
               h("input", {
@@ -962,13 +911,11 @@ window.__ModuleLoader__.load({
               h(Btn, { onClick: handleSearchBranches, small: true, variant: "outline" }, t("search")),
             ),
             h(Select, {
-              options: (() => {
-                if (state.projectBranchesLoading) return [{ value: "__loading", label: t("loadingBr"), disabled: true }];
-                const list = [...state.projectBranches];
-                // 未测试连通性时仍回显已保存的分支（不可选，仅显示）
-                if (state.selectedProjectBranch && !list.includes(state.selectedProjectBranch)) list.push(state.selectedProjectBranch);
-                return list.length ? list : [{ value: "__empty", label: t("noBranches"), disabled: true }];
-              })(),
+              options: state.projectBranchesLoading
+                ? [{ value: "__loading", label: t("loadingBr"), disabled: true }]
+                : state.projectBranches.length === 0
+                  ? [{ value: "__empty", label: t("noBranches"), disabled: true }]
+                  : state.projectBranches,
               value: state.selectedProjectBranch,
               onChange: (v) => set({ selectedProjectBranch: v }),
               disabled: !state.selectedProjectId || state.projectBranchesLoading,
@@ -976,8 +923,8 @@ window.__ModuleLoader__.load({
             }),
           ),
 
-          // 危险区：删除当前编辑的这�?GitLab 配置（可删到 0 �?保存后不�?gitlab 段）
-          state.glServers.length > 0
+          // 危险区：删除当前编辑的这套 GitLab 配置
+          state.glServers.length > 1
             ? h("div", { style: { borderTop: "1px solid var(--ds-alias-border,#2a2a2a)", paddingTop: 8 } },
                 h("button", { style: { background: "transparent", border: "none", color: "#ff453a", cursor: "pointer", fontSize: 12, padding: "2px 0" }, onClick: removeGlServer }, t("delGl")),
               )
@@ -985,7 +932,8 @@ window.__ModuleLoader__.load({
           ),
         ),
 
-        // ══�?Kubernetes ══�?        h(Section, { title: "Kubernetes", badge: k8sConnected ? t("connected") : undefined },
+        // ═══ Kubernetes ═══
+        h(Section, { title: "Kubernetes", badge: k8sConnected ? t("connected") : undefined },
 
           // ── kubeconfig 列表 ──
           h("div", null,
@@ -1015,7 +963,7 @@ window.__ModuleLoader__.load({
             ),
           ),
 
-          // ── 编辑�?──
+          // ── 编辑区 ──
           h("div", { style: { borderTop: "1px solid var(--ds-alias-border,#2a2a2a)", paddingTop: 10, display: "flex", flexDirection: "column", gap: 10 } },
             h("div", { style: { fontSize: 12, fontWeight: 600, color: "#ccc" } },
               t("editingWhat", { name: state.k8sLabel || state.k8sPath || t("unnamed") })),
@@ -1040,19 +988,14 @@ window.__ModuleLoader__.load({
             h("div", null, h(Status, { status: state.k8sTestStatus, msg: state.k8sTestMsg })),
           ),
 
-          // Context select �?ALWAYS visible. `k8sContexts` entries are
+          // Context select — ALWAYS visible. `k8sContexts` entries are
           // {name, namespace}; the dropdown shows the name, and the selected
           // context's kubeconfig namespace is used to prefill the field below.
           h("div", null,
             h(Label, null, "Context"),
             !k8sConnected && h("div", { style: S.hint }, t("testK8sFirst")),
             h(Select, {
-              options: (() => {
-                const names = (state.k8sContexts || []).map((c) => c.name).filter(Boolean);
-                // 未测试连通性时仍回显已保存�?context（不可选，仅显示）
-                if (state.k8sContext && !names.includes(state.k8sContext)) names.push(state.k8sContext);
-                return names;
-              })(),
+              options: (state.k8sContexts || []).map((c) => c.name).filter(Boolean),
               value: state.k8sContext,
               onChange: handleContextChange,
               disabled: !k8sConnected || (state.k8sContexts || []).length === 0,
@@ -1060,10 +1003,10 @@ window.__ModuleLoader__.load({
             }),
           ),
 
-          // Namespace �?supports three input methods:
+          // Namespace — supports three input methods:
           //   1) prefilled from the kubeconfig context's configured namespace,
           //   2) picked from the fetched namespace list (writes into the input),
-          //   3) free-text custom input (source of truth �?for users who lack
+          //   3) free-text custom input (source of truth — for users who lack
           //      permission to list namespaces, or want a value not in the list).
           h("div", null,
             h(Label, null, "Namespace"),
@@ -1100,8 +1043,8 @@ window.__ModuleLoader__.load({
             h("div", { style: S.hint }, t("nsHint")),
           ),
 
-          // 危险区：删除当前编辑的这�?kubeconfig（可删到 0 �?保存后不�?k8s 段）
-          state.kcList.length > 0
+          // 危险区：删除当前编辑的这套 kubeconfig
+          state.kcList.length > 1
             ? h("div", { style: { borderTop: "1px solid var(--ds-alias-border,#2a2a2a)", paddingTop: 8 } },
                 h("button", { style: { background: "transparent", border: "none", color: "#ff453a", cursor: "pointer", fontSize: 12, padding: "2px 0" }, onClick: removeKc }, t("delK8s")),
               )
@@ -1109,7 +1052,8 @@ window.__ModuleLoader__.load({
           ),
         ),
 
-        // ══�?Save ══�?        h("div", { style: S.rowEnd },
+        // ═══ Save ═══
+        h("div", { style: S.rowEnd },
           h(Btn, { onClick: handleSave, tone: "success" }, t("saveConfig")),
           h(Status, { status: state.saveStatus, msg: state.saveMsg }),
         ),
@@ -1165,7 +1109,7 @@ window.__ModuleLoader__.load({
         h("div", { style: { display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: "#888" } },
           icon ? h("span", null, icon) : null,
           h("span", { style: { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, title)),
-        h("div", { style: { fontSize: 19, fontWeight: 700, color: c, lineHeight: 1.15 } }, value != null ? value : "�?),
+        h("div", { style: { fontSize: 19, fontWeight: 700, color: c, lineHeight: 1.15 } }, value != null ? value : "—"),
         sub ? h("div", { style: { fontSize: 11, color: subTone || "#888", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, sub) : null,
       );
     }
@@ -1173,7 +1117,7 @@ window.__ModuleLoader__.load({
     function SecHeader({ icon, title, badge, badgeTone = "neutral", onNew, newLabel, right }) {
       return h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8 } },
         h("span", { style: { fontSize: 13 } }, icon),
-        title ? h("span", { style: { fontSize: 13, fontWeight: 600 } }, title) : null,
+        h("span", { style: { fontSize: 13, fontWeight: 600 } }, title),
         badge != null ? h(Badge, { tone: badgeTone }, badge) : null,
         h("span", { style: { flex: 1 } }),
         right,
@@ -1190,41 +1134,37 @@ window.__ModuleLoader__.load({
     const PIPELINE_RUNNING = ["created", "waiting_for_resource", "preparing", "pending", "running", "queued", "scheduled"];
     const POLL_INTERVAL = 60_000; // 60s auto-refresh
 
-    // ─── Config migration (legacy single-server �?multi-server) ───────────────────
+    // ─── Config migration (legacy single-server → multi-server) ───────────────────
     // Legacy: {gitlab: {baseUrl, token, projects: [...]}, k8s: {kubeconfigs: [...]}}
     // Target: {gitlab: {servers: [{id,label,baseUrl,token,projectPath,branch}], activeServerId},
     //          k8s: {kubeconfigs: [...], activeKubeconfigId}}
     function migrateConfig(cfg) {
       if (!cfg || typeof cfg !== "object") return cfg;
       const out = JSON.parse(JSON.stringify(cfg));
-      // gitlab / k8s 均为可�?section：只迁移存在的部分，不注入空 section（支持只配一侧）
-      if (out.gitlab) {
-        const gl = out.gitlab;
-        if (!Array.isArray(gl.servers)) {
-          const legacyProject = Array.isArray(gl.projects) ? gl.projects[0] : null;
-          gl.servers = [{
-            id: "s1", label: "GitLab",
-            baseUrl: gl.baseUrl || "", token: gl.token || "",
-            projectPath: legacyProject?.path || "", branch: legacyProject?.defaultBranch || legacyProject?.branch || "",
-          }];
-        }
-        delete gl.baseUrl; delete gl.token; delete gl.projects; delete gl.defaultProject;
-        gl.servers = gl.servers.filter((s) => s && s.id);
-        if (!gl.activeServerId || !gl.servers.some((s) => s.id === gl.activeServerId)) {
-          gl.activeServerId = gl.servers[0]?.id || null;
-        }
+      const gl = out.gitlab || {};
+      if (!Array.isArray(gl.servers)) {
+        const legacyProject = Array.isArray(gl.projects) ? gl.projects[0] : null;
+        gl.servers = [{
+          id: "s1", label: "GitLab",
+          baseUrl: gl.baseUrl || "", token: gl.token || "",
+          projectPath: legacyProject?.path || "", branch: legacyProject?.defaultBranch || legacyProject?.branch || "",
+        }];
       }
-      if (out.k8s) {
-        const k8s = out.k8s;
-        if (!Array.isArray(k8s.kubeconfigs)) k8s.kubeconfigs = [];
-        k8s.kubeconfigs = k8s.kubeconfigs.map((k) => ({
-          ...k,
-          label: k.label || (k.path ? k.path.split(/[\\/]/).pop() : t("k8sCfg")),
-        }));
-        if (!k8s.activeKubeconfigId || !k8s.kubeconfigs.some((k) => k.id === k8s.activeKubeconfigId)) {
-          k8s.activeKubeconfigId = k8s.kubeconfigs[0]?.id || null;
-        }
+      delete gl.baseUrl; delete gl.token; delete gl.projects; delete gl.defaultProject;
+      gl.servers = gl.servers.filter((s) => s && s.id);
+      if (!gl.activeServerId || !gl.servers.some((s) => s.id === gl.activeServerId)) {
+        gl.activeServerId = gl.servers[0]?.id || null;
       }
+      const k8s = out.k8s || {};
+      if (!Array.isArray(k8s.kubeconfigs)) k8s.kubeconfigs = [];
+      k8s.kubeconfigs = k8s.kubeconfigs.map((k) => ({
+        ...k,
+        label: k.label || (k.path ? k.path.split(/[\\/]/).pop() : t("k8sCfg")),
+      }));
+      if (!k8s.activeKubeconfigId || !k8s.kubeconfigs.some((k) => k.id === k8s.activeKubeconfigId)) {
+        k8s.activeKubeconfigId = k8s.kubeconfigs[0]?.id || null;
+      }
+      out.gitlab = gl; out.k8s = k8s;
       return out;
     }
 
@@ -1244,32 +1184,32 @@ window.__ModuleLoader__.load({
       const [config, setConfig] = useState(null);
       const [loading, setLoading] = useState(true);
       const [activeTab, setActiveTab] = useState("gitlab");
-      const [glSubTab, setGlSubTab] = useState("mrs"); // "mrs" | "tags" | "pips"
-      const [k8sSubTab, setK8sSubTab] = useState("deps"); // "deps" | "events"
       const [live, setLive] = useState(null);
       const [logsData, setLogsData] = useState(null);
       const [toast, setToast] = useState(null);
       const [busy, setBusy] = useState(false);
       const [newMrOpen, setNewMrOpen] = useState(false);
       const [newTagOpen, setNewTagOpen] = useState(false);
-      const [podLogMap, setPodLogMap] = useState({});
-      // MR / Tag 表单下拉数据（branches/members/tags 快照�?      const [formOpts, setFormOpts] = useState({ branches: [], members: [], loading: false, projectKey: "" });
+      const [logView, setLogView] = useState(null);
+      // MR / Tag 表单下拉数据（branches/members/tags 快照）
+      const [formOpts, setFormOpts] = useState({ branches: [], members: [], loading: false, projectKey: "" });
       // MR 表单受控字段（source/target/reviewers 改为下拉+可手输）
       const [mrSource, setMrSource] = useState("");
       const [mrTarget, setMrTarget] = useState("");
       const [mrReviewers, setMrReviewers] = useState("");
       // Tag 表单受控 ref 字段
       const [tagRefSel, setTagRefSel] = useState("");
-      // Context bar 下拉数据（项�?/ context / namespace 列表�?      const [barOpts, setBarOpts] = useState({ projects: [], contexts: [], namespaces: [], key: "" });
+      // Context bar 下拉数据（项目 / context / namespace 列表）
+      const [barOpts, setBarOpts] = useState({ projects: [], contexts: [], namespaces: [], key: "" });
       // 双卡片连接状态（最近一次列表拉取结果）
       const [connStatus, setConnStatus] = useState({ gl: "", k8s: "" });
       // Pipeline 展开详情
       const [expandedPipe, setExpandedPipe] = useState(null);
       const [pipeJobs, setPipeJobs] = useState({ id: null, jobs: [], loading: false });
-      const [jobLogMap, setJobLogMap] = useState({});
-      // Deployment 展开 Pods / 换镜像编�?/ 操作确认
+      // Deployment 展开 Pods / 换镜像编辑 / 操作确认
       const [expandedDep, setExpandedDep] = useState(null);
-      const [depImgEdit, setDepImgEdit] = useState(null); // 正在编辑镜像�?deployment �?      const [depSearch, setDepSearch] = useState(""); // deployment 搜索关键�?      const [restartDep, setRestartDep] = useState(null); // 重启确认弹框对应�?deployment �?      const depImgRef = useRef(null);
+      const [depImgEdit, setDepImgEdit] = useState(null); // 正在编辑镜像的 deployment 名
+      const depImgRef = useRef(null);
       const timerRef = useRef(null);
       const fetchSeqRef = useRef(0);
       const mrDescSeqRef = useRef(0);
@@ -1278,34 +1218,51 @@ window.__ModuleLoader__.load({
       const tagNameRef = useRef(null);
       const tagMsgRef = useRef(null);
 
-      // Load saved config（首�?+ 设置页保存后由事件触发重新加载）
-      async function reloadConfig() {
-        try {
-          const r = await apiCall("load-config", {});
-          if (r.ok && r.config) {
-            const migrated = migrateConfig(r.config);
-            const changed = JSON.stringify(migrated) !== JSON.stringify(r.config);
-            if (changed) apiCall("save-config", migrated).catch(() => {});
-            setConfig(migrated);
-            await fetchData(migrated);
-          }
-        } catch {
-          /* ignore */
-        } finally {
-          setLoading(false);
-        }
-      }
-      useEffect(() => { reloadConfig(); }, []);
-      // 设置页保存新配置（同窗口广播）→ 重新拉取，配置列�?下拉立即回显
+      // ===== DEBUG PROBE (remove after diagnosis) =====
+      window.__devopsRc = (window.__devopsRc || 0) + 1;
+      if (window.__devopsRc % 20 === 1) console.log("[devops] RENDER #" + window.__devopsRc);
       useEffect(() => {
-        const onCfgChanged = () => { reloadConfig(); };
-        window.addEventListener("dsh-devops:config-changed", onCfgChanged);
-        return () => window.removeEventListener("dsh-devops:config-changed", onCfgChanged);
+        console.log("[devops] DASHBOARD MOUNT");
+        const scroller = document.querySelector("[data-conversation-scroll]");
+        let last = 0;
+        const onScroll = () => {
+          const now = Date.now();
+          if (!scroller || now - last < 300) return;
+          last = now;
+          console.log("[devops] SCROLL top=" + Math.round(scroller.scrollTop) + " clientH=" + scroller.clientHeight + " scrollH=" + scroller.scrollHeight);
+        };
+        if (scroller) scroller.addEventListener("scroll", onScroll, true);
+        return () => {
+          console.log("[devops] DASHBOARD UNMOUNT");
+          if (scroller) scroller.removeEventListener("scroll", onScroll, true);
+        };
+      }, []);
+      // ===== END DEBUG PROBE =====
+
+      // Load saved config
+      useEffect(() => {
+        (async () => {
+          try {
+            const r = await apiCall("load-config", {});
+            if (r.ok && r.config) {
+              const migrated = migrateConfig(r.config);
+              const changed = JSON.stringify(migrated) !== JSON.stringify(r.config);
+              if (changed) apiCall("save-config", migrated).catch(() => {});
+              setConfig(migrated);
+              await fetchData(migrated);
+            }
+          } catch {
+            /* ignore */
+          } finally {
+            setLoading(false);
+          }
+        })();
       }, []);
 
       async function fetchData(cfg) {
         if (!cfg) return;
-        const seq = ++fetchSeqRef.current; // 快速连续切换时，旧请求的响应作�?        const jobs = [];
+        const seq = ++fetchSeqRef.current; // 快速连续切换时，旧请求的响应作废
+        const jobs = [];
         const glServer = resolveGlServer(cfg);
         if (glServer?.baseUrl && glServer?.token && glServer?.projectPath) {
           const base = { baseUrl: glServer.baseUrl, token: glServer.token, projectPath: glServer.projectPath };
@@ -1362,49 +1319,51 @@ window.__ModuleLoader__.load({
       }, [toast]);
 
       const glServer = resolveGlServer(config);
-      const glCfg = glServer; // 兼容既有引用（baseUrl/token�?      const glProject = glServer?.projectPath ? { path: glServer.projectPath } : null;
+      const glCfg = glServer; // 兼容既有引用（baseUrl/token）
+      const glProject = glServer?.projectPath ? { path: glServer.projectPath } : null;
       const k8sKc = resolveK8sKc(config);
 
       // ─── Config switching (context bar) ─────────────────────────────────────────
 
       async function applyConfig(next) {
         setConfig(next);
-        try { await apiCall("save-config", next); } catch { /* 保存失败不打断切�?*/ }
+        try { await apiCall("save-config", next); } catch { /* 保存失败不打断切换 */ }
         await fetchData(next);
       }
       function switchServer(id) {
-        if (!config || id === config.gitlab?.activeServerId) return;
-        setConnStatus((c) => ({ ...c, gl: "" })); // 切换后旧状态不再代表当前选择，回到「检测中�?        applyConfig({ ...config, gitlab: { ...(config.gitlab || {}), activeServerId: id } });
+        if (!config || id === config.gitlab.activeServerId) return;
+        setConnStatus((c) => ({ ...c, gl: "" })); // 切换后旧状态不再代表当前选择，回到「检测中」
+        applyConfig({ ...config, gitlab: { ...config.gitlab, activeServerId: id } });
       }
       function switchProject(path) {
         if (!config || !glServer || path === glServer.projectPath) return;
-        const servers = (config.gitlab?.servers || []).map((s) => (s.id === glServer.id ? { ...s, projectPath: path } : s));
-        applyConfig({ ...config, gitlab: { ...(config.gitlab || {}), servers } });
+        const servers = config.gitlab.servers.map((s) => (s.id === glServer.id ? { ...s, projectPath: path } : s));
+        applyConfig({ ...config, gitlab: { ...config.gitlab, servers } });
       }
       function switchKubeconfig(id) {
-        if (!config || id === config.k8s?.activeKubeconfigId) return;
+        if (!config || id === config.k8s.activeKubeconfigId) return;
         setConnStatus((c) => ({ ...c, k8s: "" }));
-        applyConfig({ ...config, k8s: { ...(config.k8s || {}), activeKubeconfigId: id } });
+        applyConfig({ ...config, k8s: { ...config.k8s, activeKubeconfigId: id } });
       }
       function switchContext(ctx) {
         if (!config || !k8sKc || ctx === k8sKc.context) return;
-        const kubeconfigs = (config.k8s?.kubeconfigs || []).map((k) => (k.id === k8sKc.id ? { ...k, context: ctx, namespace: "" } : k));
-        applyConfig({ ...config, k8s: { ...(config.k8s || {}), kubeconfigs } });
+        const kubeconfigs = config.k8s.kubeconfigs.map((k) => (k.id === k8sKc.id ? { ...k, context: ctx, namespace: "" } : k));
+        applyConfig({ ...config, k8s: { ...config.k8s, kubeconfigs } });
       }
       function switchNamespace(ns) {
         if (!config || !k8sKc || ns === k8sKc.namespace) return;
-        const kubeconfigs = (config.k8s?.kubeconfigs || []).map((k) => (k.id === k8sKc.id ? { ...k, namespace: ns } : k));
-        applyConfig({ ...config, k8s: { ...(config.k8s || {}), kubeconfigs } });
+        const kubeconfigs = config.k8s.kubeconfigs.map((k) => (k.id === k8sKc.id ? { ...k, namespace: ns } : k));
+        applyConfig({ ...config, k8s: { ...config.k8s, kubeconfigs } });
       }
 
-      // Context bar 下拉数据：跟�?active server / kubeconfig 拉取
+      // Context bar 下拉数据：跟随 active server / kubeconfig 拉取
       useEffect(() => {
         if (!glServer?.baseUrl || !glServer?.token) return;
         const key = `${glServer.id}:${glServer.projectPath}`;
         if (barOpts.key === key) return;
         let stale = false;
         let timer = null;
-        // GitLab 冷启动时项目列表可能超时，失败自动重试（最�?3 次）
+        // GitLab 冷启动时项目列表可能超时，失败自动重试（最多 3 次）
         const fetchProjects = (attempt) => {
           apiCall("gitlab-projects", { baseUrl: glServer.baseUrl, token: glServer.token })
             .then((r) => {
@@ -1468,7 +1427,8 @@ window.__ModuleLoader__.load({
         return () => { stale = true; if (timer) clearTimeout(timer); };
       }, [newMrOpen, newTagOpen, glServer?.id, glServer?.projectPath]);
 
-      // 分支列表到位后给 MR / Tag 表单填默认�?      useEffect(() => {
+      // 分支列表到位后给 MR / Tag 表单填默认值
+      useEffect(() => {
         if (!formOpts.branches.length) return;
         const def = formOpts.branches.find((b) => b.isDefault)?.name || glServer?.branch || "main";
         setMrTarget((v) => v || def);
@@ -1476,7 +1436,7 @@ window.__ModuleLoader__.load({
         setTagRefSel((v) => v || def);
       }, [formOpts.branches, formOpts.projectKey]);
 
-      // 分支�?�?类型前缀：feature/login �?"feat"
+      // 分支名 → 类型前缀：feature/login → "feat"
       function genMrType(branch) {
         const m = /^(feature|feat|fix|bugfix|hotfix|chore|refactor|docs|test)[/-]/.exec(branch || "");
         if (!m) return null;
@@ -1485,7 +1445,8 @@ window.__ModuleLoader__.load({
           : "feat";
       }
       const mrAutoRef = useRef({ title: "", desc: "" }); // 记录上次自动生成的内容；用户改过则不再动
-      // 选完 Source/Target 分支自动生成 Title / Description（源分支合并到目标分支的信息 + 源分支最新提交；仅填充空字段或仍是上次自动生成的内容�?      useEffect(() => {
+      // 选完 Source/Target 分支自动生成 Title / Description（源分支合并到目标分支的信息 + 源分支最新提交；仅填充空字段或仍是上次自动生成的内容）
+      useEffect(() => {
         if (!newMrOpen || !mrSource || !mrTarget || mrSource === mrTarget) return;
         const type = genMrType(mrSource);
         const words = mrSource.replace(/^(feature|feat|fix|bugfix|hotfix|chore|refactor|docs|test)[/-]/, "").replace(/[-_]+/g, " ");
@@ -1500,7 +1461,7 @@ window.__ModuleLoader__.load({
             .then((r) => {
               const d = mrDescRef.current;
               if (!r.ok || !d || d.value || seq !== mrDescSeqRef.current) return;
-              const authorSuffix = r.author ? `�?{r.author}）` : "";
+              const authorSuffix = r.author ? `（${r.author}）` : "";
               const lines = [t("descHead"), "", "- ", "", t("descCommit"), "", `- \`${r.shortId}\` ${r.title}${authorSuffix}`, "", t("descSource"), "", t("descBranch", { s: mrSource, t: mrTarget })];
               d.value = lines.join("\n");
               mrAutoRef.current.desc = d.value;
@@ -1528,7 +1489,7 @@ window.__ModuleLoader__.load({
         finally { setBusy(false); }
       }
 
-      // 从历�?Tag 生成新版本号：语义化版本 patch+1（两位数则补 patch 位），无法解析则�?-next 后缀
+      // 从历史 Tag 生成新版本号：语义化版本 patch+1（两位数则补 patch 位），无法解析则加 -next 后缀
       function bumpPatch(name) {
         let m = /^v?(\d+)\.(\d+)\.(\d+)$/.exec(name);
         if (m) return `v${m[1]}.${m[2]}.${Number(m[3]) + 1}`;
@@ -1589,7 +1550,7 @@ window.__ModuleLoader__.load({
         finally { setBusy(false); }
       }
 
-      // Pipeline 展开：拉取该 pipeline �?jobs
+      // Pipeline 展开：拉取该 pipeline 的 jobs
       function togglePipeDetail(p) {
         if (expandedPipe === p.id) { setExpandedPipe(null); return; }
         setExpandedPipe(p.id);
@@ -1597,21 +1558,6 @@ window.__ModuleLoader__.load({
         apiCall("gitlab-pipeline-jobs", { baseUrl: glCfg.baseUrl, token: glCfg.token, projectPath: glProject.path, pipelineId: p.id })
           .then((r) => setPipeJobs({ id: p.id, jobs: r.ok ? r.jobs : [], loading: false }))
           .catch(() => setPipeJobs({ id: p.id, jobs: [], loading: false }));
-      }
-
-      // Pipeline Job 日志：展开/收起单个 job 的构建日�?      async function handleViewJobLog(job) {
-        if (!glCfg?.baseUrl) return;
-        if (jobLogMap[job.id]) {
-          setJobLogMap((m) => { const n = { ...m }; delete n[job.id]; return n; });
-          return;
-        }
-        setJobLogMap((m) => ({ ...m, [job.id]: { loading: true } }));
-        try {
-          const r = await apiCall("gitlab-job-log", { baseUrl: glCfg.baseUrl, token: glCfg.token, projectPath: glProject.path, jobId: job.id });
-          setJobLogMap((m) => ({ ...m, [job.id]: r.ok ? { logs: r.logs || "" } : { err: r.message || t("logsFail"), jobUrl: r.jobUrl } }));
-        } catch (e) {
-          setJobLogMap((m) => ({ ...m, [job.id]: { err: e.message || t("logsFail") } }));
-        }
       }
 
       // Deployment 展开它的 Pods（按 pod 名前缀匹配 deployment 名）
@@ -1623,7 +1569,8 @@ window.__ModuleLoader__.load({
         return pods.filter((p) => p.name === d.name || p.name.startsWith(d.name + "-"));
       }
 
-      // 更换镜像：提交编辑框里的新镜�?      async function handleSetImage(d) {
+      // 更换镜像：提交编辑框里的新镜像
+      async function handleSetImage(d) {
         if (!k8sKc) return;
         const image = (depImgRef.current?.value || "").trim();
         if (!image || image === d.image) { setDepImgEdit(null); return; }
@@ -1636,29 +1583,26 @@ window.__ModuleLoader__.load({
         finally { setBusy(false); }
       }
 
-      // 重启 deployment（滚动重�?pods）；返回是否成功（供确认弹框决定是否关闭�?      async function handleRestartDep(d) {
-        if (!k8sKc) return false;
+      // 重启 deployment（滚动重建 pods）
+      async function handleRestartDep(d) {
+        if (!k8sKc) return;
         setBusy(true);
         try {
           const r = await apiCall("k8s-restart", { kubeconfigPath: k8sKc.path, context: k8sKc.context, namespace: k8sKc.namespace || "default", name: d.name });
-          if (r.ok) { setToast({ msg: t("restarting", { name: d.name }), tone: "ok" }); fetchData(config); return true; }
+          if (r.ok) { setToast({ msg: t("restarting", { name: d.name }), tone: "ok" }); fetchData(config); }
           else setToast({ msg: r.message || t("restartFail"), tone: "err" });
         } catch (e) { setToast({ msg: e.message || t("restartFail"), tone: "err" }); }
         finally { setBusy(false); }
-        return false;
       }
 
       async function handleViewPodLogs(pod) {
         if (!k8sKc) return;
-        if (podLogMap[pod.name]) {
-          setPodLogMap((m) => { const n = { ...m }; delete n[pod.name]; return n; });
-          return;
-        }
-        setPodLogMap((m) => ({ ...m, [pod.name]: { loading: true } }));
+        setLogView({ podName: pod.name, loading: true });
         try {
           const r = await apiCall("k8s-pod-logs", { kubeconfigPath: k8sKc.path, context: k8sKc.context, namespace: k8sKc.namespace || "default", podName: pod.name, tailLines: 200 });
-          setPodLogMap((m) => ({ ...m, [pod.name]: r.ok ? { logs: r.logs || "" } : { err: r.message || t("logsFail") } }));
-        } catch (e) { setPodLogMap((m) => ({ ...m, [pod.name]: { err: e.message || t("logsFail") } })); }
+          if (r.ok) setLogView({ podName: pod.name, logs: r.logs || "" });
+          else setLogView({ podName: pod.name, err: r.message || t("logsFail") });
+        } catch (e) { setLogView({ podName: pod.name, err: e.message || t("logsFail") }); }
       }
 
       // ─── Not configured state ───────────────────────────────────────────────────
@@ -1667,15 +1611,14 @@ window.__ModuleLoader__.load({
         return h("div", { style: { padding: 24, textAlign: "center", color: "#888", fontSize: 13 } }, t("loading"));
       }
 
-      // 未配�?= 完全没有 config，或 gitlab / k8s 两侧都没有可用条目（section 可选）
-      if (!config || ((!config.gitlab?.servers?.length) && (!config.k8s?.kubeconfigs?.length))) {
-        // 内嵌配置表单（与 设置 �?DevOps 同一组件）：保存后触�?dsh-devops:config-changed �?reloadConfig
-        return h("div", { style: { padding: 16 } },
-          h("div", { style: { ...S.calloutInfo, marginBottom: 16 } },
+      if (!config || (!config.gitlab && !config.k8s)) {
+        return h("div", { style: { padding: 24, display: "flex", flexDirection: "column", alignItems: "center", gap: 12 } },
+          h("div", { style: { fontSize: 40 } }, "🖥️"),
+          h("div", { style: { ...S.calloutInfo, textAlign: "center" } },
             h("strong", null, t("notCfgBig")),
-            h("div", { style: { marginTop: 4 } }, t("goCfgHint")),
+            h("div", { style: { marginTop: 8 } }, t("goCfgHint")),
           ),
-          h(DevopsSettings),
+          h(Btn, { onClick: () => window.dispatchEvent(new CustomEvent("dsh:open-settings", { detail: { section: "dsh-devops" } })), small: true, variant: "outline" }, t("goCfg")),
         );
       }
 
@@ -1703,11 +1646,11 @@ window.__ModuleLoader__.load({
       // ─── Activity feed ────────────────────────────────────────────────────────────
 
       const feed = [];
-      mrs.forEach((mr) => feed.push({ t: mr.updatedAt, icon: "🔄", tone: (mr.approvalsBeforeMerge ?? 0) > 0 ? "warn" : "ok", text: `!${mr.iid} ${mr.title} �?${mr.targetBranch}`, extra: (mr.approvalsBeforeMerge ?? 0) > 0 ? t("pending", { n: mr.approvalsBeforeMerge }) : (mr.draft ? "Draft" : t("mergeable")), who: mr.author }));
-      pipelines.forEach((p) => feed.push({ t: p.updatedAt || p.createdAt, icon: p.status === "success" ? "�? : p.status === "failed" ? "�? : "�?, tone: p.status === "failed" ? "err" : p.status === "success" ? "ok" : "warn", text: `pipeline ${p.ref} #${p.id} ${p.status}` }));
+      mrs.forEach((mr) => feed.push({ t: mr.updatedAt, icon: "🔄", tone: (mr.approvalsBeforeMerge ?? 0) > 0 ? "warn" : "ok", text: `!${mr.iid} ${mr.title} → ${mr.targetBranch}`, extra: (mr.approvalsBeforeMerge ?? 0) > 0 ? t("pending", { n: mr.approvalsBeforeMerge }) : (mr.draft ? "Draft" : t("mergeable")), who: mr.author }));
+      pipelines.forEach((p) => feed.push({ t: p.updatedAt || p.createdAt, icon: p.status === "success" ? "✅" : p.status === "failed" ? "❌" : "⏳", tone: p.status === "failed" ? "err" : p.status === "success" ? "ok" : "warn", text: `pipeline ${p.ref} #${p.id} ${p.status}` }));
       deployments.forEach((d) => feed.push({ t: d.updated, icon: "📦", tone: d.replicas > 0 && d.ready === d.replicas ? "ok" : d.ready === 0 ? "err" : "warn", text: `${d.name} ${d.ready}/${d.replicas} ready`, extra: d.imageTag }));
       pods.forEach((pod) => { if (pod.restarts > 0) feed.push({ t: pod.startedAt, icon: "🔁", tone: "warn", text: `pod ${pod.name} ${t("restartsN", { n: pod.restarts })}`, extra: pod.reason }); });
-      events.forEach((ev) => feed.push({ t: ev.time, icon: ev.type === "Warning" ? "⚠️" : "�?, tone: ev.type === "Warning" ? "err" : "ok", text: `${ev.reason} ${ev.object}`, extra: ev.message }));
+      events.forEach((ev) => feed.push({ t: ev.time, icon: ev.type === "Warning" ? "⚠️" : "•", tone: ev.type === "Warning" ? "err" : "ok", text: `${ev.reason} ${ev.object}`, extra: ev.message }));
       feed.forEach((it) => { it.ts = it.t ? new Date(it.t).getTime() : 0; });
       feed.sort((a, b) => b.ts - a.ts);
       const activityItems = feed.slice(0, 30);
@@ -1716,8 +1659,9 @@ window.__ModuleLoader__.load({
 
       const glServers = config?.gitlab?.servers || [];
       const kcList = config?.k8s?.kubeconfigs || [];
-      // 卡片内下拉统一样式（栅格内自动伸缩，不换行�?      const cardSelect = { ...S.select, fontSize: 11, padding: "3px 6px", width: "100%", minWidth: 0 };
-      // 切换卡片：标�?+ 连接状态点 + 内容
+      // 卡片内下拉统一样式（栅格内自动伸缩，不换行）
+      const cardSelect = { ...S.select, fontSize: 11, padding: "3px 6px", width: "100%", minWidth: 0 };
+      // 切换卡片：标题 + 连接状态点 + 内容
       function SwitchCard({ icon, title, status, children }) {
         const statusMap = { ok: { tone: "ok", text: t("connected") }, err: { tone: "err", text: t("connectFailed") } };
         const st = statusMap[status];
@@ -1736,28 +1680,21 @@ window.__ModuleLoader__.load({
       }
       const fieldLabel = { fontSize: 10, color: "#888", marginBottom: 2 };
 
-      return h("div", { style: {
-        padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10,
-        background: "rgba(20,20,20,0.55)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderRadius: 12,
-        minHeight: "120%",
-        position: "relative",
-        zIndex: 9,
-      } },
+      return h("div", { style: { padding: "12px 14px", display: "flex", flexDirection: "column", gap: 10 } },
         h("style", null, "@keyframes dshPulse{0%,100%{opacity:1}50%{opacity:0.35}}"),
 
         // 语言切换
         h("div", { style: { display: "flex" } }, h(LangToggle)),
 
-        // ─── 双卡片切换区（每�?GitLab 地址 / kubeconfig 是一个整体配置对象，切换即保存刷新）───
-        // 卡片 1：�?GitLab（服务器 + 项目�?        h(SwitchCard, { icon: "📦", title: "GitLab", status: glServers.length === 0 ? "none" : connStatus.gl },
+        // ─── 双卡片切换区（每套 GitLab 地址 / kubeconfig 是一个整体配置对象，切换即保存刷新）───
+        // 卡片 1：📦 GitLab（服务器 + 项目）
+        h(SwitchCard, { icon: "📦", title: "GitLab", status: glServers.length === 0 ? "none" : connStatus.gl },
           h("div", { style: { display: "grid", gridTemplateColumns: "minmax(120px, 160px) 1fr", gap: 8 } },
             h("div", null,
               h("div", { style: fieldLabel }, t("server")),
               h(Select, {
-                value: config.gitlab?.activeServerId || "",
+                name: "server",
+                value: config.gitlab.activeServerId || "",
                 onChange: switchServer,
                 disabled: glServers.length <= 1,
                 style: cardSelect,
@@ -1767,7 +1704,8 @@ window.__ModuleLoader__.load({
             ),
             h("div", null,
               h("div", { style: fieldLabel }, t("project")),
-              h(SearchSelect, {
+              h(Select, {
+                name: "project",
                 value: glServer?.projectPath || "",
                 onChange: switchProject,
                 disabled: !glServer?.baseUrl || !glServer?.token,
@@ -1784,12 +1722,14 @@ window.__ModuleLoader__.load({
           ),
         ),
 
-        // 卡片 2：☸�?Kubernetes（kubeconfig + context + namespace�?        h(SwitchCard, { icon: "☸️", title: "Kubernetes", status: kcList.length === 0 ? "none" : connStatus.k8s },
+        // 卡片 2：☸️ Kubernetes（kubeconfig + context + namespace）
+        h(SwitchCard, { icon: "☸️", title: "Kubernetes", status: kcList.length === 0 ? "none" : connStatus.k8s },
           h("div", { style: { display: "grid", gridTemplateColumns: "minmax(120px, 160px) 1fr 1fr", gap: 8 } },
             h("div", null,
               h("div", { style: fieldLabel }, t("configFile")),
               h(Select, {
-                value: config.k8s?.activeKubeconfigId || "",
+                name: "kubeconfig",
+                value: config.k8s.activeKubeconfigId || "",
                 onChange: switchKubeconfig,
                 disabled: kcList.length <= 1,
                 style: cardSelect,
@@ -1799,7 +1739,8 @@ window.__ModuleLoader__.load({
             ),
             h("div", null,
               h("div", { style: fieldLabel }, "Context"),
-              h(SearchSelect, {
+              h(Select, {
+                name: "context",
                 value: k8sKc?.context || "",
                 onChange: switchContext,
                 disabled: !k8sKc?.path,
@@ -1812,7 +1753,8 @@ window.__ModuleLoader__.load({
             ),
             h("div", null,
               h("div", { style: fieldLabel }, "Namespace"),
-              h(SearchSelect, {
+              h(Select, {
+                name: "namespace",
                 value: k8sKc?.namespace || "",
                 onChange: switchNamespace,
                 disabled: !k8sKc?.path,
@@ -1832,171 +1774,17 @@ window.__ModuleLoader__.load({
         // Toast
         toast
           ? h("div", { style: { display: "flex", alignItems: "center", gap: 8, padding: "8px 12px", borderRadius: 8, fontSize: 12, background: toast.tone === "err" ? "rgba(255,69,58,0.12)" : toast.tone === "warn" ? "rgba(251,191,36,0.12)" : "rgba(52,199,89,0.12)", border: `1px solid ${toast.tone === "err" ? "rgba(255,69,58,0.4)" : toast.tone === "warn" ? "rgba(251,191,36,0.4)" : "rgba(52,199,89,0.4)"}`, color: toast.tone === "err" ? "#ff8a80" : toast.tone === "warn" ? "#fbbf24" : "#34c759" } },
-              h("span", null, toast.tone === "err" ? "�? : toast.tone === "warn" ? "!" : "�?),
+              h("span", null, toast.tone === "err" ? "✗" : toast.tone === "warn" ? "!" : "✓"),
               h("span", { style: { color: "#ddd" } }, toast.msg),
             )
           : null,
 
-        // ─── 弹框：新�?MR / 新建 Tag / 换镜�?/ 重启确认 ───
-        h(Modal, {
-          open: newMrOpen,
-          title: t("mrModalTitle"),
-          width: 520,
-          onClose: () => setNewMrOpen(false),
-        },
-          h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
-            h("div", null,
-              h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("sourceBranch")),
-              h(Select, {
-                value: mrSource,
-                onChange: setMrSource,
-                placeholder: formOpts.loading ? t("loadingBr") : t("selBranch"),
-                options: [
-                  ...(mrSource && !formOpts.branches.some((b) => b.name === mrSource) ? [mrSource] : []),
-                  ...formOpts.branches.map((b) => ({ value: b.name, label: b.isDefault ? b.name + t("defaultSuffix") : b.name })),
-                ],
-              })),
-            h("div", null,
-              h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("targetBranch")),
-              h(Select, {
-                value: mrTarget,
-                onChange: setMrTarget,
-                placeholder: formOpts.loading ? t("loadingBr") : t("selBranch"),
-                options: [
-                  ...(mrTarget && !formOpts.branches.some((b) => b.name === mrTarget) ? [mrTarget] : []),
-                  ...formOpts.branches.map((b) => ({ value: b.name, label: b.isDefault ? b.name + t("defaultSuffix") : b.name })),
-                ],
-              })),
-          ),
-          h("div", null,
-            h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("titleLabel")),
-            h("input", { ref: mrTitleRef, style: S.input, placeholder: "feat: ..." })),
-          h("div", null,
-            h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("reviewersLabel")),
-            formOpts.members.length > 0
-              ? h(Select, {
-                  value: "",
-                  onChange: (username) => {
-                    if (!username) return;
-                    const cur = (mrReviewers || "").split(",").map((s) => s.trim()).filter(Boolean);
-                    if (!cur.includes(username)) cur.push(username);
-                    setMrReviewers(cur.join(", "));
-                  },
-                  placeholder: formOpts.loading ? t("loadingMem") : t("selReviewer"),
-                  options: formOpts.members
-                    .filter((m) => !(mrReviewers || "").split(",").map((x) => x.trim()).includes(m.username))
-                    .map((m) => ({ value: m.username, label: `${m.username}�?{m.name || m.username}）` })),
-                })
-              : h("div", { style: { fontSize: 11, color: "#666" } }, formOpts.loading ? t("loadingMem") : t("noMem")),
-            (mrReviewers || "").trim() && h("div", { style: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 } },
-              (mrReviewers || "").split(",").map((s) => s.trim()).filter(Boolean).map((u) =>
-                h("span", { key: u, style: { display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, padding: "2px 4px 2px 8px", borderRadius: 10, background: "var(--ds-alias-primary, #4a9eff)", color: "#fff" } },
-                  u,
-                  h("span", {
-                    style: { cursor: "pointer", width: 14, height: 14, lineHeight: "13px", textAlign: "center", borderRadius: "50%", background: "rgba(255,255,255,0.25)", fontSize: 10 },
-                    onClick: () => setMrReviewers((mrReviewers || "").split(",").map((x) => x.trim()).filter((x) => x && x !== u).join(", ")),
-                  }, "×"),
-                ),
-              ),
-            ),
-          ),
-          h("div", null,
-            h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("descLabel")),
-            h("textarea", { ref: mrDescRef, style: { ...S.input, resize: "vertical", minHeight: 54 }, placeholder: t("descPh") })),
-          h("div", { style: { display: "flex", gap: 8, justifyContent: "flex-end" } },
-            h(Btn, { onClick: () => setNewMrOpen(false), small: true, variant: "outline" }, t("cancel")),
-            h(Btn, { onClick: handleNewMr, small: true, tone: "success", disabled: busy }, t("createMr")),
-          ),
-        ),
-        h(Modal, {
-          open: newTagOpen,
-          title: t("tagModalTitle"),
-          width: 480,
-          onClose: () => setNewTagOpen(false),
-        },
-          // 历史 Tag 快捷创建：选中后自动把 patch+1 的新版本号填�?Tag Name（Ref 由用户自行选择�?          tags.length > 0 && h("div", null,
-            h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("histTag")),
-            h(Select, {
-              value: "",
-              onChange: pickHistoryTag,
-              placeholder: t("pickHist"),
-              options: tags.map((t) => ({ value: t.name, label: `${t.name} �?${bumpPatch(t.name)} · ${timeAgo(t.createdAt)}` })),
-            }),
-          ),
-          h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
-            h("div", null,
-              h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("tagNameLabel")),
-              h("input", {
-                ref: tagNameRef, style: S.input, placeholder: "v1.2.0",
-                list: "dsh-devops-tag-names",
-              }),
-              tags.length > 0
-                ? h("datalist", { id: "dsh-devops-tag-names" },
-                    tags.map((t) => h("option", { key: t.name, value: t.name })))
-                : null),
-            h("div", null,
-              h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("refLabel")),
-              h(Select, {
-                value: tagRefSel,
-                onChange: setTagRefSel,
-                placeholder: formOpts.loading ? t("loadingShort") : t("selRef"),
-                options: [
-                  ...(tagRefSel && !formOpts.branches.some((b) => b.name === tagRefSel) && !tags.some((t) => t.name === tagRefSel) ? [tagRefSel] : []),
-                  ...formOpts.branches.map((b) => ({ value: b.name, label: `�?${b.name}${b.isDefault ? t("defaultSuffix") : ""}` })),
-                  ...tags.map((t) => ({ value: t.name, label: `🏷 ${t.name}` })),
-                ],
-              })),
-          ),
-          h("div", null,
-            h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("msgLabel")),
-            h("input", { ref: tagMsgRef, style: S.input, placeholder: t("releasePh") })),
-          h("div", { style: { display: "flex", gap: 8, justifyContent: "flex-end" } },
-            h(Btn, { onClick: () => setNewTagOpen(false), small: true, variant: "outline" }, t("cancel")),
-            h(Btn, { onClick: handleNewTag, small: true, tone: "success", disabled: busy }, t("createTag")),
-          ),
-        ),
-        depImgEdit && (() => {
-          const d = deployments.find((x) => x.name === depImgEdit);
-          if (!d) return null;
-          return h(Modal, { open: true, title: `${t("setImage")} · ${d.name}`, width: 420, onClose: () => setDepImgEdit(null) },
-            h("div", null,
-              h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("curImage")),
-              h("div", { style: { fontFamily: "monospace", fontSize: 11, color: "#aaa", background: "var(--ds-alias-surface-inset, #1a1a1a)", borderRadius: 6, padding: "6px 10px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, d.image || "�?),
-            ),
-            h("div", null,
-              h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("newImage")),
-              h("input", {
-                ref: depImgRef,
-                defaultValue: d.image || "",
-                placeholder: "nginx:1.27",
-                style: { ...S.input, fontFamily: "monospace", fontSize: 11 },
-                onKeyDown: (e) => { if (e.key === "Enter") handleSetImage(d); },
-              }),
-            ),
-            h("div", { style: { display: "flex", gap: 8, justifyContent: "flex-end" } },
-              h(Btn, { onClick: () => setDepImgEdit(null), small: true, variant: "outline" }, t("cancel")),
-              h(Btn, { onClick: () => handleSetImage(d), small: true, tone: "success", disabled: busy }, t("apply")),
-            ),
-          );
-        })(),
-        restartDep && (() => {
-          const d = deployments.find((x) => x.name === restartDep);
-          if (!d) return null;
-          return h(Modal, { open: true, title: t("restartModalTitle"), width: 420, onClose: () => setRestartDep(null) },
-            h("div", { style: { fontSize: 12, lineHeight: 1.6, color: "#ccc" } }, t("restartConfirm", { name: d.name })),
-            h("div", { style: { display: "flex", gap: 8, justifyContent: "flex-end" } },
-              h(Btn, { onClick: () => setRestartDep(null), small: true, variant: "outline" }, t("cancel")),
-              h(Btn, { small: true, tone: "primary", disabled: busy, onClick: async () => { const ok = await handleRestartDep(d); if (ok) setRestartDep(null); } }, t("confirm")),
-            ),
-          );
-        })(),
-
         // Stat cards grid
         h("div", { style: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 8 } },
-          h(StatCard, { icon: "🔄", title: t("statMrsTitle"), value: glProject ? mrs.length : "�?, sub: glProject ? t("statMrsSub", { p: pendingApproval, r: runningPips }) : t("notConfigured"), tone: !glProject ? "neutral" : pendingApproval > 0 ? "warn" : mrs.length ? "ok" : "neutral", subTone: pendingApproval > 0 ? "#fbbf24" : "#888" }),
-          h(StatCard, { icon: "🔀", title: t("statPipsTitle"), value: glProject ? pipelines.length : "�?, sub: glProject ? t("statPipSub", { r: runningPips, o: okPips, f: failPips }) : t("notConfigured"), tone: !glProject ? "neutral" : failPips > 0 ? "err" : runningPips > 0 ? "warn" : okPips > 0 ? "ok" : "neutral", subTone: failPips > 0 ? "#ff8a80" : "#888" }),
-          h(StatCard, { icon: "📦", title: t("statDepsTitle"), value: k8sKc ? deployments.length : "�?, sub: k8sKc ? t("statDepSub", { f: depFail, p: depProg }) : t("notConfigured"), tone: !k8sKc ? "neutral" : depFail > 0 ? "err" : depProg > 0 ? "warn" : deployments.length ? "ok" : "neutral", subTone: depFail > 0 ? "#ff8a80" : "#888" }),
-          h(StatCard, { icon: "🐳", title: t("statPodsTitle"), value: k8sKc ? crashPods + pendPods : "�?, sub: k8sKc ? t("statPodSub", { c: crashPods, p: pendPods }) : t("notConfigured"), tone: !k8sKc ? "neutral" : crashPods > 0 ? "err" : pendPods > 0 ? "warn" : pods.length ? "ok" : "neutral", subTone: crashPods > 0 ? "#ff8a80" : "#888" }),
+          h(StatCard, { icon: "🔄", title: t("statMrsTitle"), value: glProject ? mrs.length : "—", sub: glProject ? t("statMrsSub", { p: pendingApproval, r: runningPips }) : t("notConfigured"), tone: !glProject ? "neutral" : pendingApproval > 0 ? "warn" : mrs.length ? "ok" : "neutral", subTone: pendingApproval > 0 ? "#fbbf24" : "#888" }),
+          h(StatCard, { icon: "🔀", title: t("statPipsTitle"), value: glProject ? pipelines.length : "—", sub: glProject ? t("statPipSub", { r: runningPips, o: okPips, f: failPips }) : t("notConfigured"), tone: !glProject ? "neutral" : failPips > 0 ? "err" : runningPips > 0 ? "warn" : okPips > 0 ? "ok" : "neutral", subTone: failPips > 0 ? "#ff8a80" : "#888" }),
+          h(StatCard, { icon: "📦", title: t("statDepsTitle"), value: k8sKc ? deployments.length : "—", sub: k8sKc ? t("statDepSub", { f: depFail, p: depProg }) : t("notConfigured"), tone: !k8sKc ? "neutral" : depFail > 0 ? "err" : depProg > 0 ? "warn" : deployments.length ? "ok" : "neutral", subTone: depFail > 0 ? "#ff8a80" : "#888" }),
+          h(StatCard, { icon: "🐳", title: t("statPodsTitle"), value: k8sKc ? crashPods + pendPods : "—", sub: k8sKc ? t("statPodSub", { c: crashPods, p: pendPods }) : t("notConfigured"), tone: !k8sKc ? "neutral" : crashPods > 0 ? "err" : pendPods > 0 ? "warn" : pods.length ? "ok" : "neutral", subTone: crashPods > 0 ? "#ff8a80" : "#888" }),
         ),
 
         // Sub-tabs
@@ -2018,19 +1806,74 @@ window.__ModuleLoader__.load({
           activeTab === "gitlab" && (
             glCfg
               ? h("div", { style: { display: "flex", flexDirection: "column", gap: 14 } },
-                  h(TabBar, {
-                    tabs: [
-                      { id: "mrs", label: t("secMrs") },
-                      { id: "tags", label: t("secTags") },
-                      { id: "pips", label: t("statPipsTitle") },
-                    ],
-                    active: glSubTab,
-                    onChange: setGlSubTab,
-                  }),
                   // Merge Requests
-                  glSubTab === "mrs" && (
                   h("div", null,
-                    h(SecHeader, { icon: "🔄", title: "", badge: mrs.length, badgeTone: pendingApproval > 0 ? "warn" : "ok", onNew: () => setNewMrOpen((o) => !o), newLabel: t("newMrBtn") }),
+                    h(SecHeader, { icon: "🔄", title: t("secMrs"), badge: mrs.length, badgeTone: pendingApproval > 0 ? "warn" : "ok", onNew: () => setNewMrOpen((o) => !o), newLabel: t("newMrBtn") }),
+                    newMrOpen && h("div", { style: { border: "1px solid var(--ds-alias-border,#333)", borderRadius: 8, padding: 12, background: "var(--ds-alias-surface-inset,#191919)", display: "flex", flexDirection: "column", gap: 8 } },
+                      h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
+                        h("div", null,
+                          h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("sourceBranch")),
+                          h(Select, {
+                            value: mrSource,
+                            onChange: setMrSource,
+                            placeholder: formOpts.loading ? t("loadingBr") : t("selBranch"),
+                            options: [
+                              ...(mrSource && !formOpts.branches.some((b) => b.name === mrSource) ? [mrSource] : []),
+                              ...formOpts.branches.map((b) => ({ value: b.name, label: b.isDefault ? b.name + t("defaultSuffix") : b.name })),
+                            ],
+                          })),
+                        h("div", null,
+                          h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("targetBranch")),
+                          h(Select, {
+                            value: mrTarget,
+                            onChange: setMrTarget,
+                            placeholder: formOpts.loading ? t("loadingBr") : t("selBranch"),
+                            options: [
+                              ...(mrTarget && !formOpts.branches.some((b) => b.name === mrTarget) ? [mrTarget] : []),
+                              ...formOpts.branches.map((b) => ({ value: b.name, label: b.isDefault ? b.name + t("defaultSuffix") : b.name })),
+                            ],
+                          })),
+                      ),
+                      h("div", null,
+                        h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("titleLabel")),
+                        h("input", { ref: mrTitleRef, style: S.input, placeholder: "feat: ..." })),
+                      h("div", null,
+                        h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("reviewersLabel")),
+                        formOpts.members.length > 0
+                          ? h(Select, {
+                              value: "",
+                              onChange: (username) => {
+                                if (!username) return;
+                                const cur = (mrReviewers || "").split(",").map((s) => s.trim()).filter(Boolean);
+                                if (!cur.includes(username)) cur.push(username);
+                                setMrReviewers(cur.join(", "));
+                              },
+                              placeholder: formOpts.loading ? t("loadingMem") : t("selReviewer"),
+                              options: formOpts.members
+                                .filter((m) => !(mrReviewers || "").split(",").map((x) => x.trim()).includes(m.username))
+                                .map((m) => ({ value: m.username, label: `${m.username}（${m.name || m.username}）` })),
+                            })
+                          : h("div", { style: { fontSize: 11, color: "#666" } }, formOpts.loading ? t("loadingMem") : t("noMem")),
+                        (mrReviewers || "").trim() && h("div", { style: { display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 } },
+                          (mrReviewers || "").split(",").map((s) => s.trim()).filter(Boolean).map((u) =>
+                            h("span", { key: u, style: { display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, padding: "2px 4px 2px 8px", borderRadius: 10, background: "var(--ds-alias-primary, #4a9eff)", color: "#fff" } },
+                              u,
+                              h("span", {
+                                style: { cursor: "pointer", width: 14, height: 14, lineHeight: "13px", textAlign: "center", borderRadius: "50%", background: "rgba(255,255,255,0.25)", fontSize: 10 },
+                                onClick: () => setMrReviewers((mrReviewers || "").split(",").map((x) => x.trim()).filter((x) => x && x !== u).join(", ")),
+                              }, "×"),
+                            ),
+                          ),
+                        ),
+                      ),
+                      h("div", null,
+                        h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("descLabel")),
+                        h("textarea", { ref: mrDescRef, style: { ...S.input, resize: "vertical", minHeight: 54 }, placeholder: t("descPh") })),
+                      h("div", { style: { display: "flex", gap: 8, alignItems: "center" } },
+                        h(Btn, { onClick: handleNewMr, small: true, tone: "success", disabled: busy }, t("createMr")),
+                        h(Btn, { onClick: () => setNewMrOpen(false), small: true, variant: "outline" }, t("cancel")),
+                      ),
+                    ),
                     mrs.length === 0
                       ? h(EmptyHint, null, t("noMrs"))
                       : mrs.map((mr) => {
@@ -2047,33 +1890,74 @@ window.__ModuleLoader__.load({
                                   ? h(Badge, { tone: "warn" }, t("pending", { n: mr.approvalsBeforeMerge }))
                                   : h(Badge, { tone: "ok" }, t("mergeable")),
                               ),
-                              h("div", { style: { color: "#888", fontSize: 11, marginTop: 2 } }, `${mr.sourceBranch} �?${mr.targetBranch} · ${mr.author} · ${timeAgo(mr.updatedAt)}`),
+                              h("div", { style: { color: "#888", fontSize: 11, marginTop: 2 } }, `${mr.sourceBranch} → ${mr.targetBranch} · ${mr.author} · ${timeAgo(mr.updatedAt)}`),
                             ),
                             h("div", { style: { display: "flex", gap: 5, flexShrink: 0 } },
                               h(ChipBtn, { children: t("approve"), tone: "primary", disabled: busy, onClick: () => handleApprove(mr) }),
                               h(ChipBtn, { children: t("close"), tone: "danger", disabled: busy, onClick: () => handleMrClose(mr) }),
-                              mr.webUrl ? h(ChipBtn, { children: "�?, title: t("openInGl"), onClick: () => window.open(mr.webUrl, "_blank") }) : null,
+                              mr.webUrl ? h(ChipBtn, { children: "↗", title: t("openInGl"), onClick: () => window.open(mr.webUrl, "_blank") }) : null,
                             ),
                           );
                         }),
-                  )),
+                  ),
                   // Tags
-                  glSubTab === "tags" && (
                   h("div", null,
-                    h(SecHeader, { icon: "🏷�?, title: "", badge: tags.length, onNew: () => setNewTagOpen((o) => !o), newLabel: t("newTagBtn") }),
+                    h(SecHeader, { icon: "🏷️", title: t("secTags"), badge: tags.length, onNew: () => setNewTagOpen((o) => !o), newLabel: t("newTagBtn") }),
+                    newTagOpen && h("div", { style: { border: "1px solid var(--ds-alias-border,#333)", borderRadius: 8, padding: 12, background: "var(--ds-alias-surface-inset,#191919)", display: "flex", flexDirection: "column", gap: 8 } },
+                      // 历史 Tag 快捷创建：选中后自动把 patch+1 的新版本号填进 Tag Name（Ref 由用户自行选择）
+                      tags.length > 0 && h("div", null,
+                        h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("histTag")),
+                        h(Select, {
+                          value: "",
+                          onChange: pickHistoryTag,
+                          placeholder: t("pickHist"),
+                          options: tags.map((t) => ({ value: t.name, label: `${t.name} → ${bumpPatch(t.name)} · ${timeAgo(t.createdAt)}` })),
+                        }),
+                      ),
+                      h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 } },
+                        h("div", null,
+                          h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("tagNameLabel")),
+                          h("input", {
+                            ref: tagNameRef, style: S.input, placeholder: "v1.2.0",
+                            list: "dsh-devops-tag-names",
+                          }),
+                          tags.length > 0
+                            ? h("datalist", { id: "dsh-devops-tag-names" },
+                                tags.map((t) => h("option", { key: t.name, value: t.name })))
+                            : null),
+                        h("div", null,
+                          h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("refLabel")),
+                          h(Select, {
+                            value: tagRefSel,
+                            onChange: setTagRefSel,
+                            placeholder: formOpts.loading ? t("loadingShort") : t("selRef"),
+                            options: [
+                              ...(tagRefSel && !formOpts.branches.some((b) => b.name === tagRefSel) && !tags.some((t) => t.name === tagRefSel) ? [tagRefSel] : []),
+                              ...formOpts.branches.map((b) => ({ value: b.name, label: `⑂ ${b.name}${b.isDefault ? t("defaultSuffix") : ""}` })),
+                              ...tags.map((t) => ({ value: t.name, label: `🏷 ${t.name}` })),
+                            ],
+                          })),
+                      ),
+                      h("div", null,
+                        h("div", { style: { fontSize: 11, color: "#888", marginBottom: 3 } }, t("msgLabel")),
+                        h("input", { ref: tagMsgRef, style: S.input, placeholder: t("releasePh") })),
+                      h("div", { style: { display: "flex", gap: 8, alignItems: "center" } },
+                        h(Btn, { onClick: handleNewTag, small: true, tone: "success", disabled: busy }, t("createTag")),
+                        h(Btn, { onClick: () => setNewTagOpen(false), small: true, variant: "outline" }, t("cancel")),
+                      ),
+                    ),
                     tags.length === 0
                       ? h(EmptyHint, null, t("noTags"))
                       : tags.slice(0, 6).map((t) => h("div", { key: t.name, style: insetRow },
-                          h("span", null, "🏷�?),
+                          h("span", null, "🏷️"),
                           h("span", { style: { fontWeight: 600, fontFamily: "monospace" } }, t.name),
                           t.message ? h("span", { style: { color: "#888", flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, t.message) : h("span", { style: { flex: 1 } }),
                           h("span", { style: { color: "#666", fontSize: 11 } }, timeAgo(t.createdAt)),
                         )),
-                  )),
+                  ),
                   // Pipelines
-                  glSubTab === "pips" && (
                   h("div", null,
-                    h(SecHeader, { icon: "🔀", title: "", badge: pipelines.length, badgeTone: failPips > 0 ? "err" : runningPips > 0 ? "warn" : "neutral" }),
+                    h(SecHeader, { icon: "🔀", title: t("statPipsTitle"), badge: pipelines.length, badgeTone: failPips > 0 ? "err" : runningPips > 0 ? "warn" : "neutral" }),
                     pipelines.length === 0
                       ? h(EmptyHint, null, t("noPips"))
                       : pipelines.map((p) => {
@@ -2085,7 +1969,7 @@ window.__ModuleLoader__.load({
                               h("span", {
                                 onClick: () => togglePipeDetail(p),
                                 style: { cursor: "pointer", color: "#888", fontSize: 10, width: 14, textAlign: "center", flexShrink: 0 },
-                              }, open ? "�? : "�?),
+                              }, open ? "▾" : "▸"),
                               h(Dot, { tone: dot, pulse: run }),
                               h("span", { style: { fontWeight: 600, cursor: "pointer" }, onClick: () => togglePipeDetail(p) }, `#${p.id}`),
                               h("span", { style: { color: "#ccc" } }, p.ref),
@@ -2095,7 +1979,7 @@ window.__ModuleLoader__.load({
                               run ? h(ChipBtn, { children: t("cancel"), tone: "danger", disabled: busy, onClick: () => handlePipelineAction(p, "cancel") }) : null,
                               p.status === "failed" ? h(ChipBtn, { children: t("retry"), tone: "primary", disabled: busy, onClick: () => handlePipelineAction(p, "retry") }) : null,
                             ),
-                            // 展开区：�?pipeline �?jobs 明细
+                            // 展开区：该 pipeline 的 jobs 明细
                             open && h("div", { style: { padding: "4px 10px 6px 28px", display: "flex", flexDirection: "column", gap: 3 } },
                               pipeJobs.id === p.id && pipeJobs.loading
                                 ? h("div", { style: { color: "#555", fontSize: 11 } }, t("loadingJobs"))
@@ -2103,33 +1987,20 @@ window.__ModuleLoader__.load({
                                   ? h("div", { style: { color: "#555", fontSize: 11 } }, t("noJobs"))
                                   : (pipeJobs.id === p.id ? pipeJobs.jobs : []).map((j) => {
                                       const jdot = j.status === "success" ? "ok" : j.status === "failed" ? "err" : ["created", "pending", "running", "queued", "scheduled", "waiting_for_resource", "preparing"].includes(j.status) ? "warn" : "neutral";
-                                      return h("div", { key: j.id },
-                                        h("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#ccc", padding: "3px 8px", borderRadius: 4, background: "rgba(255,255,255,0.03)" } },
-                                          h(Dot, { tone: jdot, pulse: jdot === "warn" }),
-                                          h("span", { style: { fontWeight: 500 } }, j.name),
-                                          h("span", { style: { color: "#666" } }, j.stage),
-                                          h("span", { style: { color: "#888" } }, j.status),
-                                          j.failureReason ? h("span", { style: { color: "#ff8a80" } }, j.failureReason) : null,
-                                          h("span", { style: { flex: 1 } }),
-                                          j.duration != null ? h("span", { style: { color: "#666", fontSize: 10 } }, `${Math.round(j.duration)}s`) : null,
-                                          h(ChipBtn, { children: jobLogMap[j.id] ? t("close") : t("logs"), tone: "ghost", onClick: () => handleViewJobLog(j) }),
-                                        ),
-                                        jobLogMap[j.id] && h("div", { style: { margin: "2px 0 4px 20px", border: "1px solid var(--ds-alias-border,#333)", borderRadius: 6, background: "#0d0d0d", padding: "8px 10px", fontFamily: "'Cascadia Code','Fira Code','JetBrains Mono',monospace", fontSize: 11, lineHeight: 1.6, maxHeight: 200, overflow: "auto" } },
-                                          jobLogMap[j.id].loading
-                                            ? h("div", { style: { color: "#555" } }, t("loadingLogs"))
-                                            : jobLogMap[j.id].err
-                                              ? h("div", {},
-                                                  h("div", { style: { color: "#ff8a80", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, jobLogMap[j.id].err),
-                                                  jobLogMap[j.id].jobUrl ? h("div", { style: { marginTop: 6 } }, h(ChipBtn, { children: t("openInGl") + " �?, tone: "ghost", onClick: () => window.open(jobLogMap[j.id].jobUrl, "_blank") })) : null,
-                                                )
-                                              : h("div", { style: { color: "#8f8", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, jobLogMap[j.id].logs || t("noLogs")),
-                                        ),
+                                      return h("div", { key: j.id, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#ccc", padding: "3px 8px", borderRadius: 4, background: "rgba(255,255,255,0.03)" } },
+                                        h(Dot, { tone: jdot, pulse: jdot === "warn" }),
+                                        h("span", { style: { fontWeight: 500 } }, j.name),
+                                        h("span", { style: { color: "#666" } }, j.stage),
+                                        h("span", { style: { color: "#888" } }, j.status),
+                                        j.failureReason ? h("span", { style: { color: "#ff8a80" } }, j.failureReason) : null,
+                                        h("span", { style: { flex: 1 } }),
+                                        j.duration != null ? h("span", { style: { color: "#666", fontSize: 10 } }, `${Math.round(j.duration)}s`) : null,
                                       );
                                     }),
                             ),
                           );
                         }),
-                  )),
+                  ),
                 )
               : h(EmptyHint, null, t("glNotCfg2"))
           ),
@@ -2138,28 +2009,12 @@ window.__ModuleLoader__.load({
           activeTab === "k8s" && (
             k8sKc
               ? h("div", { style: { display: "flex", flexDirection: "column", gap: 14 } },
-                  h(TabBar, {
-                    tabs: [
-                      { id: "deps", label: t("statDepsTitle") },
-                      { id: "events", label: t("secEvents") },
-                    ],
-                    active: k8sSubTab,
-                    onChange: setK8sSubTab,
-                  }),
-                  // Deployments（展开查看 Pods；支持换镜像 / 重启�?                  k8sSubTab === "deps" && (
+                  // Deployments（展开查看 Pods；支持换镜像 / 重启）
                   h("div", null,
-                    h(SecHeader, { icon: "📦", title: "", badge: deployments.length, badgeTone: depFail > 0 ? "err" : depProg > 0 ? "warn" : "ok" }),
-                    h("input", {
-                      style: { ...S.input, padding: "6px 10px", fontSize: 12, marginBottom: 4 },
-                      placeholder: t("searchPh"),
-                      onChange: (e) => setDepSearch(e.target.value),
-                    }),
-                    (() => {
-                      const dq = depSearch.trim().toLowerCase();
-                      const depList = dq ? deployments.filter((d) => (d.name || "").toLowerCase().includes(dq) || (d.image || "").toLowerCase().includes(dq)) : deployments;
-                      return depList.length === 0
-                        ? h(EmptyHint, null, deployments.length === 0 ? t("noDeps") : t("noMatch"))
-                        : depList.map((d) => {
+                    h(SecHeader, { icon: "📦", title: t("statDepsTitle"), badge: deployments.length, badgeTone: depFail > 0 ? "err" : depProg > 0 ? "warn" : "ok" }),
+                    deployments.length === 0
+                      ? h(EmptyHint, null, t("noDeps"))
+                      : deployments.map((d) => {
                           const st = d.replicas > 0 && d.ready === d.replicas ? "ok" : d.ready === 0 ? "err" : "warn";
                           const open = expandedDep === d.name;
                           const depPodList = depPods(d);
@@ -2168,52 +2023,64 @@ window.__ModuleLoader__.load({
                               h("span", {
                                 onClick: () => toggleDepDetail(d),
                                 style: { cursor: "pointer", color: "#888", fontSize: 10, width: 14, textAlign: "center", flexShrink: 0 },
-                              }, open ? "�? : "�?),
+                              }, open ? "▾" : "▸"),
                               h(Dot, { tone: st }),
                               h("div", { style: { flex: 1, minWidth: 0, cursor: "pointer" }, onClick: () => toggleDepDetail(d) },
                                 h("div", { style: { fontFamily: "monospace", fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, d.name),
-                                h("div", { style: { color: "#888", fontSize: 11 } }, `${d.ready}/${d.replicas} ${t("ready")} · ${d.imageTag || "�?} · ${timeAgo(d.updated)}`),
+                                h("div", { style: { color: "#888", fontSize: 11 } }, `${d.ready}/${d.replicas} ${t("ready")} · ${d.imageTag || "—"} · ${timeAgo(d.updated)}`),
                               ),
                               st === "ok" ? h(Badge, { tone: "ok" }, t("runningBadge")) : h(Badge, { tone: st }, t("issueN", { n: d.replicas - d.ready })),
-                              h(ChipBtn, { children: t("setImage"), tone: "ghost", disabled: busy, onClick: () => setDepImgEdit(d.name) }),
-                              h(ChipBtn, { children: t("restart"), tone: "ghost", disabled: busy, onClick: () => setRestartDep(d.name) }),
+                              h(ChipBtn, { children: depImgEdit === d.name ? t("cancel") : t("setImage"), tone: "ghost", disabled: busy, onClick: () => setDepImgEdit(depImgEdit === d.name ? null : d.name) }),
+                              h(ChipBtn, { children: t("restart"), tone: "ghost", disabled: busy, onClick: () => handleRestartDep(d) }),
                             ),
-
-                            // 展开区：属于�?deployment �?pods
+                            // 换镜像编辑行
+                            depImgEdit === d.name && h("div", { style: { display: "flex", gap: 6, padding: "0 10px 6px 28px" } },
+                              h("input", {
+                                ref: depImgRef,
+                                defaultValue: d.image || "",
+                                placeholder: "nginx:1.27",
+                                style: { ...S.input, flex: 1, fontFamily: "monospace", fontSize: 11 },
+                                onKeyDown: (e) => { if (e.key === "Enter") handleSetImage(d); },
+                              }),
+                              h(Btn, { onClick: () => handleSetImage(d), small: true, tone: "success", disabled: busy }, t("apply")),
+                            ),
+                            // 展开区：属于该 deployment 的 pods
                             open && h("div", { style: { padding: "2px 10px 6px 28px", display: "flex", flexDirection: "column", gap: 3 } },
                               depPodList.length === 0
                                 ? h("div", { style: { color: "#555", fontSize: 11 } }, t("noPods"))
-                                : depPodList.map((pod) => h("div", { key: pod.name },
-                                    h("div", { style: { display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#ccc", padding: "3px 8px", borderRadius: 4, background: "rgba(255,255,255,0.03)" } },
-                                      h(Dot, { tone: pod.phase === "Running" ? "ok" : pod.phase === "Pending" ? "warn" : "err" }),
-                                      h("span", { style: { fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, pod.name),
-                                      (pod.reason || pod.restarts > 0) ? h("span", { style: { color: "#888" } }, `${pod.restarts > 0 ? t("restartsN", { n: pod.restarts }) + " · " : ""}${pod.reason || ""}`) : null,
-                                      h("span", { style: { flex: 1 } }),
-                                      pod.restarts > 0 ? h(Badge, { tone: "warn" }, `${pod.restarts}r`) : null,
-                                      h(ChipBtn, { children: podLogMap[pod.name] ? t("close") : t("logs"), tone: "ghost", onClick: () => handleViewPodLogs(pod) }),
-                                    ),
-                                    podLogMap[pod.name] && h("div", { style: { margin: "2px 0 4px 20px", border: "1px solid var(--ds-alias-border,#333)", borderRadius: 6, background: "#0d0d0d", padding: "8px 10px", fontFamily: "'Cascadia Code','Fira Code','JetBrains Mono',monospace", fontSize: 11, lineHeight: 1.6, maxHeight: 200, overflow: "auto" } },
-                                      podLogMap[pod.name].loading
-                                        ? h("div", { style: { color: "#555" } }, t("loadingLogs"))
-                                        : podLogMap[pod.name].err
-                                          ? h("div", { style: { color: "#ff8a80", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, podLogMap[pod.name].err)
-                                          : h("div", { style: { color: "#8f8", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, podLogMap[pod.name].logs || t("noLogs")),
-                                    ),
+                                : depPodList.map((pod) => h("div", { key: pod.name, style: { display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#ccc", padding: "3px 8px", borderRadius: 4, background: "rgba(255,255,255,0.03)" } },
+                                    h(Dot, { tone: pod.phase === "Running" ? "ok" : pod.phase === "Pending" ? "warn" : "err" }),
+                                    h("span", { style: { fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, pod.name),
+                                    (pod.reason || pod.restarts > 0) ? h("span", { style: { color: "#888" } }, `${pod.restarts > 0 ? t("restartsN", { n: pod.restarts }) + " · " : ""}${pod.reason || ""}`) : null,
+                                    h("span", { style: { flex: 1 } }),
+                                    pod.restarts > 0 ? h(Badge, { tone: "warn" }, `${pod.restarts}r`) : null,
+                                    h(ChipBtn, { children: t("logs"), tone: "ghost", onClick: () => handleViewPodLogs(pod) }),
                                   )),
                             ),
                           );
-                      });
-                      })(),
-                  )),
+                        }),
+                    // pod 日志面板（从 deployment 展开的 pods 打开）
+                    logView && h("div", { style: { border: "1px solid var(--ds-alias-border,#333)", borderRadius: 8, background: "#0d0d0d", padding: "10px 12px", fontFamily: "'Cascadia Code','Fira Code','JetBrains Mono',monospace", fontSize: 11, lineHeight: 1.6, maxHeight: 220, overflow: "auto" } },
+                      h("div", { style: { display: "flex", alignItems: "center", gap: 8, marginBottom: 8, fontFamily: "sans-serif" } },
+                        h("span", { style: { color: "#ccc", fontWeight: 600 } }, `▤ ${logView.podName}`),
+                        h("span", { style: { flex: 1 } }),
+                        h(ChipBtn, { children: t("close"), onClick: () => setLogView(null) }),
+                      ),
+                      logView.loading
+                        ? h("div", { style: { color: "#555" } }, t("loadingLogs"))
+                        : logView.err
+                          ? h("div", { style: { color: "#ff8a80", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, logView.err)
+                          : h("div", { style: { color: "#8f8", whiteSpace: "pre-wrap", wordBreak: "break-all" } }, logView.logs || t("noLogs")),
+                    ),
+                  ),
                   // Events
-                  k8sSubTab === "events" && (
                   h("div", null,
-                    h(SecHeader, { icon: "📝", title: "", badge: events.length }),
+                    h(SecHeader, { icon: "📝", title: t("secEvents"), badge: events.length }),
                     events.length === 0
                       ? h(EmptyHint, null, t("noEvents"))
                       : events.slice(0, 12).map((ev, i) => h("div", { key: i, style: { padding: "6px 10px", borderRadius: 6, background: "var(--ds-alias-surface-inset,#1a1a1a)", fontSize: 12 } },
                           h("div", { style: { display: "flex", alignItems: "center", gap: 6, marginBottom: 2 } },
-                            h("span", { style: { color: ev.type === "Warning" ? "#ff8a80" : "#34c759", fontSize: 11, fontWeight: 600 } }, ev.type === "Warning" ? "�? : "�?),
+                            h("span", { style: { color: ev.type === "Warning" ? "#ff8a80" : "#34c759", fontSize: 11, fontWeight: 600 } }, ev.type === "Warning" ? "⚠" : "•"),
                             h("span", { style: { color: "#888", fontSize: 11 } }, ev.reason),
                             h("span", { style: { flex: 1 } }),
                             h("span", { style: { color: "#666", fontSize: 10 } }, timeAgo(ev.time)),
@@ -2221,7 +2088,7 @@ window.__ModuleLoader__.load({
                           h("div", { style: { color: "#ccc", lineHeight: 1.4, wordBreak: "break-word" } }, ev.message),
                           h("div", { style: { color: "#666", fontSize: 10, marginTop: 2 } }, `${ev.kind} / ${ev.object}`),
                         )),
-                  )),
+                  ),
                 )
               : h(EmptyHint, null, t("k8sNotCfg2"))
           ),
@@ -2277,7 +2144,7 @@ window.__ModuleLoader__.load({
     // ─── Plugin entry ─────────────────────────────────────────────────────────────
 
     return {
-      name: "@jacksonchen/dsh-devops",
+      name: "@JacksonChen/dsh-devops",
       inject: ["slots", "locale"],
       apply(ctx) {
         // 1. Register settings section (DevOps config form)
