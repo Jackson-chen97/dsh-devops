@@ -16,15 +16,9 @@
     "./package.json": "./package.json"
   },
   "dsh": {
-    "bundle": {
-      "patch": "./cordis.patch.yml"
-    },
+    "bundle": {},
     "client": {
-      "inject": [
-        "slots",
-        "locale",
-        "sidebarRightTabs"
-      ],
+      "inject": ["slots", "locale", "sidebarRightTabs"],
       "platform": "web"
     }
   },
