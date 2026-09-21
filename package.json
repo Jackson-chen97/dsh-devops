@@ -30,10 +30,8 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/dsh-tools": "*",
     "react": "^18.2.0"
-  },
-  "optionalDependencies": {
-    "@deepseek-ai/dsh-tools": "*"
   },
   "dependencies": {
     "yaml": "^2.4.0"
