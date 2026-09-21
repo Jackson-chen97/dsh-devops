@@ -32,8 +32,10 @@
     "@deepseek-ai/cordis": "*",
     "react": "^18.2.0"
   },
+  "optionalDependencies": {
+    "@deepseek-ai/dsh-tools": "*"
+  },
   "dependencies": {
-    "@deepseek-ai/dsh-tools": "*",
     "yaml": "^2.4.0"
   },
   "devDependencies": {
