@@ -20,7 +20,11 @@
       "patch": "./cordis.patch.yml"
     },
     "client": {
-      "inject": ["slots", "locale", "sidebarRightTabs"],
+      "inject": [
+        "slots",
+        "locale",
+        "sidebarRightTabs"
+      ],
       "platform": "web"
     }
   },
@@ -33,13 +37,14 @@
   },
   "devDependencies": {
     "@deepseek-ai/cordis": "*",
+    "@deepseek-ai/schemastery": "^3.18.2",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.0",
     "react": "^18.2.0",
-    "typescript": "*",
     "tsdown": "^0.12.0",
-    "vitest": "^3.0.0",
-    "tsx": "^4.0.0"
+    "tsx": "^4.0.0",
+    "typescript": "*",
+    "vitest": "^3.0.0"
   },
   "scripts": {
     "typecheck": "tsc --noEmit",
