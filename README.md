@@ -20,7 +20,7 @@ GitLab + Kubernetes DevOps monitoring plugin for DeepSeek Harness (DSH).
 - **Kubernetes API**: Deployment status, pod lists, events, logs, image change and rollout restart
 - **Dashboard UI**: Dual-card switcher (GitLab server / project, kubeconfig / context / namespace) with persisted config
 - **Multi-config**: Multiple GitLab servers and multiple kubeconfigs, switchable from both the dashboard and settings
-- **Webhook + Alert engine**: GitLab webhook �?`followup()` notification; background polling detects pipeline failures and pod crashes
+- **Webhook + Alert engine**: GitLab webhook → `followup()` notification; background polling detects pipeline failures and pod crashes
 - **i18n**: Built-in Chinese / English UI with a one-click language toggle (persisted; follows browser language by default)
 - **Self-signed clusters**: Per-request CA pinning from kubeconfig via `node:https`
 
@@ -48,7 +48,7 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 pnpm add "D:/path/to/dsh-devops"       # local path
 ```
 
-Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis.patch.yml` (required �?the plugin is only loaded after this step):
+Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis.patch.yml` (required — the plugin is only loaded after this step):
 
 ```yaml
 - insert:
@@ -56,45 +56,38 @@ Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis
       name: '@jacksonchen/dsh-devops'
 ```
 
-Restart DSH, then open Settings �?DevOps to configure.
+Restart DSH, then open Settings > DevOps to configure.
 
-## Install from prebuilt artifacts (no build, no registry)
+## Install from local checkout (no registry)
 
 `lib/` ships a complete, runnable bundle and is **committed to the repo**, so
-you can install with no build step and no package registry �?ideal for
-locked-down or offline machines. A plain `git clone` is enough.
+you can install without building or using a package registry — ideal for
+locked-down or offline machines. The `dsh plugin add` command still needs pnpm
+once to link the local path and auto-register the bundle.
 
 ```sh
 # 1) Clone anywhere you like
 git clone https://github.com/Jackson-chen97/dsh-devops
 
-# 2) Copy the prebuilt bundle into the profile's shared node_modules
-#    (~/.dsh is %USERPROFILE%\.dsh on Windows)
-DEST=~/.dsh/profiles/node_modules/@jacksonchen/dsh-devops
-mkdir -p "$DEST"
-cp -R dsh-devops/lib dsh-devops/package.json dsh-devops/cordis.patch.yml "$DEST"/
+# 2) Use dsh plugin to install from the local path
+dsh plugin --profile web add "$(pwd)/dsh-devops"
 
-# 3) Register the bundle: add "@jacksonchen/dsh-devops" to
-#    `dsh.profile.bundles` in ~/.dsh/profiles/web/package.json. This is the
-#    same list that loads @deepseek-ai/dsh-base and dsh-web-app; the bundle then
-#    self-registers through its own cordis.patch.yml. e.g.
-#    "dsh": { "profile": { "bundles": [
-#      "@deepseek-ai/dsh-base",
-#      "@deepseek-ai/dsh-web-app",
-#      "@jacksonchen/dsh-devops"
-#    ] } }
+# This will:
+#   - Link the local checkout into your profile's node_modules
+#   - Auto-add "@jacksonchen/dsh-devops" to dsh.profile.bundles
+#   - Load the prebuilt lib/ code automatically
 
-# 4) Restart DSH, then open Settings �?DevOps.
+# 3) Restart DSH, then open Settings > DevOps.
 ```
 
-> The offline artifact is `lib/*.js` only. The `.d.ts` type files come from the
-> normal `pnpm run build` (tsdown); the prebuilt bundle is runtime-only.
+The prebuilt artifact contains only `lib/*.js`. Type definitions (`.d.ts`)  
+come from running `pnpm run build`; they're not included in the prebuilt bundle.
 
 ## Quick Start
 
-1. Open DSH Settings �?DevOps, add GitLab server(s) (Base URL + token) and kubeconfig file(s).
-2. On the dashboard, pick the GitLab project and K8s context/namespace �?selections are saved to `~/.dsh-devops/config.json` automatically.
-3. Create MRs, tags, inspect pipelines and operate deployments right from the dashboard �?or just ask the AI, which calls the same tools with the same config.
+1. Open DSH Settings > DevOps, add GitLab server(s) (Base URL + token) and kubeconfig file(s).
+2. On the dashboard, pick the GitLab project and K8s context/namespace — selections are saved to `~/.dsh-devops/config.json` automatically.
+3. Create MRs, tags, inspect pipelines and operate deployments right from the dashboard — or just ask the AI, which calls the same tools with the same config.
 
 Or configure via `cordis.patch.yml`:
 
@@ -116,7 +109,7 @@ Or configure via `cordis.patch.yml`:
 
 ## AI Tools
 
-All tools are registered as soon as the plugin loads �?**no YAML config needed**. They read the same configuration the Settings �?DevOps UI saves (`~/.dsh-devops/config.json`), so switching project/cluster in the dashboard applies to AI calls immediately. Calling a tool before configuring returns a hint to finish setup first.
+All tools are registered as soon as the plugin loads — **no YAML config needed**. They read the same configuration the Settings > DevOps UI saves (`~/.dsh-devops/config.json`), so switching project/cluster in the dashboard applies to AI calls immediately. Calling a tool before configuring returns a hint to finish setup first.
 
 An explicit `config:` block in the cordis patch entry still works as an override layer for headless setups.
 
@@ -172,8 +165,8 @@ An explicit `config:` block in the cordis patch entry still works as an override
 |-------|---------|-------------|
 | `pollIntervalSec` | 60 | Polling interval |
 | `cooldownSec` | 300 | Alert cooldown to prevent spam |
-| `pipeline[]` | �?| Pipeline alert rules |
-| `pod[]` | �?| Pod alert rules |
+| `pipeline[]` | ⚠️ | Pipeline alert rules |
+| `pod[]` | ⚠️ | Pod alert rules |
 
 ## Development
 
@@ -197,16 +190,16 @@ src/
 ├── gitlab/           # GitLab API client + multi-project router
 ├── k8s/              # K8s API client + kubeconfig parser + multi-cluster router
 ├── tools/            # Tool registration (gitlab_*, k8s_*)
-├── webhook/          # GitLab webhook �?followup handler
+├── webhook/          # GitLab webhook → followup handler
 ├── monitor/          # Background polling alert engine + throttle
 └── runtime/          # Lazy service wrappers (lazy.ts)
 ```
 
 ## Requirements
 
-- Node.js �?22.19 (native `fetch`, ESM)
-- GitLab �?16.0 (MR Approvals API)
-- Kubernetes API �?1.25 (apps/v1)
+- Node.js ≥ 22.19 (native `fetch`, ESM)
+- GitLab ≥ 16.0 (MR Approvals API)
+- Kubernetes API ≥ 1.25 (apps/v1)
 - Network access to GitLab and K8s API endpoints
 
 ## License

@@ -46,5 +46,12 @@
     "test:e2e": "vitest run tests/e2e/ --reporter=verbose",
     "dev": "tsx src/index.ts",
     "clean": "rimraf lib"
-  }
+  },
+  "files": [
+    "lib",
+    "src",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh-CN.md"
+  ]
 }
