@@ -33,6 +33,7 @@
     "react": "^18.2.0"
   },
   "dependencies": {
+    "@deepseek-ai/dsh-tools": "*",
     "yaml": "^2.4.0"
   },
   "devDependencies": {
