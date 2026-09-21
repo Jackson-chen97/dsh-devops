@@ -26,29 +26,62 @@
 
 ## 安装
 
-`dsh plugin` 命令实际转发到 profile 目录内的 pnpm，因此 npm、Git 仓库、本地路径都可以作为安装源。
+**🚀 推荐方式：完整本地目录安装流程（无需 npm 依赖）**
+
+由于已知 `@deepseek-ai/dsh-type-meta` 包在 npm 上缺失的问题，**完整的本地目录安装是目前最可靠的安装方式**。详见 [GitHub discussion #410](https://github.com/deepseek-ai/deepseek-harness/discussions/410) 和 [discussion #984](https://github.com/deepseek-ai/deepseek-harness/discussions/984)。
+
+---
+
+### 方法一：完整设置指南（强烈推荐 ✅）
+
+本指南将带你一步步完成克隆仓库和本地安装的全过程。
+
+#### 步骤 1: 克隆仓库
 
 ```sh
-# 从 npm 安装（发布后）
-dsh plugin --profile web add @jacksonchen/dsh-devops
+# 创建项目工具目录（或沿用现有位置）
+mkdir -p ~/dev/tools
+cd ~/dev/tools
 
-# 从 GitHub 安装
-dsh plugin --profile web add https://github.com/Jackson-chen97/dsh-devops.git
+# 克隆 dsh-devops 仓库
+git clone https://github.com/Jackson-chen97/dsh-devops
+cd dsh-devops
 
-# 从本地目录安装（开发模式）
-dsh plugin --profile web add "D:/path/to/dsh-devops"
+# 验证项目结构
+ls -la
 ```
 
-等价的 pnpm 命令（如果偏好直接在 profile 目录操作）：
+预期输出包含：
+```
+src/          # TypeScript 源代码
+package.json  # 项目配置
+README.md     # 本文档
+```
 
+#### 步骤 2: 在 DSH Profile 中安装插件
+
+使用以下两种方法之一：
+
+**选项 A: 使用 dsh plugin CLI 命令**
 ```sh
-cd ~/.dsh/profiles/web
-pnpm add @jacksonchen/dsh-devops       # npm（发布后）
-pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
-pnpm add "D:/path/to/dsh-devops"       # 本地路径
+dsh plugin --profile web add "~/dev/tools/dsh-devops"
 ```
 
-然后在 profile 的补丁层 `~/.dsh/profiles/web/cordis.patch.yml` 中声明插件（必须——加了这个插件才会被加载）：
+**选项 B: 直接在 profile 的 package.json 中配置路径**
+```sh
+# 编辑你的 profile 的 package.json
+nano ~/.dsh/profiles/web/package.json
+# 或使用你喜欢的编辑器：notepad、vim、code 等
+
+# 在 "dependencies" 部分添加这行配置：
+{
+  "@jacksonchen/dsh-devops": "~/dev/tools/dsh-devops"
+}
+```
+
+#### 步骤 3: 在补丁层声明插件
+
+向 `~/.dsh/profiles/web/cordis.patch.yml` 中添加以下内容：
 
 ```yaml
 - insert:
@@ -56,30 +89,60 @@ pnpm add "D:/path/to/dsh-devops"       # 本地路径
       name: '@jacksonchen/dsh-devops'
 ```
 
-重启 DSH，打开 设置 > DevOps 完成配置。
+如果文件尚不存在，创建该文件并写入上述内容。
 
-## 从本地目录安装（无需 registry）
-
-`lib/` 里是完整可运行的构建产物，并已提交到仓库——因此安装时**无需构建步骤、无需包管理器**，适合受限或离线环境。但仍需调用一次 `dsh plugin add` 来链接和本地注册 bundle。
+#### 步骤 4: 重启 DSH
 
 ```sh
-# 1) 克隆到任意目录
-git clone https://github.com/Jackson-chen97/dsh-devops
-
-# 2) 使用 dsh plugin 从本地路径安装
-dsh plugin --profile web add "$(pwd)/dsh-devops"
-
-# 这将会：
-#   - 将本地 checkout 链接到 profile 的 node_modules
-#   - 自动将 "@jacksonchen/dsh-devops" 添加到 dsh.profile.bundles
-#   - 自动使用预构建的 lib/ 代码
-
-# 3) 重启 DSH，打开 设置 > DevOps
+# 如需先停止任何运行中的 DSH 实例
+# 然后重新启动
+dsh --profile web
 ```
 
-离线产物只含 `lib/*.js`；`.d.ts` 类型文件由正常的 `pnpm run build`（tsdown）生成，预构建的 bundle 仅提供运行时代码。
+浏览器应自动打开 http://127.0.0.1:3080/
 
-## 快速开始
+#### 步骤 5: 配置 DevOps 设置
+
+1. 打开 DSH 设置 → DevOps 页签
+2. 添加 GitLab 服务器：Base URL + Token
+3. 添加 K8s kubeconfig 文件
+4. 保存并返回监控台
+
+---
+
+### 为什么选择本地目录？
+
+✅ **离线可用** - 无需 pnpm registry  
+✅ **绕过依赖问题** - 避免了 `dsh-type-meta` 的缺失问题  
+✅ **支持热重载** - 代码修改后重启立即生效  
+✅ **TypeScript 运行时编译** - 使用 DSH 的 tsx 进行即时编译  
+✅ **非常适合开发和测试** - 活跃开发期间的理想选择  
+
+---
+
+### 其他方式（仅供参考）
+
+待 maintainer 修复 `dsh-type-meta` 问题后，可使用这些传统方式：
+
+**从 npm 安装（发布后）：**
+```sh
+dsh plugin --profile web add @jacksonchen/dsh-devops
+```
+
+**从 GitHub 安装：**
+```sh
+dsh plugin --profile web add https://github.com/Jackson-chen97/dsh-devops.git
+```
+
+等价的 pnpm 命令（在 profile 目录操作）：
+
+```sh
+cd ~/.dsh/profiles/web
+pnpm add @jacksonchen/dsh-devops       # npm（发布后）
+pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
+```
+
+**注意：** 与传统 npm 包不同，本地目录安装方式不需要预构建产物 — DSH 的运行时 tsx 会在加载插件源码时即时编译 TypeScript。
 
 1. 打开 DSH 设置 > DevOps，添加 GitLab 服务器（Base URL + Token）和 kubeconfig 文件
 2. 在监控台选择 GitLab 项目和 K8s 的 Context/Namespace，选择会自动保存到 `~/.dsh-devops/config.json`

@@ -26,29 +26,62 @@ GitLab + Kubernetes DevOps monitoring plugin for DeepSeek Harness (DSH).
 
 ## Installation
 
-The `dsh plugin` command forwards to pnpm inside the profile directory, so any pnpm source works: npm, git, or a local path.
+**🚀 Recommended: Local Checkout Method (No npm dependency issues)**
+
+Due to a known issue with `@deepseek-ai/dsh-type-meta` missing from npm, the **local checkout method is the most reliable way** to install this plugin. See [GitHub discussion #410](https://github.com/deepseek-ai/deepseek-harness/discussions/410) and [discussion #984](https://github.com/deepseek-ai/deepseek-harness/discussions/984).
+
+---
+
+### Method 1: Complete Setup Guide (Recommended ✅)
+
+This guide walks you through cloning the repository and installing it locally.
+
+#### Step 1: Clone the Repository
 
 ```sh
-# From npm (once published)
-dsh plugin --profile web add @jacksonchen/dsh-devops
+# Create a directory for your project tools (or use existing location)
+mkdir -p ~/dev/tools
+cd ~/dev/tools
 
-# From GitHub
-dsh plugin --profile web add https://github.com/Jackson-chen97/dsh-devops.git
+# Clone the dsh-devops repository
+git clone https://github.com/Jackson-chen97/dsh-devops
+cd dsh-devops
 
-# From a local checkout (development)
-dsh plugin --profile web add "D:/path/to/dsh-devops"
+# Verify the project structure
+ls -la
 ```
 
-Equivalent pnpm commands (if you prefer to work directly in the profile dir):
+Expected output shows:
+```
+src/          # Source TypeScript code
+package.json  # Project configuration
+README.md     # This documentation
+```
 
+#### Step 2: Install Plugin in DSH Profile
+
+Use one of these two methods:
+
+**Option A: Using dsh plugin CLI command**
 ```sh
-cd ~/.dsh/profiles/web
-pnpm add @jacksonchen/dsh-devops       # npm (once published)
-pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
-pnpm add "D:/path/to/dsh-devops"       # local path
+dsh plugin --profile web add "~/dev/tools/dsh-devops"
 ```
 
-Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis.patch.yml` (required — the plugin is only loaded after this step):
+**Option B: Direct configuration in profile package.json**
+```sh
+# Edit your profile's package.json
+nano ~/.dsh/profiles/web/package.json
+# Or use your preferred editor: notepad, vim, code, etc.
+
+# Add this line to the "dependencies" section:
+{
+  "@jacksonchen/dsh-devops": "~/dev/tools/dsh-devops"
+}
+```
+
+#### Step 3: Declare Plugin in Patch Layer
+
+Add the following to `~/.dsh/profiles/web/cordis.patch.yml`:
 
 ```yaml
 - insert:
@@ -56,34 +89,60 @@ Then declare the plugin in the profile's patch layer `~/.dsh/profiles/web/cordis
       name: '@jacksonchen/dsh-devops'
 ```
 
-Restart DSH, then open Settings > DevOps to configure.
+If the file doesn't exist yet, create it with that content.
 
-## Install from local checkout (no registry)
-
-`lib/` ships a complete, runnable bundle and is **committed to the repo**, so
-you can install without building or using a package registry — ideal for
-locked-down or offline machines. The `dsh plugin add` command still needs pnpm
-once to link the local path and auto-register the bundle.
+#### Step 4: Restart DSH
 
 ```sh
-# 1) Clone anywhere you like
-git clone https://github.com/Jackson-chen97/dsh-devops
-
-# 2) Use dsh plugin to install from the local path
-dsh plugin --profile web add "$(pwd)/dsh-devops"
-
-# This will:
-#   - Link the local checkout into your profile's node_modules
-#   - Auto-add "@jacksonchen/dsh-devops" to dsh.profile.bundles
-#   - Load the prebuilt lib/ code automatically
-
-# 3) Restart DSH, then open Settings > DevOps.
+# Stop any running DSH instance first if needed
+# Then start fresh
+dsh --profile web
 ```
 
-The prebuilt artifact contains only `lib/*.js`. Type definitions (`.d.ts`)  
-come from running `pnpm run build`; they're not included in the prebuilt bundle.
+The browser should open automatically at http://127.0.0.1:3080/
 
-## Quick Start
+#### Step 5: Configure DevOps Settings
+
+1. Open DSH Settings → DevOps tab
+2. Add your GitLab server(s): Base URL + Token
+3. Add your K8s kubeconfig file(s)
+4. Save and return to dashboard
+
+---
+
+### Why Local Checkout?
+
+✅ **Works offline** - No pnpm registry needed  
+✅ **Bypasses dependency issues** - The `dsh-type-meta` problem is avoided  
+✅ **Hot reload support** - Code changes take effect immediately after restart  
+✅ **TypeScript runtime compilation** - Uses DSH's tsx for on-the-fly compilation  
+✅ **Perfect for development/testing** - Ideal during active development  
+
+---
+
+### Other Methods (For Reference Only)
+
+Once the `dsh-type-meta` issue is resolved by maintainers, you can use these traditional methods:
+
+**From npm (after publishing):**
+```sh
+dsh plugin --profile web add @jacksonchen/dsh-devops
+```
+
+**From GitHub:**
+```sh
+dsh plugin --profile web add https://github.com/Jackson-chen97/dsh-devops.git
+```
+
+Equivalent pnpm commands in profile directory:
+
+```sh
+cd ~/.dsh/profiles/web
+pnpm add @jacksonchen/dsh-devops       # npm (once published)
+pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
+```
+
+**Note:** Unlike traditional npm packages, the local checkout method doesn't require pre-built artifacts — DSH's runtime tsx compiles TypeScript on-the-fly when loading the plugin from source.
 
 1. Open DSH Settings > DevOps, add GitLab server(s) (Base URL + token) and kubeconfig file(s).
 2. On the dashboard, pick the GitLab project and K8s context/namespace — selections are saved to `~/.dsh-devops/config.json` automatically.
