@@ -1,20 +1,23 @@
 {
   "compilerOptions": {
-    "target": "es2024",
+    "target": "es2023",
     "module": "nodenext",
     "moduleResolution": "nodenext",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "jsx": "react-jsx",
     "strict": true,
-    "noImplicitAny": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
-    "outDir": "lib",
-    "rootDir": ".",
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "allowImportingTsExtensions": true,
+    "rewriteRelativeImportExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*", "tests/**/*", "types/**/*"],
-  "exclude": ["node_modules", "lib"]
+  "include": ["src/**/*", "tests/**/*", "tsdown.config.ts", "vitest.config.ts"]
 }

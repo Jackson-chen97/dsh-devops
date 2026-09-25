@@ -1,31 +1,19 @@
 /**
- * Unified configuration types and parsing for dsh-devops.
+ * Plugin configuration: Schemastery schema + cross-field validation.
  *
- * Schemastery schema: Cordis validates and injects `config` into `apply(ctx, config)`.
- * Cross-field business rules (webhook requires gitlab, monitor requires gitlab or k8s)
- * are enforced by `parseConfig` as a second gate after schema validation.
+ * Schemastery schema: Cordis validates the user's `config` against this at
+ * load time and fills schema defaults before calling `apply`. Cross-field
+ * business rules (webhook requires gitlab, monitor requires gitlab or k8s)
+ * are enforced by `parseConfig` as a second gate.
+ *
+ * IMPORTANT: Do NOT use `.required()` on any field in this schema.
+ * Schemastery validates `.required()` sub-fields even when the parent object
+ * is absent from the input, causing boot failures for unconfigured plugins.
+ * Actual field-presence validation is handled by `parseConfig()` (the "second
+ * gate") which only enforces required fields when their section IS present.
  */
 
-import Schema from '@deepseek-ai/schemastery'
-
-export interface DshDevopsConfig {
-  /** GitLab config (optional — omit to disable GitLab capabilities) */
-  gitlab?: GitLabConfig
-  /** K8s config (optional) */
-  k8s?: K8sConfig
-  /** Webhook config (optional, requires gitlab) */
-  webhook?: WebhookConfig
-  /** Monitor/alert config (optional, requires gitlab or k8s) */
-  monitor?: MonitorConfig
-}
-
-export interface GitLabConfig {
-  baseUrl: string
-  /** GitLab personal access token (direct value) */
-  token: string
-  defaultProject?: string
-  projects: GitLabProjectConfig[]
-}
+import Schema from 'schemastery'
 
 export interface GitLabProjectConfig {
   id: string
@@ -37,13 +25,12 @@ export interface GitLabProjectConfig {
   tokenEnv?: string
 }
 
-export interface K8sConfig {
-  /** List of kubeconfig file references (supports multiple files = multiple clusters) */
-  kubeconfigs: KubeconfigRef[]
-  /** Default cluster to use (corresponds to context in kubeconfig) */
-  defaultContext?: string
-  /** Default namespace when context doesn't specify one */
-  defaultNamespace?: string
+export interface GitLabConfig {
+  baseUrl: string
+  /** GitLab personal access token (direct value) */
+  token: string
+  defaultProject?: string
+  projects: GitLabProjectConfig[]
 }
 
 export interface KubeconfigRef {
@@ -55,6 +42,15 @@ export interface KubeconfigRef {
   context?: string
   /** Optional: default namespace override */
   namespace?: string
+}
+
+export interface K8sConfig {
+  /** List of kubeconfig file references (supports multiple files = multiple clusters) */
+  kubeconfigs: KubeconfigRef[]
+  /** Default cluster to use (corresponds to context in kubeconfig) */
+  defaultContext?: string
+  /** Default namespace when context doesn't specify one */
+  defaultNamespace?: string
 }
 
 export interface WebhookConfig {
@@ -88,26 +84,20 @@ export interface PodAlertRuleConfig {
   includeLogs?: boolean
 }
 
-/**
- * Cordis config interface — the exported `Config` type is what Cordis uses
- * to validate and inject the plugin configuration into `apply(ctx, config)`.
- */
+export interface DshDevopsConfig {
+  /** GitLab config (optional — omit to disable GitLab capabilities) */
+  gitlab?: GitLabConfig
+  /** K8s config (optional) */
+  k8s?: K8sConfig
+  /** Webhook config (optional, requires gitlab) */
+  webhook?: WebhookConfig
+  /** Monitor/alert config (optional, requires gitlab or k8s) */
+  monitor?: MonitorConfig
+}
+
+/** The exported `Config` is what Cordis validates and injects into `apply`. */
 export type Config = DshDevopsConfig
 
-/**
- * Schemastery schema for the plugin config.
- *
- * Top-level sections (gitlab, k8s, webhook, monitor) are all optional.
- * If a section is present, its required sub-fields are enforced here.
- * Cross-field rules (webhook requires gitlab, etc.) are handled by parseConfig.
- */
-/**
- * IMPORTANT: Do NOT use `.required()` on any field in this schema.
- * Schemastery validates `.required()` sub-fields even when the parent object
- * is absent from the input, causing boot failures for unconfigured plugins.
- * Actual field-presence validation is handled by `parseConfig()` (the "second
- * gate") which only enforces required fields when their section IS present.
- */
 export const Config: Schema<Config> = Schema.object({
   gitlab: Schema.object({
     baseUrl: Schema.string(),

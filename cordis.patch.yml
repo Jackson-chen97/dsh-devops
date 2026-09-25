@@ -1,4 +1,15 @@
-# Plugin configuration for DSH
+# Mount the DevOps plugin into a DSH profile.
+#
+# Connection's generic RPC registry mounts routes in its owning Context, but
+# DSH 0.1.5's Web profile omits these dependencies from that service's scope
+# — patch it so plugin RPC channels (connection.rpc.handle) can register.
+- id: connection
+  inject: [webRuntime, webServer]
+
 - insert:
+    # All config sections are optional: the plugin loads clean when unconfigured
+    # and is configured later from Settings → DevOps (stored in
+    # ~/.dsh-devops/config.json). Static config here acts as an override.
     - id: dsh-devops
       name: '@jacksonchen/dsh-devops'
+      config: {}

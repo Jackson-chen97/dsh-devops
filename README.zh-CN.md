@@ -115,7 +115,7 @@ dsh --profile web
 ✅ **离线可用** - 无需 pnpm registry  
 ✅ **绕过依赖问题** - 避免了 `dsh-type-meta` 的缺失问题  
 ✅ **支持热重载** - 代码修改后重启立即生效  
-✅ **TypeScript 运行时编译** - 使用 DSH 的 tsx 进行即时编译  
+✅ **预构建插件产物** - 仓库内 lib/ 由 tsdown 构建（Node ESM host + 浏览器 CJS client）  
 ✅ **非常适合开发和测试** - 活跃开发期间的理想选择  
 
 ---
@@ -142,7 +142,7 @@ pnpm add @jacksonchen/dsh-devops       # npm（发布后）
 pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 ```
 
-**注意：** 与传统 npm 包不同，本地目录安装方式不需要预构建产物 — DSH 的运行时 tsx 会在加载插件源码时即时编译 TypeScript。
+**注意：** 与传统 npm 包不同，本地目录安装方式直接从本目录加载 — 执行 `pnpm install && pnpm build` 构建一次（或直接使用仓库内已提交的 lib/），DSH 宿主加载 lib/index.js，Web 端注入 lib/client.js。
 
 1. 打开 DSH 设置 > DevOps，添加 GitLab 服务器（Base URL + Token）和 kubeconfig 文件
 2. 在监控台选择 GitLab 项目和 K8s 的 Context/Namespace，选择会自动保存到 `~/.dsh-devops/config.json`
@@ -241,17 +241,30 @@ pnpm run test        # 运行单元测试
 
 ```
 src/
-├── index.ts          # 插件入口：apply(ctx) 编排
-├── config.ts         # 统一配置解析与验证
-├── types.ts          # 公共类型定义
-├── api.ts            # 本地 HTTP 路由（设置向导连通性测试）
-├── runtime-config.ts # 运行时配置（~/.dsh-devops/config.json）
-├── gitlab/           # GitLab API 客户端 + 多项目路由
-├── k8s/              # K8s API 客户端 + kubeconfig 解析 + 多集群路由
-├── tools/            # 工具注册（gitlab_*、k8s_*）
-├── webhook/          # GitLab Webhook → followup 处理
-├── monitor/          # 后台轮询告警引擎 + 节流
-└── runtime/          # 惰性服务包装（lazy.ts）
+├── index.ts            # 公共契约：name / inject / Config / apply
+├── protocol.ts         # RPC 通道与端点名（host/client 共享）
+├── config.ts           # Schemastery schema + 跨字段校验
+├── types.ts            # 共享领域类型
+├── core/               # 框架无关领域层
+│   ├── gitlab/         #   GitLab REST 客户端 + 多项目路由/服务
+│   ├── k8s/            #   K8s REST 客户端 + kubeconfig 解析 + 多集群路由/服务
+│   ├── webhook/        #   纯函数事件解析 + followup 消息生成
+│   ├── monitor/        #   告警规则求值 + 节流
+│   ├── http.ts         #   fetch/node:https，超时 + CA 固定
+│   └── logging.ts      #   ~/.dsh-devops/devops.log 写入/读取
+├── host/               # DSH 宿主适配层
+│   ├── plugin.ts       #   apply()：懒加载服务 + 工具 + RPC + webhook + monitor
+│   ├── rpc.ts          #   /dsh-devops-read + /dsh-devops-write 通道
+│   ├── endpoints-*.ts  #   RPC 端点（raw 参数，支持先测试后保存）
+│   ├── tools*.ts       #   gitlab_* / k8s_* AI 工具定义
+│   ├── services.ts     #   每次调用解析配置的懒加载服务
+│   ├── config-store.ts #   ~/.dsh-devops/config.json 持久化 + 迁移
+│   └── runtime-config.ts # cordis 覆盖 > 设置文件 解析
+└── client/             # Web 控制台（React TSX + CSS Modules，中英 locale）
+    ├── index.ts        #   slots.inject('settings.section' | 'conversation.view')
+    ├── api.ts          #   DevopsClient —— 两条 RPC 通道的业务封装
+    ├── DevopsSettings.tsx / DevopsDashboard.tsx
+    └── ui.tsx          #   共享 UI 原语（Btn/Select/StatCard/…）
 ```
 
 ## 环境要求

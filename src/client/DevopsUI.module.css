@@ -1,0 +1,769 @@
+/* Shared primitives for the dsh-devops web console (CSS Modules).
+ * Theme colors come from the DSH CSS variables with dark fallbacks. */
+
+.section {
+  margin-bottom: 24px;
+  border: 1px solid var(--ds-alias-border, #2a2a2a);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.sectionTitleText {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.sectionBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(52, 199, 89, 0.15);
+  color: #34c759;
+}
+
+.fieldGap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: var(--ds-alias-foreground-secondary, #888);
+}
+
+.input {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--ds-alias-border, #333);
+  border-radius: 6px;
+  background: var(--ds-alias-input-bg, #1a1a1a);
+  color: var(--ds-alias-foreground, #eee);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--ds-alias-border, #333);
+  border-radius: 6px;
+  background: var(--ds-alias-input-bg, #1a1a1a);
+  color: var(--ds-alias-foreground, #eee);
+  box-sizing: border-box;
+  outline: none;
+  cursor: pointer;
+}
+
+.selectCompact {
+  font-size: 11px;
+  padding: 3px 6px;
+  width: 100%;
+  min-width: 0;
+}
+
+.selectDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.hint {
+  font-size: 12px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.callout {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--ds-alias-foreground, #eee);
+}
+
+.calloutInfo {
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.5;
+  background: rgba(74, 158, 255, 0.1);
+  border: 1px solid rgba(74, 158, 255, 0.3);
+  color: var(--ds-alias-foreground, #eee);
+  text-align: center;
+}
+
+.btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.4;
+  color: #fff;
+  background: var(--ds-alias-primary, #4a9eff);
+}
+
+.btnSmall {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.btnOutline {
+  background: transparent;
+  color: var(--ds-alias-foreground, #eee);
+  border: 1px solid var(--ds-alias-border, #555);
+}
+
+.btnSuccess {
+  background: #34c759;
+  color: #fff;
+}
+
+.btnDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.status {
+  font-size: 12px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.statusOk {
+  color: #34c759;
+}
+
+.statusError {
+  color: #ff453a;
+}
+
+.statusIdle {
+  color: #888;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.dotPulse {
+  animation: devopsPulse 1.3s ease-in-out infinite;
+}
+
+@keyframes devopsPulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 9px;
+  font-weight: 500;
+  white-space: nowrap;
+  line-height: 1.5;
+}
+
+.badgeOk {
+  background: rgba(52, 199, 89, 0.16);
+  color: #34c759;
+}
+
+.badgeWarn {
+  background: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+}
+
+.badgeErr {
+  background: rgba(255, 69, 58, 0.16);
+  color: #ff8a80;
+}
+
+.badgeAccent {
+  background: rgba(74, 158, 255, 0.16);
+  color: #5aa8ff;
+}
+
+.badgeNeutral {
+  background: rgba(140, 140, 140, 0.18);
+  color: #aaa;
+}
+
+.chipBtn {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--ds-alias-border, #333);
+  background: transparent;
+  color: #bbb;
+  cursor: pointer;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.chipBtnPrimary {
+  background: rgba(74, 158, 255, 0.12);
+  color: #5aa8ff;
+}
+
+.chipBtnDanger {
+  background: rgba(255, 69, 58, 0.12);
+  color: #ff8a80;
+}
+
+.chipBtnDisabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.statCard {
+  border: 1px solid var(--ds-alias-border, #2a2a2a);
+  border-radius: 8px;
+  padding: 12px 13px;
+  background: var(--ds-alias-surface, #141414);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.statCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statCardValue {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.statCardSub {
+  font-size: 11px;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tabBar {
+  display: flex;
+  gap: 2px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--ds-alias-border, #2a2a2a);
+  padding-bottom: 8px;
+}
+
+.tab {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: transparent;
+  color: var(--ds-alias-foreground, #ccc);
+  transition: background 0.15s;
+}
+
+.tabActive {
+  background: var(--ds-alias-primary, #4a9eff);
+  color: #fff;
+}
+
+.switchCard {
+  border: 1px solid var(--ds-alias-border, #2a2a2a);
+  border-radius: 8px;
+  background: var(--ds-alias-surface, #141414);
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.switchCardHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.switchCardTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #ddd;
+}
+
+.fieldLabel {
+  font-size: 10px;
+  color: #888;
+  margin-bottom: 2px;
+}
+
+.emptyHint {
+  padding: 10px 4px;
+  font-size: 12px;
+  color: #666;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.rowItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  background: var(--ds-alias-surface-inset, #1a1a1a);
+  font-size: 12px;
+}
+
+.insetRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: var(--ds-alias-surface-inset, #1a1a1a);
+  font-size: 12px;
+}
+
+.serverList {
+  border: 1px solid var(--ds-alias-border, #333);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.serverRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.serverRowEditing {
+  cursor: default;
+  background: var(--ds-alias-primary, #4a9eff);
+}
+
+.serverRowName {
+  font-weight: 500;
+  color: #ddd;
+  flex-shrink: 0;
+}
+
+.serverRowEditing .serverRowName {
+  color: #fff;
+}
+
+.serverRowUrl {
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.serverRowEditing .serverRowUrl {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.serverRowEditingTag {
+  font-size: 10px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 1px 6px;
+  flex-shrink: 0;
+}
+
+.dangerLink {
+  background: transparent;
+  border: none;
+  color: #ff453a;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 2px 0;
+}
+
+.logPanel {
+  border: 1px solid var(--ds-alias-border, #333);
+  border-radius: 8px;
+  background: #0d0d0d;
+  padding: 10px 12px;
+  font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+  font-size: 11px;
+  line-height: 1.6;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.logLineError {
+  color: #ff453a;
+}
+
+.logLineWarn {
+  color: #fbbf24;
+}
+
+.logLineInfo {
+  color: #8f8;
+}
+
+.formBox {
+  border: 1px solid var(--ds-alias-border, #333);
+  border-radius: 8px;
+  padding: 12px;
+  background: var(--ds-alias-surface-inset, #191919);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reviewerChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  padding: 2px 4px 2px 8px;
+  border-radius: 10px;
+  background: var(--ds-alias-primary, #4a9eff);
+  color: #fff;
+}
+
+.reviewerChipRemove {
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+  line-height: 13px;
+  text-align: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.25);
+  font-size: 10px;
+}
+
+/* ─── Searchable combobox ─────────────────────────────────────────────── */
+
+.searchWrap {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  min-width: 0;
+}
+
+.searchTrigger {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 14px;
+  border: 1px solid var(--ds-alias-border, #333);
+  border-radius: 6px;
+  background: var(--ds-alias-input-bg, #1a1a1a);
+  color: var(--ds-alias-foreground, #eee);
+  box-sizing: border-box;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+
+.searchTriggerCompact {
+  font-size: 11px;
+  padding: 3px 6px;
+}
+
+.searchTriggerValue {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.searchTriggerPlaceholder {
+  color: #666;
+}
+
+.searchCaret {
+  flex-shrink: 0;
+  color: #888;
+  font-size: 10px;
+}
+
+.searchTriggerDisabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.searchPop {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  z-index: 3000;
+  background: var(--ds-alias-surface, #1c1c1c);
+  border: 1px solid var(--ds-alias-border, #444);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: none;
+  border-bottom: 1px solid var(--ds-alias-border, #333);
+  background: var(--ds-alias-input-bg, #161616);
+  color: var(--ds-alias-foreground, #eee);
+  box-sizing: border-box;
+  outline: none;
+}
+
+.searchList {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.searchOption {
+  padding: 6px 10px;
+  font-size: 13px;
+  color: var(--ds-alias-foreground, #ddd);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.searchOptionCompact {
+  font-size: 11px;
+  padding: 4px 8px;
+}
+
+.searchOptionActive {
+  background: rgba(74, 158, 255, 0.18);
+}
+
+.searchOptionSelected {
+  color: #5aa8ff;
+  font-weight: 600;
+}
+
+.searchOptionDisabled {
+  color: #555;
+  cursor: default;
+  font-style: italic;
+}
+
+.searchEmpty {
+  padding: 10px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+
+/* ─── Modal ───────────────────────────────────────────────────────────── */
+
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 8vh 16px 16px;
+}
+
+.modalCard {
+  background: var(--ds-alias-surface, #1b1b1b);
+  border: 1px solid var(--ds-alias-border, #3a3a3a);
+  border-radius: 10px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  max-height: 82vh;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ds-alias-border, #2a2a2a);
+  flex-shrink: 0;
+}
+
+.modalTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ds-alias-foreground, #eee);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modalClose {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.4;
+}
+
+.modalClose:hover {
+  color: #ddd;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.modalBody {
+  padding: 14px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.modalFooter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--ds-alias-border, #2a2a2a);
+  flex-shrink: 0;
+}
+
+.tabSmall {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+
+.tabBadge {
+  margin-left: 6px;
+  font-size: 10px;
+  opacity: 0.75;
+  font-weight: 600;
+}
+
+/* ─── Settings accordion cards ────────────────────────────────────────── */
+
+.serverCard {
+  border: 1px solid var(--ds-alias-border, #2a2a2a);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ds-alias-surface, #141414);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.cardHeader:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cardHeaderLabel {
+  font-weight: 600;
+  color: var(--ds-alias-foreground, #eee);
+  flex-shrink: 0;
+  max-width: 40%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardHeaderPath {
+  color: #888;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.cardChevron {
+  flex-shrink: 0;
+  color: #888;
+  font-size: 10px;
+}
+
+.cardBody {
+  border-top: 1px solid var(--ds-alias-border, #2a2a2a);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyCard {
+  width: 100%;
+  padding: 14px;
+  font-size: 13px;
+  color: #888;
+  background: transparent;
+  border: 1px dashed var(--ds-alias-border, #3a3a3a);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.emptyCard:hover {
+  color: var(--ds-alias-foreground, #eee);
+  border-color: var(--ds-alias-primary, #4a9eff);
+}

@@ -1,5 +1,5 @@
 /**
- * Shared public types for the dsh-devops plugin.
+ * Shared domain types for the dsh-devops plugin.
  */
 
 // ─── GitLab ────────────────────────────────────────────────────────────────────
@@ -12,16 +12,6 @@ export interface MergeRequest {
   targetBranch: string
   webUrl: string
   approvals: { approved: boolean; required: number; given: number }
-}
-
-export interface Pipeline {
-  id: number
-  status: PipelineStatus
-  ref: string
-  sha: string
-  webUrl: string
-  createdAt: string
-  finishedAt?: string
 }
 
 export type PipelineStatus =
@@ -37,6 +27,16 @@ export type PipelineStatus =
   | 'manual'
   | 'scheduled'
 
+export interface Pipeline {
+  id: number
+  status: PipelineStatus
+  ref: string
+  sha: string
+  webUrl: string
+  createdAt: string
+  finishedAt?: string
+}
+
 export interface PipelineJob {
   id: number
   name: string
@@ -50,15 +50,6 @@ export interface GitTag {
   target: string
   message?: string
   commitId: string
-}
-
-export interface PipelineWatch {
-  projectId: string
-  pipelineId: number
-  branch: string
-  status: 'watching' | 'completed' | 'failed' | 'canceled'
-  startedAt: string
-  lastPollAt?: string
 }
 
 // ─── Kubernetes ────────────────────────────────────────────────────────────────
@@ -89,6 +80,8 @@ export interface PodInfo {
   restartCount: number
   containers: { name: string; ready: boolean; restartCount: number }[]
   startTime?: string
+  /** Failure reason: current waiting state, else last terminated reason. */
+  reason?: string
 }
 
 export interface K8sEvent {
@@ -98,6 +91,7 @@ export interface K8sEvent {
   object: { kind: string; name: string; namespace: string }
   count?: number
   lastTimestamp: string
+  eventTime?: string
 }
 
 // ─── Webhook ───────────────────────────────────────────────────────────────────
@@ -108,22 +102,35 @@ export type WebhookEvent =
   | { type: 'tag_push' }
   | { type: 'note'; action: 'create' }
 
-// ─── Monitor Rules ─────────────────────────────────────────────────────────────
+// ─── Settings file (~/.dsh-devops/config.json) ────────────────────────────────
+//
+// The Settings → DevOps UI writes this file; the host merges it with the
+// cordis config (cordis override wins) and resolves live services from it.
 
-export interface PipelineAlertRule {
-  projects?: string[]
-  branches?: string[]
-  trigger: 'failed' | 'canceled' | 'success'
-  message?: string
-  includeFailedJobs?: boolean
+export interface GitLabServerEntry {
+  id: string
+  label: string
+  baseUrl: string
+  token: string
+  projectPath: string
+  branch: string
 }
 
-export interface PodAlertRule {
-  clusters?: string[]
-  namespaces?: string[]
-  trigger: 'crash' | 'restart' | 'pending_stuck'
-  restartThreshold?: number
-  pendingTimeoutSec?: number
-  message?: string
-  includeLogs?: boolean
+export interface KubeconfigEntry {
+  id: string
+  label: string
+  path: string
+  context: string
+  namespace: string
+}
+
+export interface DevopsSettingsFile {
+  gitlab?: {
+    servers: GitLabServerEntry[]
+    activeServerId: string | null
+  }
+  k8s?: {
+    kubeconfigs: KubeconfigEntry[]
+    activeKubeconfigId: string | null
+  }
 }

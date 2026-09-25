@@ -21,7 +21,7 @@ GitLab + Kubernetes DevOps monitoring plugin for DeepSeek Harness (DSH).
 - **Dashboard UI**: Dual-card switcher (GitLab server / project, kubeconfig / context / namespace) with persisted config
 - **Multi-config**: Multiple GitLab servers and multiple kubeconfigs, switchable from both the dashboard and settings
 - **Webhook + Alert engine**: GitLab webhook → `followup()` notification; background polling detects pipeline failures and pod crashes
-- **i18n**: Built-in Chinese / English UI with a one-click language toggle (persisted; follows browser language by default)
+- **i18n**: Chinese / English dictionaries registered into the DSH LocaleRuntime — the console follows the app's language setting
 - **Self-signed clusters**: Per-request CA pinning from kubeconfig via `node:https`
 
 ## Installation
@@ -115,7 +115,7 @@ The browser should open automatically at http://127.0.0.1:3080/
 ✅ **Works offline** - No pnpm registry needed  
 ✅ **Bypasses dependency issues** - The `dsh-type-meta` problem is avoided  
 ✅ **Hot reload support** - Code changes take effect immediately after restart  
-✅ **TypeScript runtime compilation** - Uses DSH's tsx for on-the-fly compilation  
+✅ **Prebuilt plugin bundle** - the checkout ships `lib/` built by tsdown (host ESM + web client CJS)  
 ✅ **Perfect for development/testing** - Ideal during active development  
 
 ---
@@ -142,7 +142,7 @@ pnpm add @jacksonchen/dsh-devops       # npm (once published)
 pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 ```
 
-**Note:** Unlike traditional npm packages, the local checkout method doesn't require pre-built artifacts — DSH's runtime tsx compiles TypeScript on-the-fly when loading the plugin from source.
+**Note:** Unlike traditional npm packages, the local checkout method is loaded directly from this directory — build once with `pnpm install && pnpm build` (or use the committed `lib/`) and the DSH host loads `lib/index.js` while the web app injects `lib/client.js`.
 
 1. Open DSH Settings > DevOps, add GitLab server(s) (Base URL + token) and kubeconfig file(s).
 2. On the dashboard, pick the GitLab project and K8s context/namespace — selections are saved to `~/.dsh-devops/config.json` automatically.
@@ -241,17 +241,30 @@ pnpm run test        # Run unit tests
 
 ```
 src/
-├── index.ts          # Plugin entry: apply(ctx) orchestrator
-├── config.ts         # Unified config parsing + validation
-├── types.ts          # Shared public types
-├── api.ts            # Local HTTP routes (settings wizard connectivity test)
-├── runtime-config.ts # Runtime config loader (~/.dsh-devops/config.json)
-├── gitlab/           # GitLab API client + multi-project router
-├── k8s/              # K8s API client + kubeconfig parser + multi-cluster router
-├── tools/            # Tool registration (gitlab_*, k8s_*)
-├── webhook/          # GitLab webhook → followup handler
-├── monitor/          # Background polling alert engine + throttle
-└── runtime/          # Lazy service wrappers (lazy.ts)
+├── index.ts            # Public contract: name / inject / Config / apply
+├── protocol.ts         # RPC channel + endpoint names (shared host/client)
+├── config.ts           # Schemastery schema + cross-field validation
+├── types.ts            # Shared domain types
+├── core/               # Framework-independent domain layer
+│   ├── gitlab/         #   GitLab REST client + multi-project router/service
+│   ├── k8s/            #   K8s REST client + kubeconfig parser + router/service
+│   ├── webhook/        #   Pure event parsing + followup message generation
+│   ├── monitor/        #   Alert rule evaluation + throttle
+│   ├── http.ts         #   fetch/node:https with timeout + CA pinning
+│   └── logging.ts      #   ~/.dsh-devops/devops.log writer/reader
+├── host/               # DSH host adaptation layer
+│   ├── plugin.ts       #   apply(): lazy services + tools + RPC + webhook + monitor
+│   ├── rpc.ts          #   /dsh-devops-read + /dsh-devops-write channels
+│   ├── endpoints-*.ts  #   RPC endpoint handlers (raw params, test-before-save)
+│   ├── tools*.ts       #   gitlab_* / k8s_* AI tool definitions
+│   ├── services.ts     #   Lazy per-call service wrappers
+│   ├── config-store.ts #   ~/.dsh-devops/config.json persistence + migration
+│   └── runtime-config.ts # cordis override > settings file resolution
+└── client/             # Web console (React TSX + CSS Modules, zh/en locales)
+    ├── index.ts        #   slots.inject('settings.section' | 'conversation.view')
+    ├── api.ts          #   DevopsClient — RPC wrapper over the two channels
+    ├── DevopsSettings.tsx / DevopsDashboard.tsx
+    └── ui.tsx          #   Shared primitives (Btn/Select/StatCard/…)
 ```
 
 ## Requirements
