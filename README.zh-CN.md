@@ -2,11 +2,11 @@
 
 [![Release](https://img.shields.io/github/v/release/Jackson-chen97/dsh-devops)](https://github.com/Jackson-chen97/dsh-devops/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](./LICENSE)
-![Node](https://img.shields.io/badge/node-%E2%89%A522.19-green)
+![Node](https://img.shields.io/badge/node-%E2%89%A520-green)
 ![DSH](https://img.shields.io/badge/dsh-%E2%89%A50.1.x-orange)
 [![Topic: dsh-plugin](https://img.shields.io/badge/dsh-plugin-8A2BE2)](https://github.com/topics/dsh-plugin)
 
-面向 DeepSeek Harness（DSH）的 GitLab + Kubernetes 研发监控插件。
+面向 DeepSeek Harness（DSH）的 GitLab + Kubernetes DevOps 控制平面：AI 工具、Web 控制台、Webhook 通知与告警监控。
 
 [English](./README.md)
 
@@ -16,12 +16,12 @@
 
 ## 功能特色
 
-- **GitLab API**：创建/评审/关闭 MR、管理 Tag、监控 CI/CD Pipeline（可展开查看每个 Job 的详情）
+- **GitLab API**：创建/评审/关闭 MR、管理 Tag、监控 CI/CD Pipeline（可展开查看每个 Job 详情与构建日志）
 - **Kubernetes API**：Deployment 状态、Pod 列表、事件、日志，支持更换镜像与滚动重启
-- **监控台 UI**：双卡片切换器（GitLab 服务器/项目、kubeconfig/Context/Namespace），选择自动保存
-- **多配置管理**：支持多个 GitLab 服务器与多个 kubeconfig，可在监控台和设置页随时切换
-- **Webhook + 告警引擎**：GitLab Webhook → `followup()` 通知；后台轮询自动发送 Pipeline 失败/Pod 崩溃告警
-- **国际化**：内置中文/英文界面，一键切换语言（记忆选择，默认跟随浏览器语言）
+- **监控台 UI**：双卡片切换器（GitLab 服务器/项目、kubeconfig/Context/Namespace）+ 二级 tab（合并请求/标签/流水线/部署/事件），全部下拉框可搜索，操作均以弹窗呈现
+- **多配置管理**：支持多个 GitLab 服务器与多个 kubeconfig，可在监控台和设置页随时切换，选择自动保存
+- **Webhook + 告警引擎**：GitLab Webhook → `followup()` 通知；后台轮询自动发送 Pipeline 失败/Pod 异常告警
+- **国际化**：中文/英文字典注册到 DSH LocaleRuntime，跟随应用语言设置
 - **自签证书集群**：基于 kubeconfig 的 CA 逐请求注入（`node:https` CA pinning）
 
 ## 安装
@@ -51,61 +51,48 @@ cd dsh-devops
 ls -la
 ```
 
-预期输出包含：
-```
-src/          # TypeScript 源代码
-package.json  # 项目配置
-README.md     # 本文档
-```
-
 #### 步骤 2: 在 DSH Profile 中安装插件
 
 使用以下两种方法之一：
 
-**选项 A: 使用 dsh plugin CLI 命令**
+**选项 A: 使用 dsh plugin CLI 命令（自动完成依赖与 bundle 注册）**
 ```sh
 dsh plugin --profile web add "~/dev/tools/dsh-devops"
 ```
 
-**选项 B: 直接在 profile 的 package.json 中配置路径**
-```sh
-# 编辑你的 profile 的 package.json
-nano ~/.dsh/profiles/web/package.json
-# 或使用你喜欢的编辑器：notepad、vim、code 等
+**选项 B: 直接编辑 profile 的 package.json**
 
-# 在 "dependencies" 部分添加这行配置：
+需要在 `dependencies` 与 `dsh.profile.bundles` 两处同时声明：
+
+```json
 {
-  "@jacksonchen/dsh-devops": "~/dev/tools/dsh-devops"
+  "dependencies": {
+    "@jacksonchen/dsh-devops": "~/dev/tools/dsh-devops"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": ["@jacksonchen/dsh-devops"]
+    }
+  }
 }
 ```
 
-#### 步骤 3: 在补丁层声明插件
-
-向 `~/.dsh/profiles/web/cordis.patch.yml` 中添加以下内容：
-
-```yaml
-- insert:
-    - id: dsh-devops
-      name: '@jacksonchen/dsh-devops'
-```
-
-如果文件尚不存在，创建该文件并写入上述内容。
-
-#### 步骤 4: 重启 DSH
+#### 步骤 3: 重启 DSH
 
 ```sh
-# 如需先停止任何运行中的 DSH 实例
-# 然后重新启动
 dsh --profile web
 ```
 
-浏览器应自动打开 http://127.0.0.1:3080/
+浏览器应自动打开 WebUI（默认 http://127.0.0.1:3080/）。
 
-#### 步骤 5: 配置 DevOps 设置
+> 插件自带的 `cordis.patch.yml` 会作为 bundle 层自动挂载（含 DSH 0.1.5 的 connection 服务依赖补丁），
+> **无需**再向 profile 的 `cordis.patch.yml` 手动插入插件条目。
+
+#### 步骤 4: 配置 DevOps 设置
 
 1. 打开 DSH 设置 → DevOps 页签
-2. 添加 GitLab 服务器：Base URL + Token
-3. 添加 K8s kubeconfig 文件
+2. 点击「+ 添加服务器」填写 GitLab 信息（Base URL + Token）并测试连接
+3. 点击「+ 添加配置文件」填写 kubeconfig 路径并测试连接
 4. 保存并返回监控台
 
 ---
@@ -114,9 +101,8 @@ dsh --profile web
 
 ✅ **离线可用** - 无需 pnpm registry  
 ✅ **绕过依赖问题** - 避免了 `dsh-type-meta` 的缺失问题  
-✅ **支持热重载** - 代码修改后重启立即生效  
-✅ **预构建插件产物** - 仓库内 lib/ 由 tsdown 构建（Node ESM host + 浏览器 CJS client）  
-✅ **非常适合开发和测试** - 活跃开发期间的理想选择  
+✅ **免构建安装** - 仓库内 lib/ 由 tsdown 预构建（Node ESM host + 浏览器 CJS client），克隆即可加载  
+✅ **支持热重载** - 修改 src/ 后执行 `pnpm build`，重启 DSH 立即生效  
 
 ---
 
@@ -142,29 +128,34 @@ pnpm add @jacksonchen/dsh-devops       # npm（发布后）
 pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 ```
 
-**注意：** 与传统 npm 包不同，本地目录安装方式直接从本目录加载 — 执行 `pnpm install && pnpm build` 构建一次（或直接使用仓库内已提交的 lib/），DSH 宿主加载 lib/index.js，Web 端注入 lib/client.js。
+## 使用
 
-1. 打开 DSH 设置 > DevOps，添加 GitLab 服务器（Base URL + Token）和 kubeconfig 文件
-2. 在监控台选择 GitLab 项目和 K8s 的 Context/Namespace，选择会自动保存到 `~/.dsh-devops/config.json`
-3. 直接在监控台创建 MR/Tag、查看 Pipeline、操作 Deployment——或者直接对 AI 说，AI 通过同一套工具、同一份配置完成
+1. 打开 DSH 设置 > DevOps，添加 GitLab 服务器（Base URL + Token）和 kubeconfig 文件，保存到 `~/.dsh-devops/config.json`
+2. 在监控台切换 GitLab 项目和 K8s 的 Context/Namespace——切换即保存，AI 调用立即跟随
+3. 直接在监控台创建 MR/Tag、查看 Pipeline 与构建日志、操作 Deployment——或者直接对 AI 说，AI 通过同一套工具、同一份配置完成
 
-也可以通过 `cordis.patch.yml` 配置：
+也可以通过 cordis 补丁条目的 `config:` 块静态覆盖配置（headless 部署等场景）：
 
 ```yaml
 - id: dsh-devops
   name: '@jacksonchen/dsh-devops'
   config:
     gitlab:
-      servers:
+      baseUrl: 'https://gitlab.example.com'
+      token: 'glpat-xxxx'
+      projects:
         - id: main
-          baseUrl: 'https://gitlab.example.com'
-          projectPath: 'my-group/my-project'
+          path: 'my-group/my-project'
+          tokenEnv: 'GITLAB_TOKEN'
     k8s:
       kubeconfigs:
         - id: prod
           path: '~/.kube/config'
           context: 'prod'
 ```
+
+> 注意结构差异：设置页写的是 `~/.dsh-devops/config.json`（`servers[]` / `kubeconfigs[]` 多条目结构）；
+> cordis `config:` 使用上方 Schemastery schema 结构，且优先级高于设置文件。
 
 ## AI 工具
 
@@ -174,13 +165,13 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 
 | 工具 | 说明 |
 |------|------|
-| `gitlab_mr_create` | 创建 MR（自动触发 Pipeline 监控） |
+| `gitlab_mr_create` | 创建 MR（可指定 Reviewers，自动触发 Pipeline 监控） |
 | `gitlab_mr_review` | 评审 MR（approve/request_changes/comment） |
 | `gitlab_mr_list` | 列出 Merge Request |
 | `gitlab_tag_create` | 创建 Git Tag |
 | `gitlab_pipeline_status` | 查询 Pipeline 状态 |
 | `gitlab_pipeline_jobs` | 列出 Pipeline 的 Job 明细 |
-| `gitlab_pipeline_watch` | 启动/停止/查询 Pipeline 监控 |
+| `gitlab_pipeline_watch` | 启动/查询 Pipeline 监控 |
 | `k8s_deployment_status` | 查询 Deployment 发布状态 |
 | `k8s_pods` | 列出 Pod（含重启次数） |
 | `k8s_events` | 获取最新 K8s 事件 |
@@ -193,10 +184,12 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 | 字段 | 必填 | 说明 |
 |------|------|------|
 | `baseUrl` | 是 | GitLab 实例地址 |
+| `token` | 是 | GitLab 访问 Token（直连值） |
 | `defaultProject` | 否 | 默认项目 ID（缺省取第一个） |
 | `projects[].id` | 是 | 项目唯一标识 |
 | `projects[].path` | 是 | GitLab 项目路径（group/project） |
-| `projects[].tokenEnv` | 是 | 存放 Token 的环境变量名 |
+| `projects[].token` | 二选一 | 项目级直连 Token（设置文件来源，优先于 tokenEnv） |
+| `projects[].tokenEnv` | 二选一 | 存放 Token 的环境变量名（cordis 配置来源） |
 | `projects[].defaultBranch` | 否 | 该项目的默认分支 |
 
 ### K8s 配置
@@ -222,15 +215,15 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 
 | 字段 | 默认值 | 说明 |
 |------|--------|------|
-| `pollIntervalSec` | 60 | 轮询间隔（秒） |
+| `pollIntervalSec` | 30 | 轮询间隔（秒） |
 | `cooldownSec` | 300 | 告警冷却时间，防止刷屏 |
-| `pipeline[]` | ⚠️ | Pipeline 告警规则 |
-| `pod[]` | ⚠️ | Pod 告警规则 |
+| `pipeline[]` | ⚠️ | Pipeline 告警规则（trigger: failed/canceled/success） |
+| `pod[]` | ⚠️ | Pod 告警规则（trigger: crash/restart/pending_stuck） |
 
 ## 开发
 
 ```sh
-pnpm install
+pnpm install         # 安装依赖
 pnpm run typecheck   # TypeScript 类型检查
 pnpm run build       # tsdown 双段构建：host ESM + 浏览器 client（输出到 lib/）
 pnpm run test        # 运行 vitest 测试
@@ -265,13 +258,15 @@ src/
 └── client/             # Web 控制台（React TSX + CSS Modules，中英 locale）
     ├── index.ts        #   slots.inject('settings.section' | 'conversation.view')
     ├── api.ts          #   DevopsClient —— 两条 RPC 通道的业务封装
+    ├── locales.ts      #   zh/en 字典（DSH LocaleRuntime）
     ├── DevopsSettings.tsx / DevopsDashboard.tsx
-    └── ui.tsx          #   共享 UI 原语（Btn/Select/StatCard/…）
+    ├── DevopsUI.module.css
+    └── ui.tsx          #   共享 UI 原语（可搜索 Select/Modal/StatCard/…）
 ```
 
 ## 环境要求
 
-- Node.js ≥ 22.19（原生 `fetch`、ESM）
+- Node.js ≥ 20（原生 `fetch`、ESM；开发构建需 ≥ 22）
 - GitLab ≥ 16.0（MR Approvals API）
 - Kubernetes API ≥ 1.25（apps/v1）
 - 可访问 GitLab 和 K8s API 端点的网络
