@@ -232,10 +232,12 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 ```sh
 pnpm install
 pnpm run typecheck   # TypeScript 类型检查
-pnpm run build       # 使用 tsdown 构建（输出到 lib/）
-node scripts/offline-build.mjs   # 离线重建 lib/（Node >= 22.13，无需 registry）
-pnpm run test        # 运行单元测试
+pnpm run build       # tsdown 双段构建：host ESM + 浏览器 client（输出到 lib/）
+pnpm run test        # 运行 vitest 测试
+pnpm run verify      # typecheck + build + test 一次跑完
 ```
+
+**注意：** 本地 link 安装（profile 的 dependencies 指向本目录）加载的就是 lib/ 下的产物——修改 src/ 后必须重新执行 `pnpm build`，否则 DSH 加载的仍是旧代码。仓库内已提交构建产物，克隆后不执行构建也可直接安装。
 
 ## 架构
 

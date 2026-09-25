@@ -232,10 +232,12 @@ An explicit `config:` block in the cordis patch entry still works as an override
 ```sh
 pnpm install
 pnpm run typecheck   # TypeScript check
-pnpm run build       # Build with tsdown (output in lib/)
-node scripts/offline-build.mjs   # no-registry rebuild of lib/ (Node >= 22.13)
-pnpm run test        # Run unit tests
+pnpm run build       # tsdown dual build: host ESM + browser client (output in lib/)
+pnpm run test        # run vitest suite
+pnpm run verify      # typecheck + build + test in one go
 ```
+
+**Note:** With a local link install (the profile dependencies point at this directory), DSH loads the artifacts in lib/ directly — re-run `pnpm build` after changing src/, otherwise the host keeps loading the stale bundle. The committed lib/ also means a fresh clone can be installed without building.
 
 ## Architecture
 
