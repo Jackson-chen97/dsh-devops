@@ -182,6 +182,15 @@ export const ZH = {
   restartBody: '重启将滚动重建 {name} 的所有 pods，正在进行的请求会中断。确定继续？',
   openJobLog: '日志',
   openInGitlab: '在 GitLab 打开',
+  searchLogs: '搜索日志...',
+  toBottom: '底部',
+  logMatch: '{n}/{m} 行',
+  tagCommit: '提交',
+  tagMsg: '提交信息',
+  tagAuthor: '提交人',
+  tagTime: '提交时间',
+  searchDepsPh: '搜索部署...',
+  noMatchDeps: '无匹配的部署',
 } as const
 
 export type DevopsKey = keyof typeof ZH
@@ -363,6 +372,15 @@ export const EN: Record<DevopsKey, string> = {
   restartBody: 'Restarting will roll-rebuild all pods of {name}. In-flight requests will be interrupted. Continue?',
   openJobLog: 'Logs',
   openInGitlab: 'Open in GitLab',
+  searchLogs: 'Search logs...',
+  toBottom: 'Bottom',
+  logMatch: '{n}/{m} lines',
+  tagCommit: 'Commit',
+  tagMsg: 'Commit message',
+  tagAuthor: 'Author',
+  tagTime: 'Commit time',
+  searchDepsPh: 'Search deployments...',
+  noMatchDeps: 'No matching deployments',
 }
 
 /** Interpolate `{name}` placeholders into a dictionary string. */

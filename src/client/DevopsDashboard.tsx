@@ -11,6 +11,7 @@ import {
   resolveGlServer,
   resolveK8sKc,
   type DashboardDeployment,
+  type DashboardJob,
   type DashboardMR,
   type DashboardPipeline,
   type DashboardPod,
@@ -24,6 +25,9 @@ import {
   ChipBtn,
   Dot,
   EmptyHint,
+  formatDateTime,
+  LogViewer,
+  type LogViewerHandle,
   Modal,
   Section as _Section,
   SecHeader,
@@ -98,18 +102,25 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   const [connStatus, setConnStatus] = useState<{ gl: string; k8s: string }>({ gl: '', k8s: '' })
   // Pipeline 展开详情
   const [expandedPipe, setExpandedPipe] = useState<number | null>(null)
-  const [pipeJobs, setPipeJobs] = useState<{ id: number | null; jobs: { id: number; name: string; stage: string; status: string; duration?: number; failureReason: string }[]; loading: boolean }>({
+  const [pipeJobs, setPipeJobs] = useState<{ id: number | null; jobs: DashboardJob[]; loading: boolean }>({
     id: null,
     jobs: [],
     loading: false,
   })
   // Pipeline job 日志（弹窗查看）
-  const [jobLog, setJobLog] = useState<{ jobId: number; name: string; logs?: string; err?: string; loading?: boolean; jobUrl?: string } | null>(null)
+  const [jobLog, setJobLog] = useState<{ jobId: number; name: string; logs?: string; err?: string; loading?: boolean } | null>(null)
+  // 日志弹窗的刷新 / 回底按钮在弹窗 footer 里，经 ref 句柄驱动 LogViewer
+  const jobLogViewRef = useRef<LogViewerHandle | null>(null)
+  const podLogViewRef = useRef<LogViewerHandle | null>(null)
   // Deployment 换镜像（弹窗）/ 重启确认（弹窗）
   const [expandedDep, setExpandedDep] = useState<string | null>(null)
   const [depImgEdit, setDepImgEdit] = useState<{ name: string; image: string } | null>(null)
   const [depImgValue, setDepImgValue] = useState('')
   const [depRestart, setDepRestart] = useState<string | null>(null)
+  // Tag 展开详情（指向的最新提交）
+  const [expandedTag, setExpandedTag] = useState<string | null>(null)
+  // 部署列表搜索关键字
+  const [depSearch, setDepSearch] = useState('')
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const fetchSeqRef = useRef(0)
   const mrDescSeqRef = useRef(0)
@@ -559,10 +570,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       .catch(() => setPipeJobs({ id: p.id, jobs: [], loading: false }))
   }
 
-  // Pipeline job 日志（弹窗）
-  function openJobLog(j: { id: number; name: string }) {
+  // Pipeline job 日志（弹窗）；keepContent：刷新时保留现有内容（loading 只变暗不闪）
+  function openJobLog(j: { id: number; name: string }, keepContent = false) {
     if (!glServer || !glProject) return
-    setJobLog({ jobId: j.id, name: j.name, loading: true })
+    setJobLog((prev) => (keepContent && prev?.jobId === j.id ? { ...prev, loading: true } : { jobId: j.id, name: j.name, loading: true }))
     client
       .gitlabJobLog({ baseUrl: glServer.baseUrl, token: glServer.token, projectPath: glProject.path, jobId: j.id })
       .then((r) =>
@@ -571,7 +582,6 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           name: j.name,
           logs: r.ok ? r.logs : undefined,
           err: r.ok ? undefined : r.message || t('logsFail'),
-          jobUrl: r.jobUrl,
         }),
       )
       .catch((e) => setJobLog({ jobId: j.id, name: j.name, err: (e as Error).message || t('logsFail') }))
@@ -629,9 +639,9 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
     }
   }
 
-  async function handleViewPodLogs(pod: DashboardPod) {
+  async function handleViewPodLogs(pod: { name: string }, keepContent = false) {
     if (!k8sKc) return
-    setPodLog({ podName: pod.name, loading: true })
+    setPodLog((prev) => (keepContent && prev?.podName === pod.name ? { ...prev, loading: true } : { podName: pod.name, loading: true }))
     try {
       const r = await client.k8sPodLogs({ kubeconfigPath: k8sKc.path, context: k8sKc.context, namespace: k8sKc.namespace || 'default', podName: pod.name, tailLines: 200 })
       if (r.ok) setPodLog({ podName: pod.name, logs: r.logs ?? '' })
@@ -672,6 +682,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   const pipelines = live?.pipelines?.pipelines ?? []
   const tags = live?.tags?.tags ?? []
   const deployments = live?.deployments?.deployments ?? []
+  // 部署搜索（按 name / 镜像过滤，大小写不敏感；imageTag 是 image 的截断，无需单独匹配）
+  const depQuery = depSearch.trim().toLowerCase()
+  const shownDeps = depQuery
+    ? deployments.filter((d) => d.name.toLowerCase().includes(depQuery) || (d.image || '').toLowerCase().includes(depQuery))
+    : deployments
   const pods = live?.pods?.pods ?? []
   const events = live?.events?.events ?? []
 
@@ -1121,18 +1136,59 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                 {tags.length === 0 ? (
                   <EmptyHint>{t('noTags')}</EmptyHint>
                 ) : (
-                  tags.slice(0, 6).map((tg) => (
-                    <div key={tg.name} className={cssUI.insetRow}>
-                      <span>🏷️</span>
-                      <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>{tg.name}</span>
-                      {tg.message ? (
-                        <span style={{ color: 'var(--dsh-devops-fg-3)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tg.message}</span>
-                      ) : (
-                        <span style={{ flex: 1 }} />
-                      )}
-                      <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{timeAgo(tg.createdAt, t)}</span>
-                    </div>
-                  ))
+                  tags.slice(0, 6).map((tg) => {
+                    const open = expandedTag === tg.name
+                    return (
+                      <div key={tg.name} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                        <div className={cssUI.insetRow}>
+                          <span
+                            onClick={() => setExpandedTag((v) => (v === tg.name ? null : tg.name))}
+                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
+                          >
+                            {open ? '▾' : '▸'}
+                          </span>
+                          <span>🏷️</span>
+                          <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>{tg.name}</span>
+                          {tg.message ? (
+                            <span style={{ color: 'var(--dsh-devops-fg-3)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tg.message}</span>
+                          ) : (
+                            <span style={{ flex: 1 }} />
+                          )}
+                          <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{timeAgo(tg.createdAt, t)}</span>
+                          {tg.webUrl ? (
+                            <ChipBtn title={t('openInGl')} onClick={() => window.open(tg.webUrl, '_blank')}>
+                              ↗
+                            </ChipBtn>
+                          ) : null}
+                        </div>
+                        {/* 展开区：该 tag 指向的最新提交 */}
+                        {open && (
+                          <div style={{ padding: '2px 10px 6px 28px', display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                              <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('tagCommit')}</span>
+                              <span style={{ fontFamily: 'monospace' }} title={tg.commitId || undefined}>
+                                {tg.commitId ? tg.commitId.slice(0, 8) : '—'}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                              <span style={{ color: 'var(--dsh-devops-fg-4)', flexShrink: 0 }}>{t('tagMsg')}</span>
+                              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={tg.commitTitle || undefined}>
+                                {tg.commitTitle || '—'}
+                              </span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                              <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('tagAuthor')}</span>
+                              <span>{tg.commitAuthor || '—'}</span>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                              <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('tagTime')}</span>
+                              <span style={{ fontFamily: 'monospace' }}>{formatDateTime(tg.commitDate || tg.createdAt) || '—'}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })
                 )}
               </div>
               )}
@@ -1179,6 +1235,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                               {t('retry')}
                             </ChipBtn>
                           ) : null}
+                          {p.webUrl ? (
+                            <ChipBtn title={t('openInGl')} onClick={() => window.open(p.webUrl, '_blank')}>
+                              ↗
+                            </ChipBtn>
+                          ) : null}
                         </div>
                         {/* 展开区：该 pipeline 的 jobs 明细 */}
                         {open && (
@@ -1221,6 +1282,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     <ChipBtn tone="ghost" onClick={() => openJobLog(j)}>
                                       {t('openJobLog')}
                                     </ChipBtn>
+                                    {j.webUrl ? (
+                                      <ChipBtn title={t('openInGl')} onClick={() => window.open(j.webUrl, '_blank')}>
+                                        ↗
+                                      </ChipBtn>
+                                    ) : null}
                                   </div>
                                 )
                               })
@@ -1260,10 +1326,21 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                   badge={deployments.length}
                   badgeTone={depFail > 0 ? 'err' : depProg > 0 ? 'warn' : 'ok'}
                 />
+                {deployments.length > 0 && (
+                  <input
+                    className={cssUI.input}
+                    placeholder={t('searchDepsPh')}
+                    value={depSearch}
+                    onChange={(e) => setDepSearch(e.target.value)}
+                    style={{ marginBottom: 8 }}
+                  />
+                )}
                 {deployments.length === 0 ? (
                   <EmptyHint>{t('noDeps')}</EmptyHint>
+                ) : shownDeps.length === 0 ? (
+                  <EmptyHint>{t('noMatchDeps')}</EmptyHint>
                 ) : (
-                  deployments.map((d) => {
+                  shownDeps.map((d) => {
                     const st = d.replicas > 0 && d.ready === d.replicas ? 'ok' : d.ready === 0 ? 'err' : 'warn'
                     const open = expandedDep === d.name
                     const depPodList = depPods(d)
@@ -1403,55 +1480,28 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
 
         {/* ─── Logs tab ─── */}
         {activeTab === 'logs' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 200 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'var(--dsh-devops-fg-3)' }}>{t('logsLast', { n: (logsData ?? []).length })}</span>
-              <Btn
-                onClick={() => {
-                  void (async () => {
-                    try {
-                      const r = await client.logs({ lines: 200 })
-                      if (r.ok) setLogsData(r.lines ?? [])
-                    } catch {
-                      /* ignore */
-                    }
-                  })()
-                }}
-                small
-                variant="outline"
-              >
-                {t('refresh')}
-              </Btn>
-            </div>
-            <div
-              style={{
-                minHeight: 200,
-                maxHeight: 400,
-                overflow: 'auto',
-                background: 'var(--dsh-devops-log-bg)',
-                borderRadius: 8,
-                padding: '10px 12px',
-                fontFamily: "'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace",
-                fontSize: 11,
-                lineHeight: 1.6,
-              }}
-            >
-              {(logsData ?? []).length === 0 ? (
-                <div style={{ color: 'var(--dsh-devops-fg-4)', textAlign: 'center', padding: 20 }}>{t('noLogsText')}</div>
-              ) : (
-                logsData!.map((line, i) => {
-                  const isError = line.includes('[ERROR]')
-                  const isWarn = line.includes('[WARN]')
-                  const cls = isError ? cssUI.logLineError : isWarn ? cssUI.logLineWarn : cssUI.logLineInfo
-                  return (
-                    <div key={i} className={cls} style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
-                      {line}
-                    </div>
-                  )
-                })
-              )}
-            </div>
-          </div>
+          <LogViewer
+            lines={logsData ?? []}
+            maxHeight={400}
+            classify={(line) => (line.includes('[ERROR]') ? cssUI.logLineError : line.includes('[WARN]') ? cssUI.logLineWarn : cssUI.logLineInfo)}
+            emptyText={t('noLogsText')}
+            toolbarExtra={
+              <span style={{ fontSize: 11, color: 'var(--dsh-devops-fg-3)', whiteSpace: 'nowrap' }}>
+                {t('logsLast', { n: (logsData ?? []).length })}
+              </span>
+            }
+            onRefresh={() => {
+              void (async () => {
+                try {
+                  const r = await client.logs({ lines: 200 })
+                  if (r.ok) setLogsData(r.lines ?? [])
+                } catch {
+                  /* ignore */
+                }
+              })()
+            }}
+            t={t}
+          />
         )}
       </div>
 
@@ -1519,26 +1569,29 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
         maxWidth={860}
         footer={
           <>
-            {jobLog?.jobUrl ? (
-              <Btn onClick={() => jobLog && window.open(jobLog.jobUrl, '_blank')} small variant="outline">
-                {t('openInGitlab')}
-              </Btn>
-            ) : null}
+            <Btn onClick={() => jobLogViewRef.current?.refresh()} small variant="outline" disabled={jobLog?.loading}>
+              {t('refresh')}
+            </Btn>
+            <Btn onClick={() => jobLogViewRef.current?.toBottom()} small variant="outline">
+              {t('toBottom')}
+            </Btn>
             <Btn onClick={() => setJobLog(null)} small variant="outline">
               {t('close')}
             </Btn>
           </>
         }
       >
-        <div className={cssUI.logPanel} style={{ maxHeight: 420 }}>
-          {jobLog?.loading ? (
-            <div style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('loadingLogs')}</div>
-          ) : jobLog?.err ? (
-            <div style={{ color: 'var(--dsh-devops-err)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{jobLog.err}</div>
-          ) : (
-            <div style={{ color: 'var(--dsh-devops-log-info)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{jobLog?.logs || t('noLogs')}</div>
-          )}
-        </div>
+        <LogViewer
+          ref={jobLogViewRef}
+          lines={jobLog?.logs ? jobLog.logs.split('\n') : []}
+          loading={jobLog?.loading}
+          err={jobLog?.err}
+          maxHeight={420}
+          externalControls
+          emptyText={t('noLogs')}
+          onRefresh={jobLog ? () => openJobLog({ id: jobLog.jobId, name: jobLog.name }, true) : undefined}
+          t={t}
+        />
       </Modal>
 
       {/* ═══ Pod 日志弹窗 ═══ */}
@@ -1548,20 +1601,30 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
         onClose={() => setPodLog(null)}
         maxWidth={860}
         footer={
-          <Btn onClick={() => setPodLog(null)} small variant="outline">
-            {t('close')}
-          </Btn>
+          <>
+            <Btn onClick={() => podLogViewRef.current?.refresh()} small variant="outline" disabled={podLog?.loading}>
+              {t('refresh')}
+            </Btn>
+            <Btn onClick={() => podLogViewRef.current?.toBottom()} small variant="outline">
+              {t('toBottom')}
+            </Btn>
+            <Btn onClick={() => setPodLog(null)} small variant="outline">
+              {t('close')}
+            </Btn>
+          </>
         }
       >
-        <div className={cssUI.logPanel} style={{ maxHeight: 420 }}>
-          {podLog?.loading ? (
-            <div style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('loadingLogs')}</div>
-          ) : podLog?.err ? (
-            <div style={{ color: 'var(--dsh-devops-err)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{podLog.err}</div>
-          ) : (
-            <div style={{ color: 'var(--dsh-devops-log-info)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{podLog?.logs || t('noLogs')}</div>
-          )}
-        </div>
+        <LogViewer
+          ref={podLogViewRef}
+          lines={podLog?.logs ? podLog.logs.split('\n') : []}
+          loading={podLog?.loading}
+          err={podLog?.err}
+          maxHeight={420}
+          externalControls
+          emptyText={t('noLogs')}
+          onRefresh={podLog ? () => void handleViewPodLogs({ name: podLog.podName }, true) : undefined}
+          t={t}
+        />
       </Modal>
     </div>
   )

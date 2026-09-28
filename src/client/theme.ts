@@ -51,6 +51,7 @@ export const THEME_CSS = `
   --dsh-devops-log-info: #8f8;
   --dsh-devops-log-warn: #fbbf24;
   --dsh-devops-log-err: #ff453a;
+  --dsh-devops-log-match: rgba(255, 193, 7, 0.28);
 }
 :root[data-dsh-devops-theme="light"] {
   --dsh-devops-border: #d9d9d9;
@@ -73,6 +74,7 @@ export const THEME_CSS = `
   --dsh-devops-log-info: #1a7f37;
   --dsh-devops-log-warn: #b45309;
   --dsh-devops-log-err: #d93025;
+  --dsh-devops-log-match: rgba(255, 193, 7, 0.55);
 }
 `
 

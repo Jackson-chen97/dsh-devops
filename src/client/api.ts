@@ -210,12 +210,19 @@ export interface DashboardPipeline {
   createdAt: string
   updatedAt: string
   duration: number | null
+  webUrl?: string
 }
 
 export interface DashboardTag {
   name: string
   message: string
   createdAt: string
+  commitId: string
+  target?: string
+  commitDate: string
+  commitAuthor: string
+  commitTitle: string
+  webUrl?: string
 }
 
 export interface DashboardJob {
@@ -225,6 +232,7 @@ export interface DashboardJob {
   status: string
   duration: number | undefined
   failureReason: string
+  webUrl?: string
 }
 
 export interface DashboardDeployment {

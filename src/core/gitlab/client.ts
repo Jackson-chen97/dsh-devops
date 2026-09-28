@@ -72,7 +72,16 @@ interface RawTag {
   name: string
   target: string
   message?: string
-  commit?: { id: string; created_at?: string; [key: string]: unknown }
+  commit?: {
+    id: string
+    created_at?: string
+    committed_date?: string
+    title?: string
+    message?: string
+    author_name?: string
+    committer_name?: string
+    [key: string]: unknown
+  }
   release?: { message?: string }
   [key: string]: unknown
 }
@@ -135,13 +144,16 @@ function mapJob(raw: RawJob): PipelineJob & { failureReason: string } {
   }
 }
 
-function mapTag(raw: RawTag): GitTag & { createdAt: string } {
+function mapTag(raw: RawTag): GitTag & { createdAt: string; commitDate: string; commitAuthor: string; commitTitle: string } {
   return {
     name: raw.name,
     target: raw.target,
     message: raw.message ?? raw.release?.message ?? '',
     commitId: raw.commit?.id ?? '',
     createdAt: raw.commit?.created_at ?? '',
+    commitDate: raw.commit?.committed_date ?? raw.commit?.created_at ?? '',
+    commitAuthor: raw.commit?.committer_name ?? raw.commit?.author_name ?? '',
+    commitTitle: raw.commit?.title ?? raw.commit?.message?.split('\n')[0] ?? '',
   }
 }
 
@@ -409,12 +421,15 @@ export class GitLabClient {
   }
 
   /** List repository tags (newest first). */
-  async listTags(projectPath: string, perPage = 20): Promise<(GitTag & { createdAt: string })[]> {
+  async listTags(
+    projectPath: string,
+    perPage = 20,
+  ): Promise<(GitTag & { createdAt: string; commitDate: string; commitAuthor: string; commitTitle: string; webUrl: string })[]> {
     const raw = await this.request<RawTag[]>(
       'GET',
       `/projects/${encodeURIComponent(projectPath)}/repository/tags?per_page=${perPage}&order_by=updated&sort=desc`,
     )
-    return raw.map(mapTag)
+    return raw.map((r) => ({ ...mapTag(r), webUrl: this.tagUrl(projectPath, r.name) }))
   }
 
   // ─── Pipelines ──────────────────────────────────────────────────────────────
@@ -465,19 +480,24 @@ export class GitLabClient {
   }
 
   /** List all jobs in a pipeline. */
-  async listPipelineJobs(projectPath: string, pipelineId: number, perPage = 50): Promise<(PipelineJob & { failureReason: string })[]> {
+  async listPipelineJobs(projectPath: string, pipelineId: number, perPage = 50): Promise<(PipelineJob & { failureReason: string; webUrl: string })[]> {
     const raw = await this.request<RawJob[]>(
       'GET',
       `/projects/${encodeURIComponent(projectPath)}/pipelines/${pipelineId}/jobs?per_page=${perPage}`,
       undefined,
       15000,
     )
-    return raw.map(mapJob)
+    return raw.map((r) => ({ ...mapJob(r), webUrl: this.jobUrl(projectPath, r.id) }))
   }
 
-  /** Web UI URL of a job (for the "open in GitLab" fallback). */
+  /** Web UI URL of a job (for the "open in GitLab" button). */
   jobUrl(projectPath: string, jobId: number): string {
-    return `${this.baseUrl.replace(/\/+$/, '')}/projects/${projectPath}/jobs/${jobId}`
+    return `${this.baseUrl.replace(/\/+$/, '')}/${projectPath}/-/jobs/${jobId}`
+  }
+
+  /** Web UI URL of a tag (for the "open in GitLab" button). Older GitLab serves tag pages without the `/-/` prefix. */
+  tagUrl(projectPath: string, tagName: string): string {
+    return `${this.baseUrl.replace(/\/+$/, '')}/${projectPath}/tags/${tagName}`
   }
 
   /**

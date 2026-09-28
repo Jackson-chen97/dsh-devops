@@ -1,7 +1,7 @@
 /**
  * Shared UI primitives for the DevOps console (CSS Modules based).
  */
-import { useCallback, useEffect, useMemo, useSyncExternalStore, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useSyncExternalStore, useRef, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import css from './DevopsUI.module.css'
@@ -550,6 +550,178 @@ export function Toast({ toast }: { toast: { msg: string; tone: string } | null }
   )
 }
 
+/** Imperative controls exposed by {@link LogViewer} through the `ref` handle. */
+export interface LogViewerHandle {
+  /** Re-fetch via the caller-provided `onRefresh`. */
+  refresh: () => void
+  /** Scroll the panel to the bottom and re-enable tail-follow. */
+  toBottom: () => void
+}
+
+export interface LogViewerProps {
+  lines: string[]
+  /** CSS class per line (e.g. log level tone); defaults to the info tone. */
+  classify?: (line: string) => string | undefined
+  loading?: boolean
+  err?: string
+  onRefresh?: () => void
+  /**
+   * Don't render the refresh / scroll-to-bottom buttons in the toolbar —
+   * the caller renders them itself (e.g. in a modal footer) and drives them
+   * through the `ref` handle.
+   */
+  externalControls?: boolean
+  /** Extra toolbar content rendered before the buttons (e.g. a line count). */
+  toolbarExtra?: ReactNode
+  maxHeight?: number
+  emptyText: string
+  t: TranslateFn
+}
+
+/**
+ * Shared log viewer: per-line rendering (with optional per-line tone class),
+ * a search box that filters lines case-insensitively and highlights the
+ * matches, an optional refresh button, and a scroll-to-bottom button. The
+ * panel auto-follows the tail while the user stays scrolled to the bottom;
+ * scrolling up pauses the follow until the button is used again.
+ */
+export const LogViewer = forwardRef<LogViewerHandle, LogViewerProps>(function LogViewer(
+  { lines, classify, loading, err, onRefresh, externalControls, toolbarExtra, maxHeight = 420, emptyText, t },
+  ref,
+) {
+  const [query, setQuery] = useState('')
+  const bodyRef = useRef<HTMLDivElement | null>(null)
+  const followRef = useRef(true)
+  const keyword = query.trim().toLowerCase()
+  const shown = keyword ? lines.filter((l) => l.toLowerCase().includes(keyword)) : lines
+
+  // The handle stays stable across renders; onRefresh is read through a ref so
+  // the caller's latest closure (e.g. re-created on modal state change) is used.
+  const onRefreshRef = useRef(onRefresh)
+  onRefreshRef.current = onRefresh
+  useImperativeHandle(
+    ref,
+    () => ({
+      refresh: () => {
+        followRef.current = true
+        onRefreshRef.current?.()
+      },
+      toBottom: () => {
+        followRef.current = true
+        scrollToBottom()
+      },
+    }),
+    [],
+  )
+
+  function scrollToBottom() {
+    const el = bodyRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }
+
+  // Follow the tail while the user stays at the bottom (new data, or the
+  // panel just mounted / finished loading).
+  useEffect(() => {
+    if (followRef.current) scrollToBottom()
+  }, [shown.length, loading, err])
+
+  function onScroll() {
+    const el = bodyRef.current
+    if (el) followRef.current = el.scrollTop + el.clientHeight >= el.scrollHeight - 24
+  }
+
+  function highlight(line: string): ReactNode {
+    if (!keyword) return line
+    const lower = line.toLowerCase()
+    const out: ReactNode[] = []
+    let from = 0
+    let idx = lower.indexOf(keyword)
+    let key = 0
+    while (idx !== -1) {
+      if (idx > from) out.push(line.slice(from, idx))
+      out.push(
+        <span key={key++} className={css.logMatch}>
+          {line.slice(idx, idx + keyword.length)}
+        </span>,
+      )
+      from = idx + keyword.length
+      idx = lower.indexOf(keyword, from)
+    }
+    if (from < line.length) out.push(line.slice(from))
+    return out
+  }
+
+  const refreshClick = () => {
+    followRef.current = true
+    onRefresh?.()
+  }
+  const bottomClick = () => {
+    followRef.current = true
+    scrollToBottom()
+  }
+
+  // 刷新时保留现有内容（面板整体变暗表示加载中），仅在无内容可显示时才出
+  // loading 占位——避免点刷新后整块内容被替换导致的闪烁。
+  const body =
+    loading && lines.length === 0 && !err ? (
+      <div style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('loadingLogs')}</div>
+    ) : err ? (
+      <div style={{ color: 'var(--dsh-devops-err)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{err}</div>
+    ) : lines.length === 0 ? (
+      <div style={{ color: 'var(--dsh-devops-fg-4)', textAlign: 'center', padding: 20 }}>{emptyText}</div>
+    ) : shown.length === 0 ? (
+      <div style={{ color: 'var(--dsh-devops-fg-4)', textAlign: 'center', padding: 20 }}>{t('searchEmpty')}</div>
+    ) : (
+      shown.map((line, i) => (
+        <div
+          key={i}
+          className={classify?.(line) ?? css.logLineInfo}
+          style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}
+        >
+          {highlight(line)}
+        </div>
+      ))
+    )
+
+  const panel = (
+    <div
+      ref={bodyRef}
+      onScroll={onScroll}
+      className={css.logPanel}
+      style={{ maxHeight, opacity: loading ? 0.6 : 1, transition: 'opacity 150ms' }}
+    >
+      {body}
+    </div>
+  )
+
+  return (
+    <div>
+      <div className={css.logToolbar}>
+        <input
+          className={`${css.input} ${css.logSearch}`}
+          placeholder={t('searchLogs')}
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {keyword ? <span className={css.logMatchCount}>{t('logMatch', { n: shown.length, m: lines.length })}</span> : null}
+        <span style={{ flex: 1 }} />
+        {toolbarExtra}
+        {!externalControls && onRefresh ? (
+          <Btn onClick={refreshClick} small variant="outline" disabled={loading}>
+            {t('refresh')}
+          </Btn>
+        ) : null}
+        {!externalControls ? (
+          <ChipBtn tone="ghost" title={t('toBottom')} onClick={bottomClick}>
+            ⬇
+          </ChipBtn>
+        ) : null}
+      </div>
+      {panel}
+    </div>
+  )
+})
+
 /** Relative "time ago" label. */
 export function timeAgo(ts: string | undefined, t: TranslateFn): string {
   if (!ts) return ''
@@ -562,6 +734,15 @@ export function timeAgo(ts: string | undefined, t: TranslateFn): string {
   const hr = Math.floor(m / 60)
   if (hr < 24) return t('hourAgo', { n: hr })
   return t('dayAgo', { n: Math.floor(hr / 24) })
+}
+
+/** Local "YYYY-MM-DD HH:mm:ss" for an ISO timestamp; '' when missing/invalid. */
+export function formatDateTime(ts: string | undefined): string {
+  if (!ts) return ''
+  const d = new Date(ts)
+  if (isNaN(d.getTime())) return ''
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`
 }
 
 /**

@@ -1,5 +1,19 @@
 # 变更记录 / Changelog
 
+## v0.3.2 — 控制台增强：标签提交信息 / 日志工具栏 / 部署搜索
+
+### 新增
+- **行级「在 GitLab 打开」按钮（↗，行最右）**：合并请求（原有）、标签、流水线、流水线 job 四类列表行统一带 ↗ 按钮——tag URL `{baseUrl}/{projectPath}/tags/{name}`（该 GitLab 版本 tag 页面无 `/-/` 前缀）、job URL `{baseUrl}/{projectPath}/-/jobs/{id}`、pipeline 直接用 API 返回的 `web_url`
+- **标签展开查看提交信息**：标签列表每行可展开（▸/▾），显示该 tag 指向的最新提交——提交 sha（短 8 位、悬浮完整 sha）、提交信息（commit title）、提交人（committer_name，缺省回退 author_name）、提交时间（本地时间 `YYYY-MM-DD HH:mm:ss`）。GitLab tags API 原生返回的 commit 详情此前在 `mapTag` 被丢弃，现已透传到客户端（`DashboardTag` 补 `commitId/target/commitDate/commitAuthor/commitTitle/webUrl`）
+- **日志搜索 / 刷新 / 滑动到底部**：新增共享 `LogViewer` 组件（ui.tsx），三个日志面板（插件日志 tab、Pipeline job 日志弹窗、Pod 日志弹窗）统一接入——搜索框即时过滤（大小写不敏感，显示「n/m 行」计数并高亮命中子串，主题变量 `--dsh-devops-log-match` 深/浅各一套）、刷新按钮（同参数重新拉取，job 运行中 202 / 日志接口 404 时可稍后刷新重试）、「底部」按钮；面板贴底时自动跟随新日志尾部，向上滚动即暂停跟随。两个日志弹窗的刷新/回底按钮放在弹窗底部左侧、与「关闭」并排（LogViewer 经 `ref` 句柄暴露刷新/回底，工具栏只留搜索框），插件日志 tab 保持在工具栏；刷新时保留现有内容（面板变暗表示加载中，仅首次打开才显示 loading 占位），不再整块闪烁
+- **部署列表搜索**：K8s tab 部署列表顶部新增搜索框，按 name / 镜像即时过滤（大小写不敏感），无匹配显示空态提示
+
+### 修复
+- **「在 GitLab 打开」地址错误**：`GitLabClient.jobUrl` 此前拼成 API 形状的 `{baseUrl}/projects/{path}/jobs/{id}`（旧版路由），现改为 Web UI 正确格式 `{baseUrl}/{projectPath}/-/jobs/{jobId}`（job 列表行的 ↗ 使用该地址；job 日志弹窗不再放该按钮）
+
+### 测试
+- 新增 tests/core/gitlab-client.spec.ts（jobUrl/tagUrl 拼接与 baseUrl 尾斜杠、tag commit 字段映射及 author/committer 回退、job 行 webUrl）；ui.spec.tsx 补 LogViewer（渲染分类、搜索过滤/计数/高亮、刷新与回底按钮、cornerControls 浮动模式、空态与无匹配态）；client-smoke 补仪表盘部署搜索渲染测试；全量 117 例通过
+
 ## v0.3.1 — 修复浅色模式下 Web 控制台显示问题
 
 ### 修复

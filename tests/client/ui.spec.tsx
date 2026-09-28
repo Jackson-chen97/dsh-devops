@@ -2,7 +2,14 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { createElement, useState } from 'react'
-import { Select, Modal } from '../../src/client/ui.tsx'
+import { Select, Modal, LogViewer, type LogViewerHandle } from '../../src/client/ui.tsx'
+import { ZH } from '../../src/client/locales.ts'
+
+const t = (key: string, vars?: Record<string, unknown>) => {
+  let s: string = ZH[key as keyof typeof ZH] ?? key
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.split(`{${k}}`).join(String(v))
+  return s
+}
 
 function SelectHarness(props: { options: (string | { value: string; label: string; disabled?: boolean })[] }) {
   const [value, setValue] = useState('')
@@ -76,5 +83,71 @@ describe('Modal', () => {
   it('renders nothing when closed', () => {
     const { container } = render(createElement(Modal, { open: false, title: 'x', onClose: () => {}, children: 'y' }))
     expect(container.textContent).toBe('')
+  })
+})
+
+describe('LogViewer', () => {
+  const lines = ['2026-01-01 INFO boot ok', '2026-01-01 [ERROR] boom', '2026-01-01 [WARN] slow', '2026-01-01 INFO done']
+
+  it('renders lines with the per-line tone class', () => {
+    const { container } = render(
+      createElement(LogViewer, {
+        lines,
+        classify: (l) => (l.includes('[ERROR]') ? 'errCls' : l.includes('[WARN]') ? 'warnCls' : 'infoCls'),
+        emptyText: '暂无日志',
+        t,
+      }),
+    )
+    expect(screen.getByText('2026-01-01 INFO boot ok')).toBeTruthy()
+    expect(screen.getByText('2026-01-01 [ERROR] boom').className).toBe('errCls')
+    expect(container.querySelector('[class*="logPanel"]')).toBeTruthy()
+  })
+
+  it('keeps existing content visible while loading (no flash on refresh)', () => {
+    render(createElement(LogViewer, { lines, loading: true, emptyText: '暂无日志', t }))
+    expect(screen.getByText('2026-01-01 INFO boot ok')).toBeTruthy()
+    expect(screen.queryByText(ZH.loadingLogs)).toBeNull()
+  })
+
+  it('filters lines by search, shows the match count, and highlights hits', () => {
+    const { container } = render(createElement(LogViewer, { lines, emptyText: '暂无日志', t }))
+    fireEvent.change(screen.getByPlaceholderText(ZH.searchLogs), { target: { value: 'error' } })
+    expect(screen.queryByText('2026-01-01 INFO boot ok')).toBeNull()
+    expect(screen.getByText('1/4 行')).toBeTruthy()
+    // 命中子串大小写不敏感高亮（选择器限定在面板内，排除工具栏的 logMatchCount 计数）
+    const match = container.querySelector('[class*="logPanel"] [class*="logMatch"]')
+    expect(match?.textContent).toBe('ERROR')
+  })
+
+  it('exposes refresh and scroll-to-bottom actions', () => {
+    const onRefresh = vi.fn()
+    render(createElement(LogViewer, { lines, onRefresh, emptyText: '暂无日志', t }))
+    fireEvent.click(screen.getByText(ZH.refresh))
+    expect(onRefresh).toHaveBeenCalledTimes(1)
+    fireEvent.click(screen.getByTitle(ZH.toBottom))
+  })
+
+  it('exposes refresh/toBottom via the ref handle in externalControls mode', () => {
+    const onRefresh = vi.fn()
+    const handle: { current: LogViewerHandle | null } = { current: null }
+    const { container } = render(
+      createElement(LogViewer, { lines, onRefresh, externalControls: true, ref: handle, emptyText: '暂无日志', t }),
+    )
+    // 工具栏不再渲染刷新 / 回底按钮（由调用方放在弹窗 footer 并经句柄驱动）
+    expect(container.querySelector('[class*="logCorner"]')).toBeNull()
+    expect(screen.queryByText(ZH.refresh)).toBeNull()
+    expect(screen.queryByTitle(ZH.toBottom)).toBeNull()
+    handle.current!.refresh()
+    expect(onRefresh).toHaveBeenCalledTimes(1)
+    expect(() => handle.current!.toBottom()).not.toThrow()
+  })
+
+  it('shows the empty state for no lines and the no-match state for unmatched search', () => {
+    const first = render(createElement(LogViewer, { lines: [], emptyText: '暂无日志', t }))
+    expect(screen.getByText('暂无日志')).toBeTruthy()
+    first.unmount()
+    render(createElement(LogViewer, { lines: ['only one line'], emptyText: '暂无日志', t }))
+    fireEvent.change(screen.getByPlaceholderText(ZH.searchLogs), { target: { value: 'zzz' } })
+    expect(screen.getByText(ZH.searchEmpty)).toBeTruthy()
   })
 })

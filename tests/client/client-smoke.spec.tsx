@@ -136,4 +136,49 @@ describe('DevopsDashboard (jsdom smoke)', () => {
     await waitFor(() => expect(screen.getByText(ZH.notCfgBig)).toBeTruthy())
     expect(screen.getByText(ZH.goCfg)).toBeTruthy()
   })
+
+  it('renders deployments and filters them via the search box', async () => {
+    const config = {
+      k8s: {
+        kubeconfigs: [{ id: 'kc1', label: '测试集群', path: '/tmp/kc.yaml', context: '', namespace: 'ns1' }],
+        activeKubeconfigId: 'kc1',
+      },
+    }
+    const deployments = [
+      { name: 'order-server', ready: 2, replicas: 2, image: 'registry/order-server:1.0.0', imageTag: '1.0.0', updated: '2026-01-01T00:00:00Z' },
+      { name: 'mall-gateway', ready: 1, replicas: 1, image: 'registry/mall-gateway:2.0.0', imageTag: '2.0.0', updated: '2026-01-01T00:00:00Z' },
+    ]
+    const connection = {
+      rpc: {
+        call: vi.fn(async (_channel: string, endpoint: string): Promise<{ ok: true; value: unknown }> => {
+          if (endpoint === 'config-load') return { ok: true, value: { ok: true, config } }
+          if (endpoint === 'k8s-deployments') return { ok: true, value: { ok: true, deployments } }
+          if (endpoint === 'k8s-pods') return { ok: true, value: { ok: true, pods: [] } }
+          if (endpoint === 'k8s-events') return { ok: true, value: { ok: true, events: [] } }
+          return { ok: true, value: { ok: false } }
+        }),
+      },
+    }
+    render(createElement(DevopsDashboard, { connection, locale: makeLocale(), t }))
+    // 切到 K8s tab（'K8s' 文本同时出现在 SwitchCard 标题里，取 tab 按钮）
+    const k8sTab = await waitFor(() => {
+      const btn = screen
+        .getAllByText('K8s')
+        .map((el) => el.closest('button'))
+        .find((b) => b && b.textContent === 'K8s')
+      expect(btn).toBeTruthy()
+      return btn!
+    })
+    fireEvent.click(k8sTab)
+    // 两个部署都渲染
+    await waitFor(() => expect(screen.getByText('order-server')).toBeTruthy())
+    expect(screen.getByText('mall-gateway')).toBeTruthy()
+    // 搜索过滤
+    fireEvent.change(screen.getByPlaceholderText(ZH.searchDepsPh), { target: { value: 'order' } })
+    expect(screen.getByText('order-server')).toBeTruthy()
+    expect(screen.queryByText('mall-gateway')).toBeNull()
+    // 无匹配提示
+    fireEvent.change(screen.getByPlaceholderText(ZH.searchDepsPh), { target: { value: 'zzz' } })
+    expect(screen.getByText(ZH.noMatchDeps)).toBeTruthy()
+  })
 })

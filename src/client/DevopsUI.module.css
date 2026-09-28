@@ -453,6 +453,35 @@
   color: var(--dsh-devops-log-info);
 }
 
+/* ─── Shared log viewer (toolbar + per-line panel) ────────────────────── */
+
+.logToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.logSearch {
+  flex: 1;
+  min-width: 0;
+  max-width: 260px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.logMatchCount {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--dsh-devops-fg-4);
+  white-space: nowrap;
+}
+
+.logMatch {
+  border-radius: 2px;
+  background: var(--dsh-devops-log-match);
+}
+
 .formBox {
   border: 1px solid var(--dsh-devops-border);
   border-radius: 8px;
