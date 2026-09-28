@@ -21,17 +21,17 @@ export function useLocaleRevision(locale: ClientLocale): number {
 }
 
 export const DOT_COLOR: Record<string, string> = {
-  ok: '#34c759',
-  warn: '#fbbf24',
-  err: '#ff6b60',
-  neutral: '#888',
+  ok: 'var(--dsh-devops-ok)',
+  warn: 'var(--dsh-devops-warn)',
+  err: 'var(--dsh-devops-err-strong)',
+  neutral: 'var(--dsh-devops-fg-3)',
 }
 
 export function Dot({ tone = 'neutral', pulse }: { tone?: string; pulse?: boolean }) {
   return (
     <span
       className={`${css.dot}${pulse ? ` ${css.dotPulse}` : ''}`}
-      style={{ background: DOT_COLOR[tone] ?? '#888' }}
+      style={{ background: DOT_COLOR[tone] ?? 'var(--dsh-devops-fg-3)' }}
     />
   )
 }
@@ -405,7 +405,14 @@ export function StatCard({
   tone?: string
   subTone?: string
 }) {
-  const color = tone === 'ok' ? '#34c759' : tone === 'err' ? '#ff8a80' : tone === 'warn' ? '#fbbf24' : '#eee'
+  const color =
+    tone === 'ok'
+      ? 'var(--dsh-devops-ok)'
+      : tone === 'err'
+        ? 'var(--dsh-devops-err)'
+        : tone === 'warn'
+          ? 'var(--dsh-devops-warn)'
+          : 'var(--dsh-devops-fg)'
   return (
     <div className={css.statCard}>
       <div className={css.statCardTitle}>
@@ -516,12 +523,12 @@ export function SwitchCard({
         <span className={css.switchCardTitle}>{title}</span>
         <span style={{ flex: 1 }} />
         {st ? (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: st.tone === 'ok' ? '#34c759' : '#ff453a' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: st.tone === 'ok' ? 'var(--dsh-devops-ok)' : 'var(--dsh-devops-err-strong)' }}>
             <Dot tone={st.tone} pulse={st.tone === 'err'} />
             {st.text}
           </span>
         ) : (
-          <span style={{ fontSize: 10, color: '#666' }}>{status === '' ? t('detecting') : t('notConfigured')}</span>
+          <span style={{ fontSize: 10, color: 'var(--dsh-devops-fg-4)' }}>{status === '' ? t('detecting') : t('notConfigured')}</span>
         )}
       </div>
       {children}
@@ -533,11 +540,12 @@ export function Toast({ toast }: { toast: { msg: string; tone: string } | null }
   if (!toast) return null
   const bg = toast.tone === 'err' ? 'rgba(255,69,58,0.12)' : toast.tone === 'warn' ? 'rgba(251,191,36,0.12)' : 'rgba(52,199,89,0.12)'
   const border = toast.tone === 'err' ? 'rgba(255,69,58,0.4)' : toast.tone === 'warn' ? 'rgba(251,191,36,0.4)' : 'rgba(52,199,89,0.4)'
-  const fg = toast.tone === 'err' ? '#ff8a80' : toast.tone === 'warn' ? '#fbbf24' : '#34c759'
+  const fg =
+    toast.tone === 'err' ? 'var(--dsh-devops-err)' : toast.tone === 'warn' ? 'var(--dsh-devops-warn)' : 'var(--dsh-devops-ok)'
   return (
     <div className={css.toast} style={{ background: bg, border: `1px solid ${border}` }}>
       <span style={{ color: fg }}>{toast.tone === 'err' ? '✗' : toast.tone === 'warn' ? '!' : '✓'}</span>
-      <span style={{ color: '#ddd' }}>{toast.msg}</span>
+      <span style={{ color: 'var(--dsh-devops-fg-2)' }}>{toast.msg}</span>
     </div>
   )
 }

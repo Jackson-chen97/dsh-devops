@@ -578,7 +578,7 @@ export function DevopsSettings({ connection, locale, t }: DevopsSettingsProps) {
                         <Label>{t('branch')}</Label>
                         {!d.projectPath && <div className={cssUI.hint}>{t('selProjFirst')}</div>}
                         {d.branchesError && (
-                          <div style={{ fontSize: 12, color: '#ff453a', marginBottom: 6 }}>⚠ {d.branchesError}</div>
+                          <div style={{ fontSize: 12, color: 'var(--dsh-devops-err-strong)', marginBottom: 6 }}>⚠ {d.branchesError}</div>
                         )}
                         {d.projectPath && !d.branchesLoading && d.branches.length > 0 && (
                           <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>
@@ -615,7 +615,7 @@ export function DevopsSettings({ connection, locale, t }: DevopsSettingsProps) {
                       </div>
 
                       {glDrafts.length > 1 ? (
-                        <div style={{ borderTop: '1px solid var(--ds-alias-border,#2a2a2a)', paddingTop: 8 }}>
+                        <div style={{ borderTop: '1px solid var(--dsh-devops-border)', paddingTop: 8 }}>
                           <button type="button" className={cssUI.dangerLink} onClick={() => removeGl(d.id)}>
                             {t('delGl')}
                           </button>
@@ -746,7 +746,7 @@ export function DevopsSettings({ connection, locale, t }: DevopsSettingsProps) {
                       </div>
 
                       {kcDrafts.length > 1 ? (
-                        <div style={{ borderTop: '1px solid var(--ds-alias-border,#2a2a2a)', paddingTop: 8 }}>
+                        <div style={{ borderTop: '1px solid var(--dsh-devops-border)', paddingTop: 8 }}>
                           <button type="button" className={cssUI.dangerLink} onClick={() => removeKc(d.id)}>
                             {t('delK8s')}
                           </button>

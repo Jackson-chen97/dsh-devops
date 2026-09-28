@@ -644,7 +644,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   // ─── Not configured state ────────────────────────────────────────────────────
 
   if (loading) {
-    return <div style={{ padding: 24, textAlign: 'center', color: '#888', fontSize: 13 }}>{t('loading')}</div>
+    return <div style={{ padding: 24, textAlign: 'center', color: 'var(--dsh-devops-fg-3)', fontSize: 13 }}>{t('loading')}</div>
   }
 
   if (!config || (!config.gitlab && !config.k8s)) {
@@ -835,7 +835,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           value={glProject ? mrs.length : '—'}
           sub={glProject ? t('statMrsSub', { p: pendingApproval, r: runningPips }) : t('notConfigured')}
           tone={!glProject ? 'neutral' : pendingApproval > 0 ? 'warn' : mrs.length ? 'ok' : 'neutral'}
-          subTone={pendingApproval > 0 ? '#fbbf24' : '#888'}
+          subTone={pendingApproval > 0 ? 'var(--dsh-devops-warn)' : 'var(--dsh-devops-fg-3)'}
         />
         <StatCard
           icon="🔀"
@@ -843,7 +843,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           value={glProject ? pipelines.length : '—'}
           sub={glProject ? t('statPipSub', { r: runningPips, o: okPips, f: failPips }) : t('notConfigured')}
           tone={!glProject ? 'neutral' : failPips > 0 ? 'err' : runningPips > 0 ? 'warn' : okPips > 0 ? 'ok' : 'neutral'}
-          subTone={failPips > 0 ? '#ff8a80' : '#888'}
+          subTone={failPips > 0 ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-fg-3)'}
         />
         <StatCard
           icon="📦"
@@ -851,7 +851,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           value={k8sKc ? deployments.length : '—'}
           sub={k8sKc ? t('statDepSub', { f: depFail, p: depProg }) : t('notConfigured')}
           tone={!k8sKc ? 'neutral' : depFail > 0 ? 'err' : depProg > 0 ? 'warn' : deployments.length ? 'ok' : 'neutral'}
-          subTone={depFail > 0 ? '#ff8a80' : '#888'}
+          subTone={depFail > 0 ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-fg-3)'}
         />
         <StatCard
           icon="🐳"
@@ -859,7 +859,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           value={k8sKc ? crashPods + pendPods : '—'}
           sub={k8sKc ? t('statPodSub', { c: crashPods, p: pendPods }) : t('notConfigured')}
           tone={!k8sKc ? 'neutral' : crashPods > 0 ? 'err' : pendPods > 0 ? 'warn' : pods.length ? 'ok' : 'neutral'}
-          subTone={crashPods > 0 ? '#ff8a80' : '#888'}
+          subTone={crashPods > 0 ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-fg-3)'}
         />
       </div>
 
@@ -973,7 +973,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                           .map((m) => ({ value: m.username, label: `${m.username}（${m.name || m.username}）` }))}
                       />
                     ) : (
-                      <div style={{ fontSize: 11, color: '#666' }}>{formOpts.loading ? t('loadingMem') : t('noMem')}</div>
+                      <div style={{ fontSize: 11, color: 'var(--dsh-devops-fg-4)' }}>{formOpts.loading ? t('loadingMem') : t('noMem')}</div>
                     )}
                     {(mrReviewers || '').trim() && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
@@ -1028,7 +1028,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                               <Badge tone="ok">{t('mergeable')}</Badge>
                             )}
                           </div>
-                          <div style={{ color: '#888', fontSize: 11, marginTop: 2 }}>
+                          <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11, marginTop: 2 }}>
                             {`${mr.sourceBranch} → ${mr.targetBranch} · ${mr.author} · ${timeAgo(mr.updatedAt, t)}`}
                           </div>
                         </div>
@@ -1126,11 +1126,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                       <span>🏷️</span>
                       <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>{tg.name}</span>
                       {tg.message ? (
-                        <span style={{ color: '#888', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tg.message}</span>
+                        <span style={{ color: 'var(--dsh-devops-fg-3)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tg.message}</span>
                       ) : (
                         <span style={{ flex: 1 }} />
                       )}
-                      <span style={{ color: '#666', fontSize: 11 }}>{timeAgo(tg.createdAt, t)}</span>
+                      <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{timeAgo(tg.createdAt, t)}</span>
                     </div>
                   ))
                 )}
@@ -1157,7 +1157,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         <div className={cssUI.insetRow}>
                           <span
                             onClick={() => togglePipeDetail(p)}
-                            style={{ cursor: 'pointer', color: '#888', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
+                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
                           >
                             {open ? '▾' : '▸'}
                           </span>
@@ -1165,10 +1165,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                           <span style={{ fontWeight: 600, cursor: 'pointer' }} onClick={() => togglePipeDetail(p)}>
                             #{p.id}
                           </span>
-                          <span style={{ color: '#ccc' }}>{p.ref}</span>
-                          {p.sha ? <span style={{ color: '#666', fontFamily: 'monospace', fontSize: 11 }}>{p.sha}</span> : null}
+                          <span style={{ color: 'var(--dsh-devops-fg-2)' }}>{p.ref}</span>
+                          {p.sha ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontFamily: 'monospace', fontSize: 11 }}>{p.sha}</span> : null}
                           <span style={{ flex: 1 }} />
-                          <span style={{ color: '#888', fontSize: 11 }}>{timeAgo(p.updatedAt || p.createdAt, t)}</span>
+                          <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{timeAgo(p.updatedAt || p.createdAt, t)}</span>
                           {run ? (
                             <ChipBtn tone="danger" disabled={busy} onClick={() => void handlePipelineAction(p, 'cancel')}>
                               {t('cancel')}
@@ -1184,9 +1184,9 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         {open && (
                           <div style={{ padding: '4px 10px 6px 28px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                             {pipeJobs.id === p.id && pipeJobs.loading ? (
-                              <div style={{ color: '#555', fontSize: 11 }}>{t('loadingJobs')}</div>
+                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{t('loadingJobs')}</div>
                             ) : (pipeJobs.id === p.id ? pipeJobs.jobs : []).length === 0 ? (
-                              <div style={{ color: '#555', fontSize: 11 }}>{t('noJobs')}</div>
+                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{t('noJobs')}</div>
                             ) : (
                               (pipeJobs.id === p.id ? pipeJobs.jobs : []).map((j) => {
                                 const jdot =
@@ -1205,19 +1205,19 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                       alignItems: 'center',
                                       gap: 8,
                                       fontSize: 11,
-                                      color: '#ccc',
+                                      color: 'var(--dsh-devops-fg-2)',
                                       padding: '3px 8px',
                                       borderRadius: 4,
-                                      background: 'rgba(255,255,255,0.03)',
+                                      background: 'var(--dsh-devops-hover)',
                                     }}
                                   >
                                     <Dot tone={jdot} pulse={jdot === 'warn'} />
                                     <span style={{ fontWeight: 500 }}>{j.name}</span>
-                                    <span style={{ color: '#666' }}>{j.stage}</span>
-                                    <span style={{ color: '#888' }}>{j.status}</span>
-                                    {j.failureReason ? <span style={{ color: '#ff8a80' }}>{j.failureReason}</span> : null}
+                                    <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{j.stage}</span>
+                                    <span style={{ color: 'var(--dsh-devops-fg-3)' }}>{j.status}</span>
+                                    {j.failureReason ? <span style={{ color: 'var(--dsh-devops-err)' }}>{j.failureReason}</span> : null}
                                     <span style={{ flex: 1 }} />
-                                    {j.duration != null ? <span style={{ color: '#666', fontSize: 10 }}>{`${Math.round(j.duration)}s`}</span> : null}
+                                    {j.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10 }}>{`${Math.round(j.duration)}s`}</span> : null}
                                     <ChipBtn tone="ghost" onClick={() => openJobLog(j)}>
                                       {t('openJobLog')}
                                     </ChipBtn>
@@ -1272,7 +1272,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         <div className={cssUI.insetRow}>
                           <span
                             onClick={() => toggleDepDetail(d)}
-                            style={{ cursor: 'pointer', color: '#888', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
+                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
                           >
                             {open ? '▾' : '▸'}
                           </span>
@@ -1281,7 +1281,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                             <div style={{ fontFamily: 'monospace', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {d.name}
                             </div>
-                            <div style={{ color: '#888', fontSize: 11 }}>
+                            <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>
                               {`${d.ready}/${d.replicas} ${t('ready')} · ${d.imageTag || '—'} · ${timeAgo(d.updated, t)}`}
                             </div>
                           </div>
@@ -1308,7 +1308,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         {open && (
                           <div style={{ padding: '2px 10px 6px 28px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                             {depPodList.length === 0 ? (
-                              <div style={{ color: '#555', fontSize: 11 }}>{t('noPods')}</div>
+                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{t('noPods')}</div>
                             ) : (
                               depPodList.map((pod) => (
                                 <div
@@ -1318,10 +1318,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     alignItems: 'center',
                                     gap: 8,
                                     fontSize: 11,
-                                    color: '#ccc',
+                                    color: 'var(--dsh-devops-fg-2)',
                                     padding: '3px 8px',
                                     borderRadius: 4,
-                                    background: 'rgba(255,255,255,0.03)',
+                                    background: 'var(--dsh-devops-hover)',
                                   }}
                                 >
                                   <Dot tone={pod.phase === 'Running' ? 'ok' : pod.phase === 'Pending' ? 'warn' : 'err'} />
@@ -1329,7 +1329,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     {pod.name}
                                   </span>
                                   {pod.reason || pod.restarts > 0 ? (
-                                    <span style={{ color: '#888' }}>
+                                    <span style={{ color: 'var(--dsh-devops-fg-3)' }}>
                                       {`${pod.restarts > 0 ? t('restartsN', { n: pod.restarts }) + ' · ' : ''}${pod.reason || ''}`}
                                     </span>
                                   ) : null}
@@ -1357,17 +1357,17 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                   <EmptyHint>{t('noEvents')}</EmptyHint>
                 ) : (
                   events.slice(0, 12).map((ev, i) => (
-                    <div key={i} style={{ padding: '6px 10px', borderRadius: 6, background: 'var(--ds-alias-surface-inset,#1a1a1a)', fontSize: 12 }}>
+                    <div key={i} style={{ padding: '6px 10px', borderRadius: 6, background: 'var(--dsh-devops-surface-inset)', fontSize: 12 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                        <span style={{ color: ev.type === 'Warning' ? '#ff8a80' : '#34c759', fontSize: 11, fontWeight: 600 }}>
+                        <span style={{ color: ev.type === 'Warning' ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-ok)', fontSize: 11, fontWeight: 600 }}>
                           {ev.type === 'Warning' ? '⚠' : '•'}
                         </span>
-                        <span style={{ color: '#888', fontSize: 11 }}>{ev.reason}</span>
+                        <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{ev.reason}</span>
                         <span style={{ flex: 1 }} />
-                        <span style={{ color: '#666', fontSize: 10 }}>{timeAgo(ev.time, t)}</span>
+                        <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10 }}>{timeAgo(ev.time, t)}</span>
                       </div>
-                      <div style={{ color: '#ccc', lineHeight: 1.4, wordBreak: 'break-word' }}>{ev.message}</div>
-                      <div style={{ color: '#666', fontSize: 10, marginTop: 2 }}>{`${ev.kind} / ${ev.object}`}</div>
+                      <div style={{ color: 'var(--dsh-devops-fg-2)', lineHeight: 1.4, wordBreak: 'break-word' }}>{ev.message}</div>
+                      <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10, marginTop: 2 }}>{`${ev.kind} / ${ev.object}`}</div>
                     </div>
                   ))
                 )}
@@ -1390,12 +1390,12 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                   <span style={{ fontSize: 12, flexShrink: 0 }}>{it.icon}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ color: '#ddd', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.text}</span>
+                      <span style={{ color: 'var(--dsh-devops-fg-2)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.text}</span>
                       {it.extra ? <Badge tone={it.tone}>{it.extra}</Badge> : null}
                     </div>
-                    {it.who ? <div style={{ color: '#888', fontSize: 11, marginTop: 1 }}>{it.who}</div> : null}
+                    {it.who ? <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11, marginTop: 1 }}>{it.who}</div> : null}
                   </div>
-                  <span style={{ color: '#666', fontSize: 10, flexShrink: 0 }}>{timeAgo(it.t, t)}</span>
+                  <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10, flexShrink: 0 }}>{timeAgo(it.t, t)}</span>
                 </div>
               ))}
             </div>
@@ -1405,7 +1405,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
         {activeTab === 'logs' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minHeight: 200 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: '#888' }}>{t('logsLast', { n: (logsData ?? []).length })}</span>
+              <span style={{ fontSize: 11, color: 'var(--dsh-devops-fg-3)' }}>{t('logsLast', { n: (logsData ?? []).length })}</span>
               <Btn
                 onClick={() => {
                   void (async () => {
@@ -1428,7 +1428,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                 minHeight: 200,
                 maxHeight: 400,
                 overflow: 'auto',
-                background: '#0d0d0d',
+                background: 'var(--dsh-devops-log-bg)',
                 borderRadius: 8,
                 padding: '10px 12px',
                 fontFamily: "'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace",
@@ -1437,7 +1437,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
               }}
             >
               {(logsData ?? []).length === 0 ? (
-                <div style={{ color: '#555', textAlign: 'center', padding: 20 }}>{t('noLogsText')}</div>
+                <div style={{ color: 'var(--dsh-devops-fg-4)', textAlign: 'center', padding: 20 }}>{t('noLogsText')}</div>
               ) : (
                 logsData!.map((line, i) => {
                   const isError = line.includes('[ERROR]')
@@ -1473,7 +1473,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       >
         <div>
           <div className={cssUI.fieldLabel}>{t('currentImage')}</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: '#ccc', padding: '6px 8px', borderRadius: 6, background: 'var(--ds-alias-surface-inset,#1a1a1a)' }}>
+          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--dsh-devops-fg-2)', padding: '6px 8px', borderRadius: 6, background: 'var(--dsh-devops-surface-inset)' }}>
             {depImgEdit?.image || '—'}
           </div>
         </div>
@@ -1508,7 +1508,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           </>
         }
       >
-        <div style={{ fontSize: 13, color: '#ccc', lineHeight: 1.6 }}>{t('restartBody', { name: depRestart ?? '' })}</div>
+        <div style={{ fontSize: 13, color: 'var(--dsh-devops-fg-2)', lineHeight: 1.6 }}>{t('restartBody', { name: depRestart ?? '' })}</div>
       </Modal>
 
       {/* ═══ Pipeline job 日志弹窗 ═══ */}
@@ -1532,11 +1532,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       >
         <div className={cssUI.logPanel} style={{ maxHeight: 420 }}>
           {jobLog?.loading ? (
-            <div style={{ color: '#555' }}>{t('loadingLogs')}</div>
+            <div style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('loadingLogs')}</div>
           ) : jobLog?.err ? (
-            <div style={{ color: '#ff8a80', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{jobLog.err}</div>
+            <div style={{ color: 'var(--dsh-devops-err)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{jobLog.err}</div>
           ) : (
-            <div style={{ color: '#8f8', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{jobLog?.logs || t('noLogs')}</div>
+            <div style={{ color: 'var(--dsh-devops-log-info)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{jobLog?.logs || t('noLogs')}</div>
           )}
         </div>
       </Modal>
@@ -1555,11 +1555,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       >
         <div className={cssUI.logPanel} style={{ maxHeight: 420 }}>
           {podLog?.loading ? (
-            <div style={{ color: '#555' }}>{t('loadingLogs')}</div>
+            <div style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('loadingLogs')}</div>
           ) : podLog?.err ? (
-            <div style={{ color: '#ff8a80', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{podLog.err}</div>
+            <div style={{ color: 'var(--dsh-devops-err)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{podLog.err}</div>
           ) : (
-            <div style={{ color: '#8f8', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{podLog?.logs || t('noLogs')}</div>
+            <div style={{ color: 'var(--dsh-devops-log-info)', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>{podLog?.logs || t('noLogs')}</div>
           )}
         </div>
       </Modal>

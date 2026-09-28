@@ -1,6 +1,6 @@
 {
   "name": "@jacksonchen/dsh-devops",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "GitLab + Kubernetes DevOps control plane for DeepSeek Harness: AI tools, Web console, webhooks, and alert monitor",
   "keywords": [
     "deepseek-harness",

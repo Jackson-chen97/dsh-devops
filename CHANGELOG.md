@@ -1,5 +1,13 @@
 # 变更记录 / Changelog
 
+## v0.3.1 — 修复浅色模式下 Web 控制台显示问题
+
+### 修复
+- **浅色模式**：Web 控制台此前无任何主题机制——48 处 `var(--ds-alias-*, 深色回退值)` + 约 60 处写死的深色（纯黑日志框、各级灰字、黑色遮罩）在宿主切到浅色时整块呈深色。客户端现拥有自有 `--dsh-devops-*` 双层变量：深色为默认（仍引用宿主 alias 变量，宿主提供值即跟随），浅色配色完全自给自足（不引用 `--ds-alias-*`，防止宿主深色值泄漏进浅色模式）
+- **主题自动检测**：宿主不暴露主题 API，检测链按优先级取信号——DOM 显式标记（宿主 `data-ds-theme-source` / `data-theme`（仅认 light/dark，`system` 视为无信号）/ 精确 class token / `meta[name=color-scheme]` / `<html>` 上级联或 inline 的 `color-scheme` 声明）→ 宿主 `--ds-alias-surface`/`--ds-alias-foreground` 计算值亮度（BT.709 权重）→ `prefers-color-scheme` 兜底；结果写入 `<html>` 的 `data-dsh-devops-theme` 命名空间属性，MutationObserver + matchMedia change 实时重检测，CSS 变量与 inline style 的 `var()` 同步切换，无需 React 重渲染
+- **日志面板跟随浅色**：背景由纯黑 `#0d0d0d` 改 `#f6f8fa`，info/warn/err 行色同步调为浅色底可读的深色调
+- **测试**：新增 tests/client/theme.spec.ts（17 例：颜色解析/亮度边界、宿主真实标记 `data-ds-theme-source` 与 `color-scheme` 及多级检测信号优先级、样式表注入幂等与 stale 替换、MutationObserver 与 matchMedia change 重检测）；全量 106 例通过
+
 ## v0.3.0 — 新增 devops_config 配置发现工具
 
 ### 新增
