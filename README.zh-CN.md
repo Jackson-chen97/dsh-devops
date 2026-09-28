@@ -165,6 +165,7 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 
 | 工具 | 说明 |
 |------|------|
+| `devops_config` | 列出全部已配置的 GitLab 服务器/项目与 K8s 集群（id、label、激活项）——调用其他工具前先用它把名字映射为 `project` / `cluster` id |
 | `gitlab_mr_create` | 创建 MR（可指定 Reviewers，自动触发 Pipeline 监控） |
 | `gitlab_mr_review` | 评审 MR（approve/request_changes/comment） |
 | `gitlab_mr_list` | 列出 Merge Request |
@@ -176,6 +177,31 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 | `k8s_pods` | 列出 Pod（含重启次数） |
 | `k8s_events` | 获取最新 K8s 事件 |
 | `k8s_logs` | 获取 Pod 日志（tail N 行） |
+
+### 在对话中直接完成
+
+配置完成后不需要任何命令语法——直接在对话窗口用自然语言描述需求，agent 会自行选择合适的工具：
+
+| 你在对话里说 | 插件会做 |
+|------|------|
+| 「最近一条流水线什么状态？」 | 查询当前项目（或指定分支）最新 pipeline 的状态 |
+| 「列出 pipeline #42 的 job」 | 列出该 pipeline 的 job 明细（名称/阶段/状态/耗时） |
+| 「盯着 main 分支的流水线，跑完告诉我」 | 启动后台监控（每 30 秒轮询），结束时自动向对话回报成功 / 失败（含失败 job 名） |
+| 「建个 MR：fix/login 提到 main，标题『修复登录』，reviewer 张三」 | 创建 MR 并自动开始 pipeline 监控 |
+| 「approve !128」/「让作者改一下，意见是…」/「在 !128 上评论…」 | MR 评审：approve / request_changes / comment |
+| 「看下当前打开的 MR 有哪些」 | 列出 MR（编号、标题、状态、分支、审批情况） |
+| 「打个 tag v1.4.0」 | 创建 git tag（可指定 ref 与 message） |
+| 「看看 staging 里订单服务的 pod」 | 先调用 `devops_config` 把「staging」映射到集群 id，再列出 Pod（阶段、重启次数） |
+| 「staging 的 order-service-7d9f 最近报什么错？给我 200 行日志」 | 映射集群后取 Pod 日志（tail N 行） |
+| 「这个 deployment 滚到哪个版本了？」/「namespace 下所有 deployment 状态」 | 查询 Deployment 滚动状态（副本数、conditions）；未给名字则列出全部 |
+| 「最近有什么 K8s 事件？」 | 列出最近事件（reason/message/object） |
+| 「现在都配了哪些服务器和集群？」 | `devops_config` 列出全部已配置项（id、label、激活项） |
+
+几点补充：
+
+- **名字够用，不用记 id**：你提到的服务器/集群名字（如 `prod-gitlab`、`staging` 这类 label）会先经 `devops_config` 查成对应的 `project` / `cluster` id，再去调其他工具。
+- **未配置 = 提示，不是报错**：未完成配置前调用任何工具都会返回「请先打开 设置 → DevOps 完成配置」的引导。
+- **Pipeline 监控是后台任务**：启动后不阻塞对话，每 30 秒轮询，成功 / 失败（含失败 job 名）/ 超时都会自动回报到当前会话。
 
 ## 配置参考
 

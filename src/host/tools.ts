@@ -1,9 +1,11 @@
 /**
  * Tool registration for dsh-devops.
  *
- * Registers all gitlab_* and k8s_* tools into the DSH tool catalog.
+ * Registers all gitlab_*, k8s_* and devops_config tools into the DSH tool
+ * catalog.
  */
 
+import { registerConfigTool } from './tools-config.ts'
 import { registerGitLabTools } from './tools-gitlab.ts'
 import { registerK8sTools } from './tools-k8s.ts'
 
@@ -74,8 +76,11 @@ export interface FollowupContext {
 }
 
 export function registerTools(ctx: DshToolContext, services: DevopsServices): void {
+  // Config discovery is always available (no service dependency) — the agent
+  // needs it to map user-mentioned names to project/cluster ids.
+  registerConfigTool(ctx)
   if (services.gitlab) registerGitLabTools(ctx, services.gitlab)
   if (services.k8s) registerK8sTools(ctx, services.k8s)
 }
 
-export { registerGitLabTools, registerK8sTools }
+export { registerConfigTool, registerGitLabTools, registerK8sTools }

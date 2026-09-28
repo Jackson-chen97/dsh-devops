@@ -1,5 +1,17 @@
 # 变更记录 / Changelog
 
+## v0.3.0 — 新增 devops_config 配置发现工具
+
+### 新增
+- **devops_config 工具**：无参数，返回全部已配置的 GitLab 服务器/项目与 kubeconfig/集群（id、label、baseUrl、projectPath、branch、context、namespace 与当前激活项），并附 hint 说明如何把名字映射为 gitlab_* 工具的 `project` 与 k8s_* 工具的 `cluster` 参数；用户说「查看 [配置名] 的 [服务] 日志」时，agent 可先调用它完成名字 → id 的映射
+- **token 不进工具输出**：token 值不出现在 AI 工具结果中（工具输出会进入模型上下文），改为 `tokenConfigured` 布尔标志；浏览器设置页的 config-load RPC 仍是唯一 token 载体
+- **有效激活项与解析器一致**：报告的 activeServerId / activeKubeconfigId 复用 resolveGitLabConfig / resolveK8sConfig 的「active 不可用则回退首个可用」选择逻辑，即其他工具实际会解析到的配置
+- **未配置时返回结果而非抛错**：`{configured: false, message}` 复用 NOT_CONFIGURED_MSG 常量，引导先完成设置
+- **测试**：新增 tests/host/tools-config.spec.ts（7 例：注册名/无参 schema、未配置提示、双 server + 双 kubeconfig 全字段与激活回退、token 屏蔽、空节省略、render JSON 无损）
+
+### 变更
+- 工具总数 11 → 12：devops_config 无服务依赖，插件加载即注册（其余工具行为不变）
+
 ## v0.2.0 — 项目架构与 Web 控制台全面重构
 
 ### 架构

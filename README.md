@@ -164,6 +164,7 @@ An explicit `config:` block in the cordis patch entry still works as an override
 
 | Tool | Description |
 |------|-------------|
+| `devops_config` | List all configured GitLab servers/projects and K8s clusters (ids, labels, active selection) — call it first to map a name to a `project` / `cluster` id |
 | `gitlab_mr_create` | Create MR (optional reviewers, auto-triggers pipeline watch) |
 | `gitlab_mr_review` | Review MR (approve/request_changes/comment) |
 | `gitlab_mr_list` | List merge requests |
@@ -175,6 +176,31 @@ An explicit `config:` block in the cordis patch entry still works as an override
 | `k8s_pods` | List pods with restart counts |
 | `k8s_events` | Get recent K8s events |
 | `k8s_logs` | Get pod logs (tail N lines) |
+
+### Do it directly from the conversation
+
+Once configured, no command syntax is needed — just describe what you want in plain language and the agent picks the right tools:
+
+| You say in chat | What the plugin does |
+|------|------|
+| "What's the latest pipeline status?" | Get the latest pipeline status for the current project (or a given branch) |
+| "List the jobs of pipeline #42" | List the pipeline's job details (name / stage / status / duration) |
+| "Watch the main branch pipeline and tell me when it's done" | Start background monitoring (30s polling); reports success / failure (with failed job names) back into the chat when it settles |
+| "Create an MR: fix/login into main, titled 'Fix login', reviewer zhangsan" | Create the MR and auto-start pipeline monitoring |
+| "Approve !128" / "Request changes with…" / "Comment on !128: …" | MR review: approve / request_changes / comment |
+| "Which MRs are currently open?" | List MRs (iid, title, state, branches, approvals) |
+| "Tag v1.4.0" | Create a git tag (ref and message optional) |
+| "Show the pods of the order service in staging" | Calls `devops_config` first to map "staging" to the cluster id, then lists pods (phase, restart counts) |
+| "Give me 200 lines of logs from pod order-service-7d9f in staging" | Maps the cluster, then tails the pod logs (N lines) |
+| "Which version is this deployment rolled to?" / "Status of all deployments" | Deployment rolling status (replicas, conditions); lists all when no name is given |
+| "Any recent K8s events?" | List recent events (reason / message / object) |
+| "What servers and clusters are configured?" | `devops_config` lists all configured entries (id, label, active selection) |
+
+Notes:
+
+- **Names are enough — no ids to memorize**: a server/cluster name you mention (e.g., a label like `prod-gitlab` or `staging`) is first mapped to the `project` / `cluster` id via `devops_config` before the other tools are called.
+- **Unconfigured = hint, not error**: calling any tool before setup returns "open Settings → DevOps and finish configuring first".
+- **Pipeline watch is a background job**: it does not block the chat, polls every 30s, and reports success / failure (with failed job names) / timeout back into the conversation when it settles.
 
 ## Configuration Reference
 
