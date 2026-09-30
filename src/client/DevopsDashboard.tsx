@@ -46,6 +46,19 @@ void _Section
 const PIPELINE_RUNNING = ['created', 'waiting_for_resource', 'preparing', 'pending', 'running', 'queued', 'scheduled']
 const POLL_INTERVAL = 60_000 // 60s auto-refresh
 
+/** 列表状态筛选 chip 组：选中项高亮（primary），未选为 ghost。 */
+function FilterChips({ selected, options, onPick }: { selected: string; options: { v: string; label: string }[]; onPick: (v: string) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+      {options.map((o) => (
+        <ChipBtn key={o.v} tone={o.v === selected ? 'primary' : 'ghost'} onClick={() => onPick(o.v)}>
+          {o.label}
+        </ChipBtn>
+      ))}
+    </div>
+  )
+}
+
 export interface DevopsDashboardProps {
   connection: DevopsClientContext['connection']
   locale: ClientLocale
@@ -54,6 +67,8 @@ export interface DevopsDashboardProps {
 
 interface Live {
   mrs?: { ok: boolean; mergeRequests?: DashboardMR[]; message?: string }
+  // MR 状态筛选为 server-side（非 opened 时重拉一份该状态的列表）
+  mrsState?: { ok: boolean; mergeRequests?: DashboardMR[]; message?: string }
   pipelines?: { ok: boolean; pipelines?: DashboardPipeline[]; message?: string }
   tags?: { ok: boolean; tags?: DashboardTag[]; message?: string }
   deployments?: { ok: boolean; deployments?: DashboardDeployment[]; message?: string }
@@ -70,10 +85,16 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   // 二级 tab：GitLab（合并请求/标签/流水线）与 K8s（部署/事件）
   const [gitlabSubTab, setGitlabSubTab] = useState('mrs')
   const [k8sSubTab, setK8sSubTab] = useState('deployments')
+  // 子 tab 列表状态筛选：MR 走 server-side state（切换即重拉），流水线/部署为客户端过滤
+  const [mrState, setMrState] = useState<'opened' | 'merged' | 'closed'>('opened')
+  const [pipeFilter, setPipeFilter] = useState<'all' | 'success' | 'failed' | 'running' | 'canceled'>('all')
+  const [depFilter, setDepFilter] = useState<'all' | 'ok' | 'prog' | 'down'>('all')
   const [live, setLive] = useState<Live | null>(null)
   const [logsData, setLogsData] = useState<string[] | null>(null)
   const [toast, setToast] = useState<{ msg: string; tone: string } | null>(null)
   const [busy, setBusy] = useState(false)
+  // 手动刷新：列表拉取在途时禁用刷新按钮
+  const [refreshing, setRefreshing] = useState(false)
   const [newMrOpen, setNewMrOpen] = useState(false)
   const [newTagOpen, setNewTagOpen] = useState(false)
   // Pod 日志（弹窗查看）
@@ -149,39 +170,49 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   }, [])
 
   const fetchData = useCallback(
-    async (cfg: DevopsSettingsFile | null) => {
+    // stateOverride：筛选 chip 点击当帧调用时闭包里的 mrState 还是旧值，需显式传入
+    async (cfg: DevopsSettingsFile | null, stateOverride?: 'opened' | 'merged' | 'closed') => {
+      const st = stateOverride ?? mrState
       if (!cfg) return
       const seq = ++fetchSeqRef.current // 快速连续切换时，旧请求的响应作废
-      const jobs: [string, Promise<unknown>][] = []
-      const glServer = resolveGlServer(cfg)
-      if (glServer?.baseUrl && glServer?.token && glServer?.projectPath) {
-        const base = { baseUrl: glServer.baseUrl, token: glServer.token, projectPath: glServer.projectPath }
-        jobs.push(['mrs', client.gitlabMRs({ ...base })])
-        jobs.push(['pipelines', client.gitlabPipelines({ ...base, perPage: 10 })])
-        jobs.push(['tags', client.gitlabTags(base)])
+      setRefreshing(true)
+      try {
+        const jobs: [string, Promise<unknown>][] = []
+        const glServer = resolveGlServer(cfg)
+        if (glServer?.baseUrl && glServer?.token && glServer?.projectPath) {
+          const base = { baseUrl: glServer.baseUrl, token: glServer.token, projectPath: glServer.projectPath }
+          // live.mrs 固定拉 opened（统计卡/动态流计数用）；筛选非 opened 时另拉该状态的列表
+          jobs.push(['mrs', client.gitlabMRs({ ...base })])
+          if (st !== 'opened') jobs.push(['mrsState', client.gitlabMRs({ ...base, state: st })])
+          jobs.push(['pipelines', client.gitlabPipelines({ ...base, perPage: 10 })])
+          jobs.push(['tags', client.gitlabTags(base)])
+        }
+        const kc = resolveK8sKc(cfg)
+        if (kc?.path) {
+          const ns = kc.namespace || 'default'
+          const kb = { kubeconfigPath: kc.path, context: kc.context, namespace: ns }
+          jobs.push(['deployments', client.k8sDeployments(kb)])
+          jobs.push(['pods', client.k8sPods(kb)])
+          jobs.push(['events', client.k8sEvents({ ...kb, limit: 15 })])
+        }
+        if (jobs.length === 0) {
+          if (seq === fetchSeqRef.current) setLive({})
+          return
+        }
+        const settled = await Promise.all(jobs.map(([, p]) => p.catch(() => ({ ok: false }))))
+        if (seq !== fetchSeqRef.current) return
+        const data: Record<string, unknown> = {}
+        jobs.forEach(([key], i) => {
+          data[key] = settled[i]
+        })
+        setLive(data as Live)
+      } finally {
+        // 仅最新一次请求复位，避免旧响应提前点亮刷新按钮
+        if (seq === fetchSeqRef.current) setRefreshing(false)
       }
-      const kc = resolveK8sKc(cfg)
-      if (kc?.path) {
-        const ns = kc.namespace || 'default'
-        const kb = { kubeconfigPath: kc.path, context: kc.context, namespace: ns }
-        jobs.push(['deployments', client.k8sDeployments(kb)])
-        jobs.push(['pods', client.k8sPods(kb)])
-        jobs.push(['events', client.k8sEvents({ ...kb, limit: 15 })])
-      }
-      if (jobs.length === 0) {
-        if (seq === fetchSeqRef.current) setLive({})
-        return
-      }
-      const settled = await Promise.all(jobs.map(([, p]) => p.catch(() => ({ ok: false }))))
-      if (seq !== fetchSeqRef.current) return
-      const data: Record<string, unknown> = {}
-      jobs.forEach(([key], i) => {
-        data[key] = settled[i]
-      })
-      setLive(data as Live)
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [client],
+    [client, mrState],
   )
 
   // Auto-refresh
@@ -682,11 +713,20 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   const pipelines = live?.pipelines?.pipelines ?? []
   const tags = live?.tags?.tags ?? []
   const deployments = live?.deployments?.deployments ?? []
+  // 状态筛选：MR 展示当前 state 的列表（opened 即 live.mrs，其余为 mrsState 重拉结果）
+  const shownMrs = mrState === 'opened' ? mrs : (live?.mrsState?.mergeRequests ?? [])
+  // 流水线状态筛选（GitLab API 的 status 无法表达"运行中"组，客户端过滤）
+  const shownPips = pipeFilter === 'all'
+    ? pipelines
+    : pipelines.filter((p) => (pipeFilter === 'running' ? PIPELINE_RUNNING.includes(p.status) : p.status === pipeFilter))
+  // 部署就绪度判定：down = 有副本且 0 就绪；prog = 部分就绪；其余（含 0/0 缩容）为 ok
+  const depStatusOf = (d: DashboardDeployment): 'ok' | 'prog' | 'down' =>
+    d.replicas > 0 && d.ready === 0 ? 'down' : d.replicas > 0 && d.ready < d.replicas ? 'prog' : 'ok'
   // 部署搜索（按 name / 镜像过滤，大小写不敏感；imageTag 是 image 的截断，无需单独匹配）
   const depQuery = depSearch.trim().toLowerCase()
-  const shownDeps = depQuery
-    ? deployments.filter((d) => d.name.toLowerCase().includes(depQuery) || (d.image || '').toLowerCase().includes(depQuery))
-    : deployments
+  const shownDeps = (depFilter === 'all' ? deployments : deployments.filter((d) => depStatusOf(d) === depFilter)).filter(
+    (d) => !depQuery || d.name.toLowerCase().includes(depQuery) || (d.image || '').toLowerCase().includes(depQuery),
+  )
   const pods = live?.pods?.pods ?? []
   const events = live?.events?.events ?? []
 
@@ -749,6 +789,12 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
 
   const glServers = config?.gitlab?.servers ?? []
   const kcList = config?.k8s?.kubeconfigs ?? []
+  // 各子 tab 的 SecHeader 右侧刷新按钮（重跑全部列表拉取，与 60s 轮询同机制）
+  const refreshBtn = (
+    <Btn small variant="outline" disabled={refreshing} onClick={() => void fetchData(config)}>
+      {t('refresh')}
+    </Btn>
+  )
 
   return (
     <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -842,7 +888,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       {/* Toast */}
       <Toast toast={toast} />
 
-      {/* Stat cards grid */}
+      {/* Stat cards grid（点击跳转到对应 tab / 子 tab） */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8 }}>
         <StatCard
           icon="🔄"
@@ -851,6 +897,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           sub={glProject ? t('statMrsSub', { p: pendingApproval, r: runningPips }) : t('notConfigured')}
           tone={!glProject ? 'neutral' : pendingApproval > 0 ? 'warn' : mrs.length ? 'ok' : 'neutral'}
           subTone={pendingApproval > 0 ? 'var(--dsh-devops-warn)' : 'var(--dsh-devops-fg-3)'}
+          onClick={() => {
+            setActiveTab('gitlab')
+            setGitlabSubTab('mrs')
+          }}
         />
         <StatCard
           icon="🔀"
@@ -859,6 +909,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           sub={glProject ? t('statPipSub', { r: runningPips, o: okPips, f: failPips }) : t('notConfigured')}
           tone={!glProject ? 'neutral' : failPips > 0 ? 'err' : runningPips > 0 ? 'warn' : okPips > 0 ? 'ok' : 'neutral'}
           subTone={failPips > 0 ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-fg-3)'}
+          onClick={() => {
+            setActiveTab('gitlab')
+            setGitlabSubTab('pipelines')
+          }}
         />
         <StatCard
           icon="📦"
@@ -867,6 +921,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           sub={k8sKc ? t('statDepSub', { f: depFail, p: depProg }) : t('notConfigured')}
           tone={!k8sKc ? 'neutral' : depFail > 0 ? 'err' : depProg > 0 ? 'warn' : deployments.length ? 'ok' : 'neutral'}
           subTone={depFail > 0 ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-fg-3)'}
+          onClick={() => {
+            setActiveTab('k8s')
+            setK8sSubTab('deployments')
+          }}
         />
         <StatCard
           icon="🐳"
@@ -875,6 +933,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           sub={k8sKc ? t('statPodSub', { c: crashPods, p: pendPods }) : t('notConfigured')}
           tone={!k8sKc ? 'neutral' : crashPods > 0 ? 'err' : pendPods > 0 ? 'warn' : pods.length ? 'ok' : 'neutral'}
           subTone={crashPods > 0 ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-fg-3)'}
+          onClick={() => {
+            setActiveTab('k8s')
+            setK8sSubTab('deployments')
+          }}
         />
       </div>
 
@@ -911,11 +973,26 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                 <SecHeader
                   icon="🔄"
                   title={t('secMrs')}
-                  badge={mrs.length}
+                  badge={shownMrs.length}
                   badgeTone={pendingApproval > 0 ? 'warn' : 'ok'}
+                  right={refreshBtn}
                   onNew={() => setNewMrOpen((o) => !o)}
                   newLabel={t('newMrBtn')}
                 />
+                <div style={{ marginBottom: 8 }}>
+                  <FilterChips
+                    selected={mrState}
+                    options={[
+                      { v: 'opened', label: t('stateOpened') },
+                      { v: 'merged', label: t('stateMerged') },
+                      { v: 'closed', label: t('stateClosed') },
+                    ]}
+                    onPick={(v) => {
+                      setMrState(v as 'opened' | 'merged' | 'closed')
+                      void fetchData(config, v as 'opened' | 'merged' | 'closed')
+                    }}
+                  />
+                </div>
                 <Modal
                   open={newMrOpen}
                   title={t('newMrBtn')}
@@ -1023,10 +1100,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                     <textarea ref={mrDescRef} className={cssUI.input} style={{ resize: 'vertical', minHeight: 54 }} placeholder={t('descPh')} />
                   </div>
                 </Modal>
-                {mrs.length === 0 ? (
-                  <EmptyHint>{t('noMrs')}</EmptyHint>
+                {shownMrs.length === 0 ? (
+                  <EmptyHint>{mrState === 'opened' ? t('noMrs') : t('noMatch')}</EmptyHint>
                 ) : (
-                  mrs.map((mr) => {
+                  shownMrs.map((mr) => {
                     const ms = mr.mergeStatus || 'unchecked'
                     const dotTone = ms === 'can_be_merged' ? 'ok' : ms === 'cannot_be_merged' ? 'err' : 'warn'
                     return (
@@ -1048,12 +1125,17 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
-                          <ChipBtn tone="primary" disabled={busy} onClick={() => void handleApprove(mr)}>
-                            {t('approve')}
-                          </ChipBtn>
-                          <ChipBtn tone="danger" disabled={busy} onClick={() => void handleMrClose(mr)}>
-                            {t('close')}
-                          </ChipBtn>
+                          {/* 审批/关闭仅对开放 MR 有意义 */}
+                          {mrState === 'opened' && (
+                            <>
+                              <ChipBtn tone="primary" disabled={busy} onClick={() => void handleApprove(mr)}>
+                                {t('approve')}
+                              </ChipBtn>
+                              <ChipBtn tone="danger" disabled={busy} onClick={() => void handleMrClose(mr)}>
+                                {t('close')}
+                              </ChipBtn>
+                            </>
+                          )}
                           {mr.webUrl ? (
                             <ChipBtn title={t('openInGl')} onClick={() => window.open(mr.webUrl, '_blank')}>
                               ↗
@@ -1069,7 +1151,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
 
               {gitlabSubTab === 'tags' && (
               <div>
-                <SecHeader icon="🏷️" title={t('secTags')} badge={tags.length} onNew={() => setNewTagOpen((o) => !o)} newLabel={t('newTagBtn')} />
+                <SecHeader icon="🏷️" title={t('secTags')} badge={tags.length} right={refreshBtn} onNew={() => setNewTagOpen((o) => !o)} newLabel={t('newTagBtn')} />
                 <Modal
                   open={newTagOpen}
                   title={t('newTagBtn')}
@@ -1198,13 +1280,29 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                 <SecHeader
                   icon="🔀"
                   title={t('statPipsTitle')}
-                  badge={pipelines.length}
+                  badge={shownPips.length}
                   badgeTone={failPips > 0 ? 'err' : runningPips > 0 ? 'warn' : 'neutral'}
+                  right={refreshBtn}
                 />
+                <div style={{ marginBottom: 8 }}>
+                  <FilterChips
+                    selected={pipeFilter}
+                    options={[
+                      { v: 'all', label: t('filterAll') },
+                      { v: 'success', label: t('statusSuccess') },
+                      { v: 'failed', label: t('statusFailed') },
+                      { v: 'running', label: t('statusRunning') },
+                      { v: 'canceled', label: t('statusCanceled') },
+                    ]}
+                    onPick={(v) => setPipeFilter(v as typeof pipeFilter)}
+                  />
+                </div>
                 {pipelines.length === 0 ? (
                   <EmptyHint>{t('noPips')}</EmptyHint>
+                ) : shownPips.length === 0 ? (
+                  <EmptyHint>{t('noMatch')}</EmptyHint>
                 ) : (
-                  pipelines.map((p) => {
+                  shownPips.map((p) => {
                     const run = PIPELINE_RUNNING.includes(p.status)
                     const dot = p.status === 'success' ? 'ok' : p.status === 'failed' ? 'err' : run ? 'warn' : 'neutral'
                     const open = expandedPipe === p.id
@@ -1323,17 +1421,30 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                 <SecHeader
                   icon="📦"
                   title={t('statDepsTitle')}
-                  badge={deployments.length}
+                  badge={shownDeps.length}
                   badgeTone={depFail > 0 ? 'err' : depProg > 0 ? 'warn' : 'ok'}
+                  right={refreshBtn}
                 />
                 {deployments.length > 0 && (
-                  <input
-                    className={cssUI.input}
-                    placeholder={t('searchDepsPh')}
-                    value={depSearch}
-                    onChange={(e) => setDepSearch(e.target.value)}
-                    style={{ marginBottom: 8 }}
-                  />
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginBottom: 8 }}>
+                    <FilterChips
+                      selected={depFilter}
+                      options={[
+                        { v: 'all', label: t('filterAll') },
+                        { v: 'ok', label: t('depHealthy') },
+                        { v: 'prog', label: t('depPartial') },
+                        { v: 'down', label: t('depDown') },
+                      ]}
+                      onPick={(v) => setDepFilter(v as typeof depFilter)}
+                    />
+                    <input
+                      className={cssUI.input}
+                      placeholder={t('searchDepsPh')}
+                      value={depSearch}
+                      onChange={(e) => setDepSearch(e.target.value)}
+                      style={{ flex: 1, minWidth: 140, marginBottom: 0 }}
+                    />
+                  </div>
                 )}
                 {deployments.length === 0 ? (
                   <EmptyHint>{t('noDeps')}</EmptyHint>
@@ -1411,6 +1522,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     </span>
                                   ) : null}
                                   <span style={{ flex: 1 }} />
+                                  {pod.startedAt ? (
+                                    <span title={formatDateTime(pod.startedAt)} style={{ color: 'var(--dsh-devops-fg-4)' }}>
+                                      {timeAgo(pod.startedAt, t)}
+                                    </span>
+                                  ) : null}
                                   {pod.restarts > 0 ? <Badge tone="warn">{`${pod.restarts}r`}</Badge> : null}
                                   <ChipBtn tone="ghost" onClick={() => void handleViewPodLogs(pod)}>
                                     {t('logs')}
@@ -1429,7 +1545,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
 
               {k8sSubTab === 'events' && (
               <div>
-                <SecHeader icon="📝" title={t('secEvents')} badge={events.length} />
+                <SecHeader icon="📝" title={t('secEvents')} badge={events.length} right={refreshBtn} />
                 {events.length === 0 ? (
                   <EmptyHint>{t('noEvents')}</EmptyHint>
                 ) : (

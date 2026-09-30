@@ -191,6 +191,19 @@ export const ZH = {
   tagTime: '提交时间',
   searchDepsPh: '搜索部署...',
   noMatchDeps: '无匹配的部署',
+  // 列表状态筛选
+  filterAll: '全部',
+  stateOpened: '开放',
+  stateMerged: '已合并',
+  stateClosed: '已关闭',
+  statusSuccess: '成功',
+  statusFailed: '失败',
+  statusRunning: '运行中',
+  statusCanceled: '已取消',
+  depHealthy: '正常',
+  depPartial: '部分就绪',
+  depDown: '未就绪',
+  noMatch: '无匹配项',
 } as const
 
 export type DevopsKey = keyof typeof ZH
@@ -381,6 +394,18 @@ export const EN: Record<DevopsKey, string> = {
   tagTime: 'Commit time',
   searchDepsPh: 'Search deployments...',
   noMatchDeps: 'No matching deployments',
+  filterAll: 'All',
+  stateOpened: 'Open',
+  stateMerged: 'Merged',
+  stateClosed: 'Closed',
+  statusSuccess: 'Success',
+  statusFailed: 'Failed',
+  statusRunning: 'Running',
+  statusCanceled: 'Canceled',
+  depHealthy: 'Healthy',
+  depPartial: 'Degraded',
+  depDown: 'Down',
+  noMatch: 'No matching items',
 }
 
 /** Interpolate `{name}` placeholders into a dictionary string. */

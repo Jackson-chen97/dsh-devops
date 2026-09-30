@@ -256,6 +256,16 @@
   min-width: 0;
 }
 
+.statCardClickable {
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms;
+}
+
+.statCardClickable:hover {
+  border-color: var(--dsh-devops-accent);
+  background: var(--dsh-devops-hover);
+}
+
 .statCardTitle {
   display: flex;
   align-items: center;

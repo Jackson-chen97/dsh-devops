@@ -397,6 +397,7 @@ export function StatCard({
   sub,
   tone = 'neutral',
   subTone,
+  onClick,
 }: {
   icon?: string
   title: string
@@ -404,6 +405,8 @@ export function StatCard({
   sub?: string
   tone?: string
   subTone?: string
+  /** 提供时卡片可点击（跳转对应 tab/子 tab） */
+  onClick?: () => void
 }) {
   const color =
     tone === 'ok'
@@ -414,7 +417,10 @@ export function StatCard({
           ? 'var(--dsh-devops-warn)'
           : 'var(--dsh-devops-fg)'
   return (
-    <div className={css.statCard}>
+    <div
+      className={css.statCard + (onClick ? ` ${css.statCardClickable}` : '')}
+      onClick={onClick}
+    >
       <div className={css.statCardTitle}>
         {icon ? <span>{icon}</span> : null}
         <span>{title}</span>

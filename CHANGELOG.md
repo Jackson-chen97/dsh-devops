@@ -1,5 +1,20 @@
 # 变更记录 / Changelog
 
+## v0.3.3 — 控制台增强：Pod 启动时间 / 子 tab 刷新 / 统计卡跳转 / 列表状态筛选
+
+### 新增
+- **Pod 启动时间**：K8s 部署展开区每个 Pod 行显示启动时间——相对时间（如「5 分钟前」），悬浮显示本地精确时间 `YYYY-MM-DD HH:mm:ss`；数据链 `PodInfo.startTime` → RPC `startedAt`（`endpoints-k8s.ts`）→ `DashboardPod.startedAt` 已存在，此前未渲染；未启动的 Pod 不显示
+- **五个子 tab 独立刷新**：GitLab（合并请求/标签/流水线）与 K8s（部署/事件）每个子 tab 的标题栏右侧新增刷新按钮，与 60s 自动轮询同一机制（重拉全部列表 + seq 防过期响应）；请求期间按钮禁用
+- **统计卡点击跳转**：开放 MR / 流水线 / 部署 / 异常 Pod 四张统计卡可点击，跳到对应 tab + 子 tab（部署与异常 Pod 均到 deployments——Pod 在 deployment 展开区内）
+- **列表状态筛选**：
+  - 合并请求：开放 / 已合并 / 已关闭 chip 组，server-side 筛选（`gitlab-mrs` 端点带 `state`，切换即重拉该状态列表）；「开放 MR」统计卡与动态流固定按 opened 计数、不受筛选影响；非开放状态下隐藏审批/关闭按钮（审批/关闭仅对开放 MR 有意义）
+  - 流水线：全部 / 成功 / 失败 / 运行中 / 已取消 chip 组，客户端过滤——GitLab `status` 查询无法表达「运行中」组（created / waiting_for_resource / preparing / pending / running / queued / scheduled 共 7 态）
+  - 部署：全部 / 正常 / 部分就绪 / 未就绪 chip 组，客户端过滤，与统计卡同口径（0/0 缩容视为正常）；与既有搜索框组合生效（先状态筛选、后搜索）
+  - 各子 tab 标题徽标改为显示筛选后行数；「列表为空」与「筛选无匹配」区分提示（新增 `noMatch` 文案，zh/en 同键）
+
+### 测试
+- client-smoke 新增 3 例：MR 状态筛选（含 `state=merged` 请求断言与非开放态按钮隐藏）、流水线状态筛选（含「运行中」组与无匹配态）、部署就绪度筛选；全量 122 例通过
+
 ## v0.3.2 — 控制台增强：标签提交信息 / 日志工具栏 / 部署搜索
 
 ### 新增

@@ -80,7 +80,7 @@ export class DevopsClient {
     )
   }
 
-  gitlabMRs(params: { baseUrl: string; token: string; projectPath: string }) {
+  gitlabMRs(params: { baseUrl: string; token: string; projectPath: string; state?: 'opened' | 'merged' | 'closed' }) {
     return this.read<{ ok: boolean; mergeRequests: DashboardMR[]; message?: string }>('gitlab-mrs', params)
   }
 
