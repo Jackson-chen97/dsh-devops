@@ -231,6 +231,7 @@ export interface DashboardJob {
   stage: string
   status: string
   duration: number | undefined
+  startedAt: string
   failureReason: string
   webUrl?: string
 }

@@ -1,5 +1,18 @@
 # 变更记录 / Changelog
 
+## v0.3.4 — 控制台增强：全 tab 绝对时间 / 流水线 job 启动时间 / Pod 启动时间可见
+
+### 新增
+- **全 tab 绝对时间显示**：合并请求、标签、部署、事件、动态流五个列表统一新增绝对时间列（`YYYY-MM-DD HH:mm:ss` 本地时间），与原有相对时间并列显示——绝对时间用 fg-3 色调，相对时间用 fg-4 色调（更暗），视觉主次分明。数据字段均已存在（`createdAt` / `updatedAt` / `updated` / `time` / `t`），无数据层改动
+- **流水线 job 启动时间**：每个 job 行显示 `started_at`（绝对时间 `YYYY-MM-DD HH:mm:ss`），与已有的耗时（duration）并列。GitLab job API 原生返回 `started_at`，此前在 `RawJob` 未声明、`mapJob` 未映射，现已补全
+- **Pod 启动时间从 tooltip 升为可见文本**：K8s 部署展开区每个 Pod 行的启动时间此前仅在 `title` 属性（悬浮）中，现改为直接显示绝对时间 + 相对时间双文本，与全 tab 风格统一
+
+### 数据链
+- `RawJob` 加 `started_at?: string` → `mapJob` 输出 `startedAt: string` → `listPipelineJobs` 返回类型补 `startedAt` → `DashboardJob` 补 `startedAt: string`
+
+### 测试
+- 全量 122 例通过（typecheck + build + vitest）
+
 ## v0.3.3 — 控制台增强：Pod 启动时间 / 子 tab 刷新 / 统计卡跳转 / 列表状态筛选
 
 ### 新增

@@ -1121,7 +1121,9 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                             )}
                           </div>
                           <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11, marginTop: 2 }}>
-                            {`${mr.sourceBranch} → ${mr.targetBranch} · ${mr.author} · ${timeAgo(mr.updatedAt, t)}`}
+                            {`${mr.sourceBranch} → ${mr.targetBranch} · ${mr.author}`}
+                            {formatDateTime(mr.createdAt) ? <span> · {formatDateTime(mr.createdAt)}</span> : null}
+                            <span style={{ color: 'var(--dsh-devops-fg-4)' }}> · {timeAgo(mr.updatedAt, t)}</span>
                           </div>
                         </div>
                         <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
@@ -1236,6 +1238,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                           ) : (
                             <span style={{ flex: 1 }} />
                           )}
+                          {formatDateTime(tg.createdAt) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{formatDateTime(tg.createdAt)}</span> : null}
                           <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{timeAgo(tg.createdAt, t)}</span>
                           {tg.webUrl ? (
                             <ChipBtn title={t('openInGl')} onClick={() => window.open(tg.webUrl, '_blank')}>
@@ -1322,6 +1325,8 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                           <span style={{ color: 'var(--dsh-devops-fg-2)' }}>{p.ref}</span>
                           {p.sha ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontFamily: 'monospace', fontSize: 11 }}>{p.sha}</span> : null}
                           <span style={{ flex: 1 }} />
+                          {p.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11, fontFamily: 'monospace' }}>{Math.round(p.duration)}s</span> : null}
+                          {formatDateTime(p.createdAt) ? <span title={t('triggerTime')} style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{formatDateTime(p.createdAt)}</span> : null}
                           <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{timeAgo(p.updatedAt || p.createdAt, t)}</span>
                           {run ? (
                             <ChipBtn tone="danger" disabled={busy} onClick={() => void handlePipelineAction(p, 'cancel')}>
@@ -1376,6 +1381,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     <span style={{ color: 'var(--dsh-devops-fg-3)' }}>{j.status}</span>
                                     {j.failureReason ? <span style={{ color: 'var(--dsh-devops-err)' }}>{j.failureReason}</span> : null}
                                     <span style={{ flex: 1 }} />
+                                    {j.startedAt ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 10 }}>{formatDateTime(j.startedAt)}</span> : null}
                                     {j.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10 }}>{`${Math.round(j.duration)}s`}</span> : null}
                                     <ChipBtn tone="ghost" onClick={() => openJobLog(j)}>
                                       {t('openJobLog')}
@@ -1470,7 +1476,9 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                               {d.name}
                             </div>
                             <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>
-                              {`${d.ready}/${d.replicas} ${t('ready')} · ${d.imageTag || '—'} · ${timeAgo(d.updated, t)}`}
+                              {`${d.ready}/${d.replicas} ${t('ready')} · ${d.imageTag || '—'}`}
+                              {formatDateTime(d.updated) ? <span style={{ color: 'var(--dsh-devops-fg-4)' }}> · {formatDateTime(d.updated)}</span> : null}
+                              <span style={{ color: 'var(--dsh-devops-fg-4)' }}> · {timeAgo(d.updated, t)}</span>
                             </div>
                           </div>
                           {st === 'ok' ? (
@@ -1523,9 +1531,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                   ) : null}
                                   <span style={{ flex: 1 }} />
                                   {pod.startedAt ? (
-                                    <span title={formatDateTime(pod.startedAt)} style={{ color: 'var(--dsh-devops-fg-4)' }}>
-                                      {timeAgo(pod.startedAt, t)}
-                                    </span>
+                                    <>
+                                      <span style={{ color: 'var(--dsh-devops-fg-3)' }}>{formatDateTime(pod.startedAt)}</span>
+                                      <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{timeAgo(pod.startedAt, t)}</span>
+                                    </>
                                   ) : null}
                                   {pod.restarts > 0 ? <Badge tone="warn">{`${pod.restarts}r`}</Badge> : null}
                                   <ChipBtn tone="ghost" onClick={() => void handleViewPodLogs(pod)}>
@@ -1557,6 +1566,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         </span>
                         <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{ev.reason}</span>
                         <span style={{ flex: 1 }} />
+                        {formatDateTime(ev.time) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 10 }}>{formatDateTime(ev.time)}</span> : null}
                         <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10 }}>{timeAgo(ev.time, t)}</span>
                       </div>
                       <div style={{ color: 'var(--dsh-devops-fg-2)', lineHeight: 1.4, wordBreak: 'break-word' }}>{ev.message}</div>
@@ -1588,6 +1598,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                     </div>
                     {it.who ? <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11, marginTop: 1 }}>{it.who}</div> : null}
                   </div>
+                  {formatDateTime(it.t) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 10, flexShrink: 0 }}>{formatDateTime(it.t)}</span> : null}
                   <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10, flexShrink: 0 }}>{timeAgo(it.t, t)}</span>
                 </div>
               ))}

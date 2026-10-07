@@ -204,6 +204,7 @@ export const ZH = {
   depPartial: '部分就绪',
   depDown: '未就绪',
   noMatch: '无匹配项',
+  triggerTime: '触发时间',
 } as const
 
 export type DevopsKey = keyof typeof ZH
@@ -406,6 +407,7 @@ export const EN: Record<DevopsKey, string> = {
   depPartial: 'Degraded',
   depDown: 'Down',
   noMatch: 'No matching items',
+  triggerTime: 'Triggered',
 }
 
 /** Interpolate `{name}` placeholders into a dictionary string. */

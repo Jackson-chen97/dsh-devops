@@ -64,6 +64,7 @@ interface RawJob {
   status: string
   stage: string
   duration?: number
+  started_at?: string
   failure_reason?: string
   [key: string]: unknown
 }
@@ -133,7 +134,7 @@ function mapPipeline(raw: RawPipeline): Pipeline & { updatedAt: string; duration
   }
 }
 
-function mapJob(raw: RawJob): PipelineJob & { failureReason: string } {
+function mapJob(raw: RawJob): PipelineJob & { failureReason: string; startedAt: string } {
   return {
     id: raw.id,
     name: raw.name,
@@ -141,6 +142,7 @@ function mapJob(raw: RawJob): PipelineJob & { failureReason: string } {
     stage: raw.stage,
     duration: raw.duration,
     failureReason: raw.failure_reason || '',
+    startedAt: raw.started_at ?? '',
   }
 }
 
@@ -471,7 +473,17 @@ export class GitLabClient {
       'GET',
       `/projects/${encodeURIComponent(projectPath)}/pipelines?per_page=${count}&order_by=id&sort=desc${refParam}`,
     )
-    return raw.map((p) => ({ ...mapPipeline(p), sha: p.sha?.slice(0, 8) ?? '' }))
+    // GitLab < 14 list endpoint omits created_at/duration/finished_at;
+    // fetch full details per pipeline (parallel, bounded by perPage ≤ 50) to backfill.
+    const details = await Promise.all(
+      raw.map((p) =>
+        this.request<RawPipeline>(
+          'GET',
+          `/projects/${encodeURIComponent(projectPath)}/pipelines/${p.id}`,
+        ).catch(() => p),
+      ),
+    )
+    return details.map((p) => ({ ...mapPipeline(p), sha: p.sha?.slice(0, 8) ?? '' }))
   }
 
   /** Cancel or retry a pipeline. */
@@ -480,7 +492,7 @@ export class GitLabClient {
   }
 
   /** List all jobs in a pipeline. */
-  async listPipelineJobs(projectPath: string, pipelineId: number, perPage = 50): Promise<(PipelineJob & { failureReason: string; webUrl: string })[]> {
+  async listPipelineJobs(projectPath: string, pipelineId: number, perPage = 50): Promise<(PipelineJob & { failureReason: string; webUrl: string; startedAt: string })[]> {
     const raw = await this.request<RawJob[]>(
       'GET',
       `/projects/${encodeURIComponent(projectPath)}/pipelines/${pipelineId}/jobs?per_page=${perPage}`,
