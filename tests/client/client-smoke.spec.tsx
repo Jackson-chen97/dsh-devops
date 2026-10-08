@@ -61,14 +61,42 @@ function makeCtx(rpcValue: unknown) {
 }
 
 describe('client entry', () => {
-  it('declares its injected services and registers both slots', () => {
+  it('declares its injected services and registers all slots', () => {
     expect(clientInject).toEqual(['slots', 'locale', 'connection'])
     const { ctx, registered, injected } = makeCtx({ ok: true, config: null })
     clientApply(ctx)
-    expect(injected).toEqual(['settings.section', 'conversation.view'])
-    const ids = registered.map((r) => (r.options as { id: string }).id)
+    expect(injected).toEqual(['settings.section', 'conversation.view', 'main', 'sidebar.panellist'])
+    const ids = registered.map((r) => (r.options as { id?: string }).id)
     expect(ids).toContain('dsh-devops')
     expect(ids).toContain('devops')
+  })
+
+  it('pairs the main seat with the sidebar row via the shared panel id', () => {
+    const { ctx } = makeCtx({ ok: true, config: null })
+    // 捕获注册项，验证 main / sidebar.panellist 配对
+    const seen: { options: Record<string, unknown>; component: unknown; injectProps: unknown }[] = []
+    const originalRegister = ctx.slots.register
+    ctx.slots.register = ((options: Record<string, unknown>, component: unknown) => {
+      seen.push({ options, component, injectProps: (options.inject as (() => unknown) | undefined)?.() })
+      return originalRegister(options as never, component)
+    }) as never
+    clientApply(ctx)
+    const main = seen.find((s) => s.options.name === 'main')
+    const row = seen.find((s) => s.options.name === 'sidebar.panellist')
+    expect(main).toBeTruthy()
+    expect(row).toBeTruthy()
+    // 同一面板 id 配对：main 用 key，panellist 用 id
+    expect(main!.options.key).toBe('devops')
+    expect(row!.options.id).toBe('devops')
+    expect(row!.options.order).toBe(30)
+    // 面板页收到与 conversation tab 相同的一组 props
+    expect(main!.injectProps).toEqual({ connection: ctx.connection, locale: ctx.locale, t: expect.any(Function) })
+    // 行标签走 i18n（zh 字典）
+    const label = row!.options.label as () => string
+    expect(label()).toBe(ZH.panelLabel)
+    // 图标组件接受宿主注入的 { size, active }
+    const Icon = row!.component as (props: { size: number; active: boolean }) => unknown
+    expect(Icon({ size: 16, active: false })).toBeTruthy()
   })
 
   it('registers the locale dictionaries', () => {

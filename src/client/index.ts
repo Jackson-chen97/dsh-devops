@@ -13,8 +13,15 @@
 import { ZH, EN } from './locales.ts'
 import { DevopsSettings } from './DevopsSettings.tsx'
 import { DevopsDashboard } from './DevopsDashboard.tsx'
+import { DevopsPanelIcon } from './DevopsPanelIcon.tsx'
 import { initDevopsTheme } from './theme.ts'
 import type { DevopsClientContext } from './dsh-context.ts'
+
+/** Native sidebar panel id: the `main` keyed seat and the `sidebar.panellist` row share it. */
+const DEVOPS_PANEL_ID = 'devops'
+
+/** Sidebar row position (rows sort by order among contributed panels). */
+const DEVOPS_PANEL_ORDER = 30
 
 export const inject = ['slots', 'locale', 'connection']
 
@@ -54,5 +61,38 @@ export function apply(ctx: DevopsClientContext): void {
       },
       DevopsDashboard,
     ),
+  )
+
+  // 4. Native sidebar panel (row below New Session): a `sidebar.panellist`
+  //    entry paired with the matching `main` seat. DSH owns the button,
+  //    typography, tooltip, selection and collapsed layout; we contribute
+  //    the icon, the label and the page itself. The nested inject is the
+  //    declaration guard: setup runs only once both slots exist (the layout
+  //    AppFrame and the sidebar), which replacement shells may not declare.
+  ctx.slots.inject('main', () =>
+    ctx.slots.inject('sidebar.panellist', () => {
+      const stopMain = ctx.slots.register(
+        {
+          name: 'main',
+          key: DEVOPS_PANEL_ID,
+          inject: () => ({ connection: ctx.connection, locale: ctx.locale, t: translate }),
+        },
+        DevopsDashboard,
+      )
+      const stopIcon = ctx.slots.register(
+        {
+          name: 'sidebar.panellist',
+          id: DEVOPS_PANEL_ID,
+          order: DEVOPS_PANEL_ORDER,
+          label: () => translate('panelLabel'),
+          locale: 'dsh-devops',
+        },
+        DevopsPanelIcon,
+      )
+      return () => {
+        stopIcon()
+        stopMain()
+      }
+    }),
   )
 }

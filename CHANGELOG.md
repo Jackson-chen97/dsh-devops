@@ -1,5 +1,23 @@
 # 变更记录 / Changelog
 
+## v0.3.5 — 原生侧边栏面板入口（新会话下方）
+
+### 新增
+- **DSH 原生侧边栏入口**：监控台现为侧边栏一级面板——「新会话」按钮下方新增 DevOps 行（git 分支图标 + 本地化标签），点击即在主区域打开监控台，再点「新会话」返回对话。按钮、排版、tooltip、选中态与折叠布局全部由 DSH 原生 Sidebar 承载，与内置 Plugins 等面板完全同构（对齐 dsh-mnemon 的 `sidebar.panellist` + `main` 席位模式）
+- **主区域面板席位**：`main` 槽 keyed 注册（key `devops`），DSH 选中时渲染 `DevopsDashboard` 组件，注入 props（`connection` / `locale` / `t`）与会话 DevOps tab 完全一致；无会话依赖，可在任意会话下打开
+- **声明式嵌套注册**：`ctx.slots.inject('main', () => ctx.slots.inject('sidebar.panellist', …))`——两个槽位由宿主声明后才注册，替换型 shell（未声明原生面板槽）下自动跳过、不报错，既有会话 tab / 设置页入口不受影响
+
+### 实现
+- `src/client/index.ts`：新增 `main`（keyed，`key: 'devops'`）与 `sidebar.panellist`（list，`id: 'devops'`、`order: 30`）成对注册，面板 id 同一常量；注册选项补 `locale: 'dsh-devops'` 使标签随语言切换重解析
+- `src/client/DevopsPanelIcon.tsx`：新增侧边栏图标组件（git 分支字形，`{ size, active }` props，`currentColor` 描边随主题深浅色自适应，选中行加粗 + 实心标记）
+- `src/client/dsh-context.ts`：`ClientSlots.register` 选项补 `key?: string`（keyed 槽）与 `locale?: string`
+- `src/client/locales.ts`：新增 `panelLabel` 键（zh/en 同键：'DevOps'）
+- `package.json`：`dsh.client.inject` 由服务名改为**包名**形式（DSH 0.2.0 模块图按包名解析依赖，旧的服务名写法不匹配图节点、实际为空操作）：`@deepseek-ai/dsh-client-connection` / `-locale` / `-ui-conversation` / `-ui-layout` / `-ui-settings` / `-ui-sidebar` / `-ui-slots`
+
+### 测试
+- client-smoke 新增 1 例：main / sidebar.panellist 以同一面板 id 配对（key/id）、order=30、面板注入 props 与行标签 i18n、图标组件接受 `{ size, active }`；入口用例断言更新为四个槽位（settings.section / conversation.view / main / sidebar.panellist）
+- 全量测试通过（typecheck + build + vitest）
+
 ## v0.3.4 — 控制台增强：全 tab 绝对时间 / 流水线 job 启动时间 / Pod 启动时间可见
 
 ### 新增

@@ -29,9 +29,14 @@ export interface ClientSlots {
   register(
     options: {
       name: string
-      id: string
+      /** list / single slots address the entry by id */
+      id?: string
+      /** keyed slots (e.g. `main`) address the entry by key */
+      key?: string
       order?: number
       label?: string | (() => string)
+      /** locale namespace the label lives in; host re-resolves on language switch */
+      locale?: string
       inject?: (...args: unknown[]) => Record<string, unknown>
     },
     component: unknown,

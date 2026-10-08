@@ -18,7 +18,7 @@
 
 - **GitLab API**：创建/评审/关闭 MR、管理 Tag、监控 CI/CD Pipeline（可展开查看每个 Job 详情与构建日志）
 - **Kubernetes API**：Deployment 状态、Pod 列表、事件、日志，支持更换镜像与滚动重启
-- **监控台 UI**：双卡片切换器（GitLab 服务器/项目、kubeconfig/Context/Namespace）+ 二级 tab（合并请求/标签/流水线/部署/事件），全部下拉框可搜索，操作均以弹窗呈现
+- **监控台 UI**：双卡片切换器（GitLab 服务器/项目、kubeconfig/Context/Namespace）+ 二级 tab（合并请求/标签/流水线/部署/事件），全部下拉框可搜索，操作均以弹窗呈现——可从原生侧边栏（新会话下方的面板行）、会话 DevOps tab 与设置页进入
 - **多配置管理**：支持多个 GitLab 服务器与多个 kubeconfig，可在监控台和设置页随时切换，选择自动保存
 - **Webhook + 告警引擎**：GitLab Webhook → `followup()` 通知；后台轮询自动发送 Pipeline 失败/Pod 异常告警
 - **国际化**：中文/英文字典注册到 DSH LocaleRuntime，跟随应用语言设置
