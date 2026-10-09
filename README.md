@@ -18,7 +18,8 @@ GitLab + Kubernetes DevOps control plane for DeepSeek Harness (DSH): AI tools, w
 
 - **GitLab API**: Create/review/close merge requests, manage tags, monitor CI/CD pipelines with per-job detail and build logs
 - **Kubernetes API**: Deployment status, pod lists, events, logs, image change and rollout restart
-- **Dashboard UI**: Dual-card switcher (GitLab server / project, kubeconfig / context / namespace) + second-level tabs (MRs / Tags / Pipelines / Deployments / Events), searchable dropdowns everywhere, modal-driven operations — reachable from the native sidebar (a panel row below New Session), the session DevOps tab, and Settings
+- **Dashboard UI**: Four stat cards at the top (open MRs / pipelines / deployments / unhealthy pods) + second-level tabs (MRs / Tags / Pipelines / Deployments / Events), each config card placed under its own tab (GitLab server / project, kubeconfig / context / namespace), searchable dropdowns everywhere, modal-driven operations — reachable from the native sidebar (a panel row below New Session), the session DevOps tab, and Settings
+- **Native-style alignment**: the console styling is fully aligned with the DSH host native design — the palette bridges the host's semantic tokens (light/dark follows instantly, no detection logic), 0.5px hairline strokes, inverted pill primary buttons, underline-style tabs; state-color tints and font sizes follow the host theme and font-size adjustment
 - **Multi-config**: Multiple GitLab servers and multiple kubeconfigs, switchable from both the dashboard and settings
 - **Webhook + Alert engine**: GitLab webhook → `followup()` notification; background polling detects pipeline failures and pod issues
 - **i18n**: Chinese / English dictionaries registered into the DSH LocaleRuntime — the console follows the app's language setting

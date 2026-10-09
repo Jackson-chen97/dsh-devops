@@ -685,7 +685,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
   // ─── Not configured state ────────────────────────────────────────────────────
 
   if (loading) {
-    return <div style={{ padding: 24, textAlign: 'center', color: 'var(--dsh-devops-fg-3)', fontSize: 13 }}>{t('loading')}</div>
+    return <div style={{ padding: 24, textAlign: 'center', color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-2)' }}>{t('loading')}</div>
   }
 
   if (!config || (!config.gitlab && !config.k8s)) {
@@ -795,96 +795,93 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       {t('refresh')}
     </Btn>
   )
+  // 各 tab 顶部配置卡（切换即保存刷新）：GitLab tab 显示 GitLab 配置，K8s tab 显示 K8s 配置
+  const gitlabSwitchCard = (
+    <SwitchCard icon="📦" title="GitLab" status={glServers.length === 0 ? 'none' : connStatus.gl} t={t}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 160px) 1fr', gap: 8 }}>
+        <div>
+          <div className={cssUI.fieldLabel}>{t('server')}</div>
+          <Select
+            t={t}
+            value={config.gitlab?.activeServerId ?? ''}
+            onChange={switchServer}
+            disabled={glServers.length <= 1}
+            placeholder={glServers.length ? t('server') : t('notConfigured')}
+            options={glServers.map((s) => ({ value: s.id, label: s.label || s.baseUrl }))}
+          />
+        </div>
+        <div>
+          <div className={cssUI.fieldLabel}>{t('project')}</div>
+          <Select
+            t={t}
+            value={glServer?.projectPath ?? ''}
+            onChange={switchProject}
+            disabled={!glServer?.baseUrl || !glServer?.token}
+            placeholder={!glServer?.baseUrl ? t('glNotCfg') : barOpts.projects.length ? t('selProject') : t('loadingProjects')}
+            options={(() => {
+              const opts = barOpts.projects.map((p) => ({ value: p.path, label: p.path }))
+              const cur = glServer?.projectPath
+              if (cur && !barOpts.projects.some((p) => p.path === cur)) opts.unshift({ value: cur, label: cur })
+              return opts
+            })()}
+          />
+        </div>
+      </div>
+    </SwitchCard>
+  )
+  const k8sSwitchCard = (
+    <SwitchCard icon="☸️" title="Kubernetes" status={kcList.length === 0 ? 'none' : connStatus.k8s} t={t}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 160px) 1fr 1fr', gap: 8 }}>
+        <div>
+          <div className={cssUI.fieldLabel}>{t('configFile')}</div>
+          <Select
+            t={t}
+            value={config.k8s?.activeKubeconfigId ?? ''}
+            onChange={switchKubeconfig}
+            disabled={kcList.length <= 1}
+            placeholder={kcList.length ? t('configFile') : t('notConfigured')}
+            options={kcList.map((k) => ({ value: k.id, label: k.label || k.path }))}
+          />
+        </div>
+        <div>
+          <div className={cssUI.fieldLabel}>Context</div>
+          <Select
+            t={t}
+            value={k8sKc?.context ?? ''}
+            onChange={switchContext}
+            disabled={!k8sKc?.path}
+            placeholder={k8sKc?.path ? t('ctxPh') : t('notConfigured')}
+            options={
+              barOpts.contexts.length > 0
+                ? barOpts.contexts.map((c) => ({ value: c.name, label: c.name }))
+                : k8sKc?.context
+                  ? [{ value: k8sKc.context, label: k8sKc.context }]
+                  : []
+            }
+          />
+        </div>
+        <div>
+          <div className={cssUI.fieldLabel}>Namespace</div>
+          <Select
+            t={t}
+            value={k8sKc?.namespace ?? ''}
+            onChange={switchNamespace}
+            disabled={!k8sKc?.path}
+            placeholder={k8sKc?.path ? t('nsPh') : t('notConfigured')}
+            options={(() => {
+              const nsList = barOpts.namespaces.map((n) => ({ value: n, label: n }))
+              const cur = k8sKc?.namespace
+              if (cur && !barOpts.namespaces.includes(cur)) nsList.unshift({ value: cur, label: cur })
+              return nsList
+            })()}
+          />
+        </div>
+      </div>
+    </SwitchCard>
+  )
 
   return (
     <div style={{ padding: '12px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {/* ─── 双卡片切换区（切换即保存刷新）─── */}
-      <SwitchCard icon="📦" title="GitLab" status={glServers.length === 0 ? 'none' : connStatus.gl} t={t}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 160px) 1fr', gap: 8 }}>
-          <div>
-            <div className={cssUI.fieldLabel}>{t('server')}</div>
-            <Select
-              t={t}
-              value={config.gitlab?.activeServerId ?? ''}
-              onChange={switchServer}
-              disabled={glServers.length <= 1}
-              compact
-              placeholder={glServers.length ? t('server') : t('notConfigured')}
-              options={glServers.map((s) => ({ value: s.id, label: s.label || s.baseUrl }))}
-            />
-          </div>
-          <div>
-            <div className={cssUI.fieldLabel}>{t('project')}</div>
-            <Select
-              t={t}
-              value={glServer?.projectPath ?? ''}
-              onChange={switchProject}
-              disabled={!glServer?.baseUrl || !glServer?.token}
-              compact
-              placeholder={!glServer?.baseUrl ? t('glNotCfg') : barOpts.projects.length ? t('selProject') : t('loadingProjects')}
-              options={(() => {
-                const opts = barOpts.projects.map((p) => ({ value: p.path, label: p.path }))
-                const cur = glServer?.projectPath
-                if (cur && !barOpts.projects.some((p) => p.path === cur)) opts.unshift({ value: cur, label: cur })
-                return opts
-              })()}
-            />
-          </div>
-        </div>
-      </SwitchCard>
-
-      <SwitchCard icon="☸️" title="Kubernetes" status={kcList.length === 0 ? 'none' : connStatus.k8s} t={t}>
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(120px, 160px) 1fr 1fr', gap: 8 }}>
-          <div>
-            <div className={cssUI.fieldLabel}>{t('configFile')}</div>
-            <Select
-              t={t}
-              value={config.k8s?.activeKubeconfigId ?? ''}
-              onChange={switchKubeconfig}
-              disabled={kcList.length <= 1}
-              compact
-              placeholder={kcList.length ? t('configFile') : t('notConfigured')}
-              options={kcList.map((k) => ({ value: k.id, label: k.label || k.path }))}
-            />
-          </div>
-          <div>
-            <div className={cssUI.fieldLabel}>Context</div>
-            <Select
-              t={t}
-              value={k8sKc?.context ?? ''}
-              onChange={switchContext}
-              disabled={!k8sKc?.path}
-              compact
-              placeholder={k8sKc?.path ? t('ctxPh') : t('notConfigured')}
-              options={
-                barOpts.contexts.length > 0
-                  ? barOpts.contexts.map((c) => ({ value: c.name, label: c.name }))
-                  : k8sKc?.context
-                    ? [{ value: k8sKc.context, label: k8sKc.context }]
-                    : []
-              }
-            />
-          </div>
-          <div>
-            <div className={cssUI.fieldLabel}>Namespace</div>
-            <Select
-              t={t}
-              value={k8sKc?.namespace ?? ''}
-              onChange={switchNamespace}
-              disabled={!k8sKc?.path}
-              compact
-              placeholder={k8sKc?.path ? t('nsPh') : t('notConfigured')}
-              options={(() => {
-                const nsList = barOpts.namespaces.map((n) => ({ value: n, label: n }))
-                const cur = k8sKc?.namespace
-                if (cur && !barOpts.namespaces.includes(cur)) nsList.unshift({ value: cur, label: cur })
-                return nsList
-              })()}
-            />
-          </div>
-        </div>
-      </SwitchCard>
-
       {/* Toast */}
       <Toast toast={toast} />
 
@@ -958,6 +955,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
         {activeTab === 'gitlab' && (
           glServer ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {gitlabSwitchCard}
               <TabBar
                 small
                 tabs={[
@@ -1065,7 +1063,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                           .map((m) => ({ value: m.username, label: `${m.username}（${m.name || m.username}）` }))}
                       />
                     ) : (
-                      <div style={{ fontSize: 11, color: 'var(--dsh-devops-fg-4)' }}>{formOpts.loading ? t('loadingMem') : t('noMem')}</div>
+                      <div style={{ fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-4)' }}>{formOpts.loading ? t('loadingMem') : t('noMem')}</div>
                     )}
                     {(mrReviewers || '').trim() && (
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
@@ -1120,7 +1118,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                               <Badge tone="ok">{t('mergeable')}</Badge>
                             )}
                           </div>
-                          <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11, marginTop: 2 }}>
+                          <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)', marginTop: 2 }}>
                             {`${mr.sourceBranch} → ${mr.targetBranch} · ${mr.author}`}
                             {formatDateTime(mr.createdAt) ? <span> · {formatDateTime(mr.createdAt)}</span> : null}
                             <span style={{ color: 'var(--dsh-devops-fg-4)' }}> · {timeAgo(mr.updatedAt, t)}</span>
@@ -1227,19 +1225,19 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         <div className={cssUI.insetRow}>
                           <span
                             onClick={() => setExpandedTag((v) => (v === tg.name ? null : tg.name))}
-                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
+                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)', width: 14, textAlign: 'center', flexShrink: 0 }}
                           >
                             {open ? '▾' : '▸'}
                           </span>
                           <span>🏷️</span>
-                          <span style={{ fontWeight: 600, fontFamily: 'monospace' }}>{tg.name}</span>
+                          <span style={{ fontWeight: 600, fontFamily: 'var(--ds-font-family-code, monospace)' }}>{tg.name}</span>
                           {tg.message ? (
                             <span style={{ color: 'var(--dsh-devops-fg-3)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{tg.message}</span>
                           ) : (
                             <span style={{ flex: 1 }} />
                           )}
-                          {formatDateTime(tg.createdAt) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{formatDateTime(tg.createdAt)}</span> : null}
-                          <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{timeAgo(tg.createdAt, t)}</span>
+                          {formatDateTime(tg.createdAt) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>{formatDateTime(tg.createdAt)}</span> : null}
+                          <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)' }}>{timeAgo(tg.createdAt, t)}</span>
                           {tg.webUrl ? (
                             <ChipBtn title={t('openInGl')} onClick={() => window.open(tg.webUrl, '_blank')}>
                               ↗
@@ -1249,25 +1247,25 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         {/* 展开区：该 tag 指向的最新提交 */}
                         {open && (
                           <div style={{ padding: '2px 10px 6px 28px', display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 6, background: 'var(--dsh-devops-hover)' }}>
                               <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('tagCommit')}</span>
-                              <span style={{ fontFamily: 'monospace' }} title={tg.commitId || undefined}>
+                              <span style={{ fontFamily: 'var(--ds-font-family-code, monospace)' }} title={tg.commitId || undefined}>
                                 {tg.commitId ? tg.commitId.slice(0, 8) : '—'}
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 6, background: 'var(--dsh-devops-hover)' }}>
                               <span style={{ color: 'var(--dsh-devops-fg-4)', flexShrink: 0 }}>{t('tagMsg')}</span>
                               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={tg.commitTitle || undefined}>
                                 {tg.commitTitle || '—'}
                               </span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 6, background: 'var(--dsh-devops-hover)' }}>
                               <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('tagAuthor')}</span>
                               <span>{tg.commitAuthor || '—'}</span>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 4, background: 'var(--dsh-devops-hover)' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-2)', padding: '3px 8px', borderRadius: 6, background: 'var(--dsh-devops-hover)' }}>
                               <span style={{ color: 'var(--dsh-devops-fg-4)' }}>{t('tagTime')}</span>
-                              <span style={{ fontFamily: 'monospace' }}>{formatDateTime(tg.commitDate || tg.createdAt) || '—'}</span>
+                              <span style={{ fontFamily: 'var(--ds-font-family-code, monospace)' }}>{formatDateTime(tg.commitDate || tg.createdAt) || '—'}</span>
                             </div>
                           </div>
                         )}
@@ -1314,7 +1312,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         <div className={cssUI.insetRow}>
                           <span
                             onClick={() => togglePipeDetail(p)}
-                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
+                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)', width: 14, textAlign: 'center', flexShrink: 0 }}
                           >
                             {open ? '▾' : '▸'}
                           </span>
@@ -1323,11 +1321,11 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                             #{p.id}
                           </span>
                           <span style={{ color: 'var(--dsh-devops-fg-2)' }}>{p.ref}</span>
-                          {p.sha ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontFamily: 'monospace', fontSize: 11 }}>{p.sha}</span> : null}
+                          {p.sha ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontFamily: 'var(--ds-font-family-code, monospace)', fontSize: 'var(--dsh-devops-font-3)' }}>{p.sha}</span> : null}
                           <span style={{ flex: 1 }} />
-                          {p.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11, fontFamily: 'monospace' }}>{Math.round(p.duration)}s</span> : null}
-                          {formatDateTime(p.createdAt) ? <span title={t('triggerTime')} style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{formatDateTime(p.createdAt)}</span> : null}
-                          <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{timeAgo(p.updatedAt || p.createdAt, t)}</span>
+                          {p.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)', fontFamily: 'var(--ds-font-family-code, monospace)' }}>{Math.round(p.duration)}s</span> : null}
+                          {formatDateTime(p.createdAt) ? <span title={t('triggerTime')} style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>{formatDateTime(p.createdAt)}</span> : null}
+                          <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>{timeAgo(p.updatedAt || p.createdAt, t)}</span>
                           {run ? (
                             <ChipBtn tone="danger" disabled={busy} onClick={() => void handlePipelineAction(p, 'cancel')}>
                               {t('cancel')}
@@ -1348,9 +1346,9 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         {open && (
                           <div style={{ padding: '4px 10px 6px 28px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                             {pipeJobs.id === p.id && pipeJobs.loading ? (
-                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{t('loadingJobs')}</div>
+                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)' }}>{t('loadingJobs')}</div>
                             ) : (pipeJobs.id === p.id ? pipeJobs.jobs : []).length === 0 ? (
-                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{t('noJobs')}</div>
+                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)' }}>{t('noJobs')}</div>
                             ) : (
                               (pipeJobs.id === p.id ? pipeJobs.jobs : []).map((j) => {
                                 const jdot =
@@ -1368,10 +1366,10 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                       display: 'flex',
                                       alignItems: 'center',
                                       gap: 8,
-                                      fontSize: 11,
+                                      fontSize: 'var(--dsh-devops-font-3)',
                                       color: 'var(--dsh-devops-fg-2)',
                                       padding: '3px 8px',
-                                      borderRadius: 4,
+                                      borderRadius: 6,
                                       background: 'var(--dsh-devops-hover)',
                                     }}
                                   >
@@ -1381,8 +1379,8 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     <span style={{ color: 'var(--dsh-devops-fg-3)' }}>{j.status}</span>
                                     {j.failureReason ? <span style={{ color: 'var(--dsh-devops-err)' }}>{j.failureReason}</span> : null}
                                     <span style={{ flex: 1 }} />
-                                    {j.startedAt ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 10 }}>{formatDateTime(j.startedAt)}</span> : null}
-                                    {j.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10 }}>{`${Math.round(j.duration)}s`}</span> : null}
+                                    {j.startedAt ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>{formatDateTime(j.startedAt)}</span> : null}
+                                    {j.duration != null ? <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)' }}>{`${Math.round(j.duration)}s`}</span> : null}
                                     <ChipBtn tone="ghost" onClick={() => openJobLog(j)}>
                                       {t('openJobLog')}
                                     </ChipBtn>
@@ -1413,6 +1411,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
         {activeTab === 'k8s' && (
           k8sKc ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {k8sSwitchCard}
               <TabBar
                 small
                 tabs={[
@@ -1466,16 +1465,16 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         <div className={cssUI.insetRow}>
                           <span
                             onClick={() => toggleDepDetail(d)}
-                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 10, width: 14, textAlign: 'center', flexShrink: 0 }}
+                            style={{ cursor: 'pointer', color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)', width: 14, textAlign: 'center', flexShrink: 0 }}
                           >
                             {open ? '▾' : '▸'}
                           </span>
                           <Dot tone={st} />
                           <div style={{ flex: 1, minWidth: 0, cursor: 'pointer' }} onClick={() => toggleDepDetail(d)}>
-                            <div style={{ fontFamily: 'monospace', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            <div style={{ fontFamily: 'var(--ds-font-family-code, monospace)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                               {d.name}
                             </div>
-                            <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>
+                            <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>
                               {`${d.ready}/${d.replicas} ${t('ready')} · ${d.imageTag || '—'}`}
                               {formatDateTime(d.updated) ? <span style={{ color: 'var(--dsh-devops-fg-4)' }}> · {formatDateTime(d.updated)}</span> : null}
                               <span style={{ color: 'var(--dsh-devops-fg-4)' }}> · {timeAgo(d.updated, t)}</span>
@@ -1504,7 +1503,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                         {open && (
                           <div style={{ padding: '2px 10px 6px 28px', display: 'flex', flexDirection: 'column', gap: 3 }}>
                             {depPodList.length === 0 ? (
-                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 11 }}>{t('noPods')}</div>
+                              <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)' }}>{t('noPods')}</div>
                             ) : (
                               depPodList.map((pod) => (
                                 <div
@@ -1513,15 +1512,15 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: 8,
-                                    fontSize: 11,
+                                    fontSize: 'var(--dsh-devops-font-3)',
                                     color: 'var(--dsh-devops-fg-2)',
                                     padding: '3px 8px',
-                                    borderRadius: 4,
+                                    borderRadius: 6,
                                     background: 'var(--dsh-devops-hover)',
                                   }}
                                 >
                                   <Dot tone={pod.phase === 'Running' ? 'ok' : pod.phase === 'Pending' ? 'warn' : 'err'} />
-                                  <span style={{ fontFamily: 'monospace', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                  <span style={{ fontFamily: 'var(--ds-font-family-code, monospace)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                     {pod.name}
                                   </span>
                                   {pod.reason || pod.restarts > 0 ? (
@@ -1559,18 +1558,18 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
                   <EmptyHint>{t('noEvents')}</EmptyHint>
                 ) : (
                   events.slice(0, 12).map((ev, i) => (
-                    <div key={i} style={{ padding: '6px 10px', borderRadius: 6, background: 'var(--dsh-devops-surface-inset)', fontSize: 12 }}>
+                    <div key={i} style={{ padding: '6px 10px', borderRadius: 8, background: 'var(--dsh-devops-surface-inset)', fontSize: 'var(--dsh-devops-font-2)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-                        <span style={{ color: ev.type === 'Warning' ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-ok)', fontSize: 11, fontWeight: 600 }}>
+                        <span style={{ color: ev.type === 'Warning' ? 'var(--dsh-devops-err)' : 'var(--dsh-devops-ok)', fontSize: 'var(--dsh-devops-font-3)', fontWeight: 600 }}>
                           {ev.type === 'Warning' ? '⚠' : '•'}
                         </span>
-                        <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11 }}>{ev.reason}</span>
+                        <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>{ev.reason}</span>
                         <span style={{ flex: 1 }} />
-                        {formatDateTime(ev.time) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 10 }}>{formatDateTime(ev.time)}</span> : null}
-                        <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10 }}>{timeAgo(ev.time, t)}</span>
+                        {formatDateTime(ev.time) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)' }}>{formatDateTime(ev.time)}</span> : null}
+                        <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)' }}>{timeAgo(ev.time, t)}</span>
                       </div>
                       <div style={{ color: 'var(--dsh-devops-fg-2)', lineHeight: 1.4, wordBreak: 'break-word' }}>{ev.message}</div>
-                      <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10, marginTop: 2 }}>{`${ev.kind} / ${ev.object}`}</div>
+                      <div style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)', marginTop: 2 }}>{`${ev.kind} / ${ev.object}`}</div>
                     </div>
                   ))
                 )}
@@ -1590,16 +1589,16 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {activityItems.map((it, i) => (
                 <div key={i} className={cssUI.rowItem}>
-                  <span style={{ fontSize: 12, flexShrink: 0 }}>{it.icon}</span>
+                  <span style={{ fontSize: 'var(--dsh-devops-font-2)', flexShrink: 0 }}>{it.icon}</span>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <span style={{ color: 'var(--dsh-devops-fg-2)', fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.text}</span>
+                      <span style={{ color: 'var(--dsh-devops-fg-2)', fontSize: 'var(--dsh-devops-font-2)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{it.text}</span>
                       {it.extra ? <Badge tone={it.tone}>{it.extra}</Badge> : null}
                     </div>
-                    {it.who ? <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 11, marginTop: 1 }}>{it.who}</div> : null}
+                    {it.who ? <div style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)', marginTop: 1 }}>{it.who}</div> : null}
                   </div>
-                  {formatDateTime(it.t) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 10, flexShrink: 0 }}>{formatDateTime(it.t)}</span> : null}
-                  <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 10, flexShrink: 0 }}>{timeAgo(it.t, t)}</span>
+                  {formatDateTime(it.t) ? <span style={{ color: 'var(--dsh-devops-fg-3)', fontSize: 'var(--dsh-devops-font-3)', flexShrink: 0 }}>{formatDateTime(it.t)}</span> : null}
+                  <span style={{ color: 'var(--dsh-devops-fg-4)', fontSize: 'var(--dsh-devops-font-3)', flexShrink: 0 }}>{timeAgo(it.t, t)}</span>
                 </div>
               ))}
             </div>
@@ -1613,7 +1612,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
             classify={(line) => (line.includes('[ERROR]') ? cssUI.logLineError : line.includes('[WARN]') ? cssUI.logLineWarn : cssUI.logLineInfo)}
             emptyText={t('noLogsText')}
             toolbarExtra={
-              <span style={{ fontSize: 11, color: 'var(--dsh-devops-fg-3)', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-3)', whiteSpace: 'nowrap' }}>
                 {t('logsLast', { n: (logsData ?? []).length })}
               </span>
             }
@@ -1650,7 +1649,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
       >
         <div>
           <div className={cssUI.fieldLabel}>{t('currentImage')}</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 12, color: 'var(--dsh-devops-fg-2)', padding: '6px 8px', borderRadius: 6, background: 'var(--dsh-devops-surface-inset)' }}>
+          <div style={{ fontFamily: 'var(--ds-font-family-code, monospace)', fontSize: 'var(--dsh-devops-font-2)', color: 'var(--dsh-devops-fg-2)', padding: '6px 8px', borderRadius: 8, background: 'var(--dsh-devops-surface-inset)' }}>
             {depImgEdit?.image || '—'}
           </div>
         </div>
@@ -1658,7 +1657,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           <div className={cssUI.fieldLabel}>{t('newImage')}</div>
           <input
             className={cssUI.input}
-            style={{ fontFamily: 'monospace', fontSize: 12 }}
+            style={{ fontFamily: 'var(--ds-font-family-code, monospace)', fontSize: 'var(--dsh-devops-font-2)' }}
             placeholder="nginx:1.27"
             value={depImgValue}
             onChange={(e) => setDepImgValue(e.target.value)}
@@ -1685,7 +1684,7 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
           </>
         }
       >
-        <div style={{ fontSize: 13, color: 'var(--dsh-devops-fg-2)', lineHeight: 1.6 }}>{t('restartBody', { name: depRestart ?? '' })}</div>
+        <div style={{ fontSize: 'var(--dsh-devops-font-2)', color: 'var(--dsh-devops-fg-2)', lineHeight: 1.6 }}>{t('restartBody', { name: depRestart ?? '' })}</div>
       </Modal>
 
       {/* ═══ Pipeline job 日志弹窗 ═══ */}

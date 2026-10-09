@@ -1,5 +1,30 @@
 # 变更记录 / Changelog
 
+## v0.3.6 — 控制台样式对齐 DSH 宿主原生设计
+
+### 变更
+- **宿主 token 桥接层**：`theme.ts` 从「自研色板 + JS 主题检测」重写为纯 CSS 宿主 token 桥接——`--dsh-devops-*` 变量在 `body` / `body[data-ds-dark-theme]` 两段声明为 `var(--dsw-alias-*, <每主题 fallback>)`，亮/暗即时跟随宿主原生明暗属性切换（零检测逻辑、零重渲染）；无宿主 token 的环境（jsdom 测试 / 旧宿主）按同一宿主属性取对应 fallback
+- **发丝描边与圆角节奏**：全部 1px 描边 → 0.5px，卡片/输入/分隔按宿主层级取 l3/l4/l2/l1；卡片 r16 / 小卡 r12 / 行与输入 r8；按钮、badge、chip 统一 999px 胶囊 + `corner-shape: round`
+- **主按钮与 Tab 对齐宿主**：主按钮改为宿主反色胶囊按钮（亮 = 近黑底白字 / 暗 = 近白底深字，hover 走 `button-primary-hover`，0.16s 过渡）；二级 tab 从实心蓝底白字改为宿主下划线式（active = 业务主色字 + 2px 下划线，容器底线 0.5px l2）
+- **状态色 tint 随主题**：badge / chip / callout / 搜索激活选项的底色从暗色硬编码 tint 改为 `color-mix(状态色 10–12%, transparent)` + 状态色字，明暗自动适配；neutral 徽标用宿主 `bg-module-platform` + `label-secondary`
+- **浮层对齐宿主**：弹窗（r16、`bg-layer-2`、`border: 0` + `--dsw-elevation-prominent` 阴影，遮罩加 `--dsw-mask-blur` 背景模糊）、搜索弹层（r8、`bg-layer-2` + `--dsw-elevation-panel`）、toast（宿主规格：固定深灰 chip + 浅色字 + elevation 阴影，tone 以状态色符号区分）
+- **日志面板**：底色改宿主 `markdown-code-block`（亮 #f9fafb / 暗 #1b1b1c），等宽字体改宿主 `--ds-font-family-code` 栈（替换自持 Cascadia 栈，含视图内联的 `monospace` 字面量）
+- **细节**：`.label` 13→12px、`.fieldLabel` 10→11px（宿主最小字号）；统计卡 hover 从 accent 描边改为 `label-dimmed` 边 + `interactive-bg-hover` 底；reviewer chip 从实心蓝改为 business-tertiary 底 + business-primary 字
+- **下拉框尺寸统一**：监控台切换卡的五个下拉框（GitLab 服务器/项目、kubeconfig/context/namespace）去掉 `compact` 小规格（11px 字、3/6 padding、约 18px 高），与输入框/按钮统一为标准尺寸（14px 字、8/10 padding、r8、0.5px l4 描边）；`Select` 组件的 `compact` prop 与 `searchTriggerCompact` / `searchOptionCompact` 类随之删除
+- **布局按数据源归位**：GitLab 配置卡（服务器/项目切换）移入 GitLab tab 下方，K8s 配置卡（kubeconfig/context/namespace）移入 K8s tab 下方，顶部不再常驻两张切换卡；4 张统计卡（开放 MR / 流水线 / 部署 / 异常 Pod）上移至面板最顶部，tab 切换栏之下。配置与数据同屏，未配置的 tab 仍显示原空态提示
+- **字体大小统一适配宿主**：控制台字号全部桥接宿主内容字体 token——正文 / 输入 / 标题走宿主 `--dsh-content-font-size`（14px），按钮 / 标签 / 列表行走 `--dsh-content-font-size-secondary`（13px）；微文本（badge / 日志 / 微符号）与统计卡数值联动宿主字号调节量 `--dsh-content-font-delta`，宿主调字号时控制台自动缩放。原 12px 文本升宿主 13px 次级档、10px 微符号升宿主最小 11px（徽标 / tag 规格）、15px 标题收敛为 14px 正文、统计数值 20px → 宿主标题档 18px
+
+### 实现
+- `src/client/theme.ts`：删除 `detectTheme` / `colorLuminance` / `MutationObserver` / `matchMedia` 检测链；`THEME_CSS` 改为 `body` 上两段桥接声明（宿主 token 声明在 body，`:root` 桥接因作用域解析不到宿主变量，故必须挂 body）；`initDevopsTheme` 保持幂等注入并替换旧版残留的 stale `<style>` 标签
+- `src/client/DevopsUI.module.css`：全量按宿主规格重调，删除死类 `select` / `selectCompact` / `selectDisabled` / `serverRow*` / `formBox` / `searchTriggerCompact` / `searchOptionCompact`
+- `src/client/ui.tsx`：Toast 硬编码 rgba 底/边移入 CSS（`--dsh-devops-toast-bg` + 状态色符号）
+- `src/client/DevopsDashboard.tsx`：内联 `borderRadius` 4/6 → 6/8 统一，内联等宽字体改 `var(--ds-font-family-code, monospace)`（颜色本就走变量，自动跟随）；顶部双 SwitchCard 提为 `gitlabSwitchCard` / `k8sSwitchCard` 常量，分别渲染为对应 tab 内容区首个子元素，统计卡 grid 上移至 tab 切换栏之上
+- `src/client/theme.ts`：新增 4 个字号变量 `--dsh-devops-font` / `-font-2` / `-font-3` / `-font-xl`（两主题块相同声明：base/secondary 桥宿主内容字体 token，微文本与展示档 `calc(Npx + var(--dsh-content-font-delta, 0px))` 联动宿主字号调节）；`DevopsUI.module.css` 41 处字号字面量全部映射到这些变量，`ui.tsx` / `DevopsSettings.tsx` / `DevopsDashboard.tsx` 约 35 处内联 `fontSize` 字面量改 `var(--dsh-devops-font*)`（40px 装饰 emoji 除外）
+
+### 测试
+- `tests/client/theme.spec.ts` 重写：`colorLuminance` / `detectTheme` 套件删除；新断言——桥接声明在 `body`（无 `:root`）、暗色块声明数与亮色块相等且 ≥30、每个变量要么 `var(<宿主 token>, <原始 fallback>)` 要么显式自持（toast 字色、日志命中高亮）、字号变量按字阶断言（base/secondary 必须桥宿主内容字体 token，微文本/展示档必须联动宿主字号调节量）、注入幂等、stale 标签替换、不写任何 `data-dsh-devops-theme` 属性
+- 全量测试通过（typecheck + build + vitest），lib/ 已重建
+
 ## v0.3.5 — 原生侧边栏面板入口（新会话下方）
 
 ### 新增

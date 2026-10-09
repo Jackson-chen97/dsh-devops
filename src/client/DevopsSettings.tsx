@@ -578,7 +578,7 @@ export function DevopsSettings({ connection, locale, t }: DevopsSettingsProps) {
                         <Label>{t('branch')}</Label>
                         {!d.projectPath && <div className={cssUI.hint}>{t('selProjFirst')}</div>}
                         {d.branchesError && (
-                          <div style={{ fontSize: 12, color: 'var(--dsh-devops-err-strong)', marginBottom: 6 }}>⚠ {d.branchesError}</div>
+                          <div style={{ fontSize: 'var(--dsh-devops-font-2)', color: 'var(--dsh-devops-err-strong)', marginBottom: 6 }}>⚠ {d.branchesError}</div>
                         )}
                         {d.projectPath && !d.branchesLoading && d.branches.length > 0 && (
                           <div style={{ display: 'flex', gap: 6, marginBottom: 8 }}>

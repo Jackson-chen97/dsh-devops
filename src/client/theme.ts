@@ -1,221 +1,131 @@
 /**
- * Theme detection and self-owned theme variables for the DevOps console.
+ * Theme bridge for the DevOps console.
  *
- * The DSH host exposes no theme API and does not define light values for the
- * `--ds-alias-*` CSS variables, so the console owns a small `--dsh-devops-*`
- * variable layer: a dark palette (the default `:root` block) and a
- * self-contained light palette keyed on `:root[data-dsh-devops-theme="light"]`.
- * The light block intentionally never references `--ds-alias-*` — a host that
- * only ever defines the dark values must not leak them into light mode.
+ * The DSH host is a dual-theme design system: it declares `--dsw-alias-*`
+ * semantic tokens on `body`, with the dark theme a single attribute away
+ * (`body[data-ds-dark-theme]`). The console consumes those tokens through a
+ * small `--dsh-devops-*` layer, declared on `body` (never `:root` — the host
+ * tokens are body-declared, and `var()` substitution happens at the declaring
+ * element, so a `:root` bridge could never see them).
  *
- * The active theme is detected in priority order:
- *   1. explicit DOM markers — a `data-theme` or `data-ds-theme-source`
- *      attribute (exact `light`/`dark`; anything else, e.g. `system`, is no
- *      signal), an exact `light`/`dark` class token,
- *      `<meta name="color-scheme">`, or the cascaded / inline `color-scheme`
- *      declaration on `<html>`;
- *   2. luminance of the host's computed `--ds-alias-surface` /
- *      `--ds-alias-foreground` values;
- *   3. the system `prefers-color-scheme` media query.
+ * Every declaration is `var(<host token>, <fallback>)`: when the host provides
+ * the token the console follows its light/dark attribute automatically with no
+ * JS detection; when the token is absent (old hosts, jsdom) the per-theme
+ * fallback below — the host's own resolved values — keeps the console looking
+ * native under the same `body[data-ds-dark-theme]` attribute.
  *
- * `initDevopsTheme()` injects the CSS once, writes the detected theme to the
- * `data-dsh-devops-theme` attribute on `<html>`, and re-detects live via a
- * MutationObserver plus a matchMedia change listener. Every color the console
- * renders resolves through `var(--dsh-devops-*)`, so flipping the attribute
- * re-themes CSS and inline styles alike — no React re-render is needed.
+ * `initDevopsTheme()` injects the bridge CSS once (idempotent, replaces a
+ * stale tag from a previous plugin version). All colors the console renders
+ * resolve through `var(--dsh-devops-*)`, so theme flips re-style CSS and
+ * inline styles alike with no React re-render.
  */
-
-export type DevopsTheme = 'light' | 'dark'
-
-export const THEME_ATTR = 'data-dsh-devops-theme'
 
 export const THEME_CSS = `
-:root {
-  --dsh-devops-border: var(--ds-alias-border, #2a2a2a);
-  --dsh-devops-fg: var(--ds-alias-foreground, #eee);
-  --dsh-devops-fg-2: #ccc;
-  --dsh-devops-fg-3: #888;
-  --dsh-devops-fg-4: #666;
-  --dsh-devops-surface: var(--ds-alias-surface, #141414);
-  --dsh-devops-surface-inset: var(--ds-alias-surface-inset, #1a1a1a);
-  --dsh-devops-input-bg: var(--ds-alias-input-bg, #1a1a1a);
-  --dsh-devops-primary: var(--ds-alias-primary, #4a9eff);
-  --dsh-devops-hover: rgba(255, 255, 255, 0.05);
-  --dsh-devops-overlay: rgba(0, 0, 0, 0.55);
-  --dsh-devops-ok: #34c759;
-  --dsh-devops-warn: #fbbf24;
-  --dsh-devops-err: #ff8a80;
-  --dsh-devops-err-strong: #ff453a;
-  --dsh-devops-accent: #5aa8ff;
-  --dsh-devops-log-bg: #0d0d0d;
-  --dsh-devops-log-info: #8f8;
-  --dsh-devops-log-warn: #fbbf24;
-  --dsh-devops-log-err: #ff453a;
-  --dsh-devops-log-match: rgba(255, 193, 7, 0.28);
+body {
+  --dsh-devops-border: var(--dsw-alias-border-l3, rgba(0, 0, 0, 0.12));
+  --dsh-devops-border-l1: var(--dsw-alias-border-l1, rgba(0, 0, 0, 0.04));
+  --dsh-devops-border-l2: var(--dsw-alias-border-l2, rgba(0, 0, 0, 0.1));
+  --dsh-devops-border-l4: var(--dsw-alias-border-l4, rgba(0, 0, 0, 0.16));
+  --dsh-devops-fg: var(--dsw-alias-label-primary, #0f1115);
+  --dsh-devops-fg-2: var(--dsw-alias-label-secondary, #61666b);
+  --dsh-devops-fg-3: var(--dsw-alias-label-tertiary, #81858c);
+  --dsh-devops-fg-4: var(--dsw-alias-label-dimmed, #e1e5ee);
+  --dsh-devops-surface: var(--dsw-alias-bg-layer-3, #ffffff);
+  --dsh-devops-surface-inset: var(--dsw-alias-bg-module-platform, #f5f6f7);
+  --dsh-devops-input-bg: var(--dsw-alias-bg-layer-1, #ffffff);
+  --dsh-devops-layer-2: var(--dsw-alias-bg-layer-2, #ffffff);
+  --dsh-devops-primary: var(--dsw-alias-brand-primary-new-colorprimary-new-color, #4176e6);
+  --dsh-devops-accent: var(--dsw-alias-state-business-primary, #4176e6);
+  --dsh-devops-chip-bg: var(--dsw-alias-state-business-tertiary, #e4edfd);
+  --dsh-devops-btn: var(--dsw-alias-button-primary-fill, #0f1115);
+  --dsh-devops-btn-hover: var(--dsw-alias-button-primary-hover, #43454a);
+  --dsh-devops-btn-fg: var(--dsw-alias-label-primary-foreground, #ffffff);
+  --dsh-devops-hover: var(--dsw-alias-interactive-bg-hover, rgba(38, 49, 72, 0.06));
+  --dsh-devops-overlay: var(--dsw-alias-bg-mask-1, rgba(0, 0, 0, 0.24));
+  --dsh-devops-ok: var(--dsw-alias-state-success-primary, #22c55e);
+  --dsh-devops-warn: var(--dsw-alias-state-warn-primary, #f59e0b);
+  --dsh-devops-err: var(--dsw-alias-state-error-secondary, #f25a5a);
+  --dsh-devops-err-strong: var(--dsw-alias-state-error-primary, #ec1313);
+  --dsh-devops-toast-bg: var(--dsw-alias-toast-bg, #353638);
+  --dsh-devops-toast-fg: #f9fafb;
+  --dsh-devops-log-bg: var(--dsw-alias-markdown-code-block, #f9fafb);
+  --dsh-devops-log-info: var(--dsw-alias-state-success-primary, #22c55e);
+  --dsh-devops-log-warn: var(--dsw-alias-state-warn-primary, #f59e0b);
+  --dsh-devops-log-err: var(--dsw-alias-state-error-primary, #ec1313);
+  --dsh-devops-log-match: rgba(245, 158, 11, 0.45);
+  --dsh-devops-mask-blur: var(--dsw-mask-blur, blur(2px));
+  --dsh-devops-elevation-panel: var(--dsw-elevation-panel, 0 8px 24px rgba(0, 0, 0, 0.25));
+  --dsh-devops-elevation-prominent: var(--dsw-elevation-prominent, 0 16px 48px rgba(0, 0, 0, 0.35));
+  --dsh-devops-code-font: var(--ds-font-family-code, 'SF Mono', 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Menlo, Courier, 'PingFang SC', 'Microsoft YaHei');
+  /* Font scale — base/secondary bridge the host's content font tokens, the
+     micro and display steps are delta-linked so a host font-size adjustment
+     scales the console too. Theme-independent (same values in both blocks). */
+  --dsh-devops-font: var(--dsh-content-font-size, 14px);
+  --dsh-devops-font-2: var(--dsh-content-font-size-secondary, 13px);
+  --dsh-devops-font-3: calc(11px + var(--dsh-content-font-delta, 0px));
+  --dsh-devops-font-xl: calc(18px + var(--dsh-content-font-delta, 0px));
 }
-:root[data-dsh-devops-theme="light"] {
-  --dsh-devops-border: #d9d9d9;
-  --dsh-devops-fg: #1f1f1f;
-  --dsh-devops-fg-2: #444;
-  --dsh-devops-fg-3: #666;
-  --dsh-devops-fg-4: #999;
-  --dsh-devops-surface: #ffffff;
-  --dsh-devops-surface-inset: #f5f5f5;
-  --dsh-devops-input-bg: #ffffff;
-  --dsh-devops-primary: #0a84ff;
-  --dsh-devops-hover: rgba(0, 0, 0, 0.05);
-  --dsh-devops-overlay: rgba(0, 0, 0, 0.4);
-  --dsh-devops-ok: #1a7f37;
-  --dsh-devops-warn: #b45309;
-  --dsh-devops-err: #d93025;
-  --dsh-devops-err-strong: #d93025;
-  --dsh-devops-accent: #0a63c9;
-  --dsh-devops-log-bg: #f6f8fa;
-  --dsh-devops-log-info: #1a7f37;
-  --dsh-devops-log-warn: #b45309;
-  --dsh-devops-log-err: #d93025;
-  --dsh-devops-log-match: rgba(255, 193, 7, 0.55);
+body[data-ds-dark-theme] {
+  --dsh-devops-border: var(--dsw-alias-border-l3, rgba(255, 255, 255, 0.16));
+  --dsh-devops-border-l1: var(--dsw-alias-border-l1, rgba(255, 255, 255, 0.06));
+  --dsh-devops-border-l2: var(--dsw-alias-border-l2, rgba(255, 255, 255, 0.12));
+  --dsh-devops-border-l4: var(--dsw-alias-border-l4, rgba(255, 255, 255, 0.2));
+  --dsh-devops-fg: var(--dsw-alias-label-primary, #f9fafb);
+  --dsh-devops-fg-2: var(--dsw-alias-label-secondary, #cfd3da);
+  --dsh-devops-fg-3: var(--dsw-alias-label-tertiary, #adb2b8);
+  --dsh-devops-fg-4: var(--dsw-alias-label-dimmed, #43454a);
+  --dsh-devops-surface: var(--dsw-alias-bg-layer-3, #353638);
+  --dsh-devops-surface-inset: var(--dsw-alias-bg-layer-2, #2c2c2e);
+  --dsh-devops-input-bg: var(--dsw-alias-bg-layer-1, #232324);
+  --dsh-devops-layer-2: var(--dsw-alias-bg-layer-2, #2c2c2e);
+  --dsh-devops-primary: var(--dsw-alias-brand-primary-new-colorprimary-new-color, #5686fe);
+  --dsh-devops-accent: var(--dsw-alias-state-business-primary, #679efe);
+  --dsh-devops-chip-bg: var(--dsw-alias-state-business-tertiary, #34415b);
+  --dsh-devops-btn: var(--dsw-alias-button-primary-fill, #f9fafb);
+  --dsh-devops-btn-hover: var(--dsw-alias-button-primary-hover, #ebeef2);
+  --dsh-devops-btn-fg: var(--dsw-alias-label-primary-foreground, #0f1115);
+  --dsh-devops-hover: var(--dsw-alias-interactive-bg-hover, rgba(255, 255, 255, 0.08));
+  --dsh-devops-overlay: var(--dsw-alias-bg-mask-1, rgba(0, 0, 0, 0.5));
+  --dsh-devops-ok: var(--dsw-alias-state-success-primary, #22c55e);
+  --dsh-devops-warn: var(--dsw-alias-state-warn-primary, #f59e0b);
+  --dsh-devops-err: var(--dsw-alias-state-error-secondary, #f25a5a);
+  --dsh-devops-err-strong: var(--dsw-alias-state-error-primary, #f25a5a);
+  --dsh-devops-toast-bg: var(--dsw-alias-toast-bg, #43454a);
+  --dsh-devops-toast-fg: #f9fafb;
+  --dsh-devops-log-bg: var(--dsw-alias-markdown-code-block, #1b1b1c);
+  --dsh-devops-log-info: var(--dsw-alias-state-success-primary, #22c55e);
+  --dsh-devops-log-warn: var(--dsw-alias-state-warn-primary, #f59e0b);
+  --dsh-devops-log-err: var(--dsw-alias-state-error-primary, #f25a5a);
+  --dsh-devops-log-match: rgba(245, 158, 11, 0.3);
+  --dsh-devops-mask-blur: var(--dsw-mask-blur, blur(2px));
+  --dsh-devops-elevation-panel: var(--dsw-elevation-panel, 0 8px 24px rgba(0, 0, 0, 0.45));
+  --dsh-devops-elevation-prominent: var(--dsw-elevation-prominent, 0 16px 48px rgba(0, 0, 0, 0.55));
+  --dsh-devops-code-font: var(--ds-font-family-code, 'SF Mono', 'JetBrains Mono', 'Fira Code', Consolas, 'Liberation Mono', Menlo, Courier, 'PingFang SC', 'Microsoft YaHei');
+  --dsh-devops-font: var(--dsh-content-font-size, 14px);
+  --dsh-devops-font-2: var(--dsh-content-font-size-secondary, 13px);
+  --dsh-devops-font-3: calc(11px + var(--dsh-content-font-delta, 0px));
+  --dsh-devops-font-xl: calc(18px + var(--dsh-content-font-delta, 0px));
 }
 `
-
-/**
- * Parse a CSS color (`#rgb`/`#rrggbb`, `rgb()`/`rgba()`) to 0..1 relative
- * luminance (BT.709 weights); null for anything unparseable (var references,
- * named colors, empty strings).
- */
-export function colorLuminance(value: string): number | null {
-  const v = (value ?? '').trim().toLowerCase()
-  if (!v) return null
-  let r = 0
-  let g = 0
-  let b = 0
-  if (v.startsWith('#')) {
-    let hex = v.slice(1)
-    if (hex.length === 3) hex = hex.replace(/./g, (c) => c + c)
-    if (!/^[0-9a-f]{6}$/.test(hex)) return null
-    r = parseInt(hex.slice(0, 2), 16)
-    g = parseInt(hex.slice(2, 4), 16)
-    b = parseInt(hex.slice(4, 6), 16)
-  } else {
-    const m = /^rgba?\(([^)]*)\)$/.exec(v)
-    if (!m) return null
-    const parts = (m[1] ?? '')
-      .split(/[\s,/]+/)
-      .filter((p) => p !== '')
-      .map(Number)
-    if (parts.length < 3) return null
-    const nr = Number(parts[0])
-    const ng = Number(parts[1])
-    const nb = Number(parts[2])
-    if ([nr, ng, nb].some((n) => Number.isNaN(n) || n < 0 || n > 255)) return null
-    ;[r, g, b] = [nr, ng, nb]
-  }
-  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255
-}
-
-/** DOM markers the host (or a regression harness) may set on <html>/<body>. */
-function domSignal(): DevopsTheme | null {
-  if (typeof document === 'undefined') return null
-  const roots: (HTMLElement | null)[] = [document.documentElement, document.body]
-  for (const attr of ['data-theme', 'data-ds-theme-source']) {
-    for (const el of roots) {
-      const t = el?.getAttribute(attr)?.toLowerCase()
-      if (t === 'light' || t === 'dark') return t
-    }
-  }
-  for (const el of roots) {
-    if (el?.classList.contains('light')) return 'light'
-    if (el?.classList.contains('dark')) return 'dark'
-  }
-  const meta = document.querySelector('meta[name="color-scheme"]')
-  if (meta) {
-    const c = meta.getAttribute('content')?.toLowerCase() ?? ''
-    if (c.includes('light') && !c.includes('dark')) return 'light'
-    if (c.includes('dark') && !c.includes('light')) return 'dark'
-  }
-  // The host also declares the scheme in CSS (an inline
-  // `style="color-scheme: light"` or a `:root { color-scheme: ... }` rule);
-  // the cascaded value wins, with the raw inline value as fallback.
-  const colorScheme = (
-    getComputedStyle(document.documentElement).getPropertyValue('color-scheme') ||
-    document.documentElement.style.getPropertyValue('color-scheme') ||
-    ''
-  ).trim().toLowerCase()
-  if (colorScheme === 'light' || colorScheme === 'dark') return colorScheme
-  return null
-}
-
-/** Luminance of the host's own alias variables, when they resolve to colors. */
-function hostAliasSignal(): DevopsTheme | null {
-  if (typeof document === 'undefined') return null
-  const style = getComputedStyle(document.documentElement)
-  for (const name of ['--ds-alias-surface', '--ds-alias-foreground']) {
-    const lum = colorLuminance(style.getPropertyValue(name))
-    if (lum !== null) return lum > 0.5 ? 'light' : 'dark'
-  }
-  return null
-}
-
-function systemSignal(): DevopsTheme {
-  try {
-    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    }
-  } catch {
-    // fall through to the dark default
-  }
-  return 'dark'
-}
-
-/** Detection chain: DOM markers → host alias luminance → system setting. */
-export function detectTheme(): DevopsTheme {
-  return domSignal() ?? hostAliasSignal() ?? systemSignal()
-}
 
 let initialized = false
 
 /**
- * Inject the theme stylesheet, apply the detected theme, and keep
- * `data-dsh-devops-theme` in sync with later host/theme changes. Idempotent;
- * safe to call from a non-DOM environment (no-op).
+ * Inject the theme bridge stylesheet. Idempotent (replaces a stale tag left
+ * by a previous plugin version); safe to call from a non-DOM environment
+ * (no-op). The bridge declares plain (non-module) string CSS, so it can be
+ * injected verbatim at runtime without hashing or scoping.
  */
 export function initDevopsTheme(): void {
   if (typeof document === 'undefined' || initialized) return
   initialized = true
 
-  // Plain (non-module) string CSS: no lightningcss scope or hashing, so it can
-  // be injected verbatim at runtime.
   const head = document.head
-  if (head) {
-    const tag = document.createElement('style')
-    tag.setAttribute('data-dsh-devops-theme-css', '1')
-    tag.textContent = THEME_CSS
-    const stale = head.querySelector('style[data-dsh-devops-theme-css="1"]')
-    if (stale) stale.replaceWith(tag)
-    else head.appendChild(tag)
-  }
-
-  const applyTheme = (): void => {
-    const theme = detectTheme()
-    const root = document.documentElement
-    if (root.getAttribute(THEME_ATTR) !== theme) root.setAttribute(THEME_ATTR, theme)
-  }
-  applyTheme()
-
-  try {
-    const observer = new MutationObserver(applyTheme)
-    observer.observe(document.documentElement, { attributes: true })
-    if (document.body) observer.observe(document.body, { attributes: true })
-  } catch {
-    // No MutationObserver (odd environment) — the one-shot detection above
-    // already ran.
-  }
-
-  try {
-    if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
-      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme)
-    }
-  } catch {
-    // matchMedia unsupported — DOM/alias detection still applies.
-  }
+  if (!head) return
+  const tag = document.createElement('style')
+  tag.setAttribute('data-dsh-devops-theme-css', '1')
+  tag.textContent = THEME_CSS
+  const stale = head.querySelector('style[data-dsh-devops-theme-css="1"]')
+  if (stale) stale.replaceWith(tag)
+  else head.appendChild(tag)
 }

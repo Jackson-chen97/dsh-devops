@@ -1,292 +1,103 @@
 // @vitest-environment jsdom
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { colorLuminance, detectTheme } from '../../src/client/theme.ts'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
-const THEME_ATTR = 'data-dsh-devops-theme'
-const STALE_CSS_ATTR = 'data-dsh-devops-theme-css'
+const CSS_ATTR = 'data-dsh-devops-theme-css'
 
-/** Let queued MutationObserver callbacks run. */
-function flush(): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, 0))
+function injectedTags(): NodeListOf<HTMLStyleElement> {
+  return document.head.querySelectorAll<HTMLStyleElement>(`style[${CSS_ATTR}="1"]`)
 }
 
-describe('colorLuminance', () => {
-  it('parses 3-digit and 6-digit hex', () => {
-    expect(colorLuminance('#fff')).toBeCloseTo(1, 6)
-    expect(colorLuminance('#000')).toBe(0)
-    expect(colorLuminance('#ff0000')).toBeCloseTo(0.2126, 10)
-    expect(colorLuminance('#141414')).toBeCloseTo(20 / 255, 6)
-    const abc = colorLuminance('#ABC')
-    const aabbcc = colorLuminance('#aabbcc')
-    expect(abc).not.toBeNull()
-    expect(aabbcc).not.toBeNull()
-    expect(abc).toBeCloseTo(aabbcc as number, 10)
+describe('THEME_CSS', () => {
+  it('declares the bridge on body, with a body[data-ds-dark-theme] override block', async () => {
+    const { THEME_CSS } = await import('../../src/client/theme.ts')
+    expect(THEME_CSS).toMatch(/^\s*body \{/)
+    expect(THEME_CSS).toContain('body[data-ds-dark-theme] {')
+    // Host tokens are body-declared; a :root bridge could never resolve them.
+    expect(THEME_CSS).not.toContain(':root')
   })
 
-  it('parses rgb()/rgba(), ignoring alpha', () => {
-    expect(colorLuminance('rgb(30, 30, 30)')).toBeCloseTo(30 / 255, 6)
-    expect(colorLuminance('rgba(255, 255, 255, 0.9)')).toBeCloseTo(1, 6)
-    expect(colorLuminance('RGB( 0, 0, 0 )')).toBe(0)
-    expect(colorLuminance('rgb(128,128,128)')).toBeCloseTo(128 / 255, 6)
+  it('bridges the console variables to the host alias tokens', async () => {
+    const { THEME_CSS } = await import('../../src/client/theme.ts')
+    expect(THEME_CSS).toContain('var(--dsw-alias-border-l3,')
+    expect(THEME_CSS).toContain('var(--dsw-alias-label-primary,')
+    expect(THEME_CSS).toContain('var(--dsw-alias-bg-layer-3,')
+    expect(THEME_CSS).toContain('var(--dsw-alias-brand-primary-new-colorprimary-new-color,')
+    expect(THEME_CSS).toContain('var(--dsw-alias-button-primary-fill,')
+    expect(THEME_CSS).toContain('var(--dsw-alias-toast-bg,')
+    expect(THEME_CSS).toContain('var(--dsw-elevation-prominent,')
+    expect(THEME_CSS).toContain('var(--dsw-mask-blur,')
+    expect(THEME_CSS).toContain('var(--ds-font-family-code,')
   })
 
-  it('returns null for unparseable values', () => {
-    expect(colorLuminance('')).toBeNull()
-    expect(colorLuminance('   ')).toBeNull()
-    expect(colorLuminance('var(--x)')).toBeNull()
-    expect(colorLuminance('rebeccapurple')).toBeNull()
-    expect(colorLuminance('#12345')).toBeNull()
-    expect(colorLuminance('#zzzzzz')).toBeNull()
-    expect(colorLuminance('rgb(30, 30)')).toBeNull()
-    expect(colorLuminance('rgb(300, 0, 0)')).toBeNull()
-    expect(colorLuminance('rgb(-1, 0, 0)')).toBeNull()
-  })
-})
+  it('gives every bridged variable a per-theme raw fallback', async () => {
+    const { THEME_CSS } = await import('../../src/client/theme.ts')
+    const darkIdx = THEME_CSS.indexOf('body[data-ds-dark-theme]')
+    expect(darkIdx).toBeGreaterThan(0)
+    const blocks = [THEME_CSS.slice(0, darkIdx), THEME_CSS.slice(darkIdx)]
+    // Self-owned values with no host token: the toast text is fixed light
+    // (the chip is dark in both themes) and the log match highlight has no
+    // host counterpart.
+    const selfOwned = new Set(['--dsh-devops-toast-fg', '--dsh-devops-log-match'])
 
-describe('detectTheme', () => {
-  const de = document.documentElement
-
-  function clearMarkers(): void {
-    de.removeAttribute('data-theme')
-    de.removeAttribute('data-ds-theme-source')
-    de.removeAttribute(THEME_ATTR)
-    de.classList.remove('light', 'dark')
-    de.style.removeProperty('color-scheme')
-    document.body.removeAttribute('data-theme')
-    document.body.removeAttribute('data-ds-theme-source')
-    document.body.classList.remove('light', 'dark')
-    document.head
-      .querySelectorAll('meta[name="color-scheme"]')
-      .forEach((m) => m.remove())
-    de.style.removeProperty('--ds-alias-surface')
-    de.style.removeProperty('--ds-alias-foreground')
-  }
-
-  function stubSystem(dark: boolean): void {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({
-        matches: dark,
-        media: '(prefers-color-scheme: dark)',
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    )
-  }
-
-  beforeEach(() => {
-    clearMarkers()
-    stubSystem(false)
-  })
-
-  afterEach(() => {
-    clearMarkers()
-    vi.unstubAllGlobals()
-  })
-
-  it('data-theme on <html> beats the host alias luminance', () => {
-    de.setAttribute('data-theme', 'light')
-    de.style.setProperty('--ds-alias-surface', '#141414')
-    expect(detectTheme()).toBe('light')
-  })
-
-  it('data-theme on <body> is read too', () => {
-    document.body.setAttribute('data-theme', 'dark')
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('treats data-theme="system" as no signal and falls through', () => {
-    de.setAttribute('data-theme', 'system')
-    stubSystem(true)
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('reads exact light/dark class tokens', () => {
-    de.classList.add('light')
-    expect(detectTheme()).toBe('light')
-    de.classList.remove('light')
-    document.body.classList.add('dark')
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('reads meta[name=color-scheme] when unambiguous', () => {
-    const meta = document.createElement('meta')
-    meta.setAttribute('name', 'color-scheme')
-    meta.setAttribute('content', 'light')
-    document.head.appendChild(meta)
-    expect(detectTheme()).toBe('light')
-    meta.setAttribute('content', 'dark')
-    expect(detectTheme()).toBe('dark')
-    // Ambiguous "light dark" is no signal → system fallback.
-    meta.setAttribute('content', 'light dark')
-    stubSystem(true)
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('reads the host data-ds-theme-source attribute (beats alias luminance)', () => {
-    de.setAttribute('data-ds-theme-source', 'light')
-    de.style.setProperty('--ds-alias-surface', '#141414')
-    expect(detectTheme()).toBe('light')
-    de.setAttribute('data-ds-theme-source', 'dark')
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('treats data-ds-theme-source="system" as no signal and falls through', () => {
-    de.setAttribute('data-ds-theme-source', 'system')
-    stubSystem(true)
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('reads the cascaded/inline color-scheme on <html>', () => {
-    de.style.setProperty('--ds-alias-surface', '#141414')
-    de.style.setProperty('color-scheme', 'light')
-    expect(detectTheme()).toBe('light')
-    de.style.setProperty('color-scheme', 'dark')
-    expect(detectTheme()).toBe('dark')
-    // "normal" (the initial value) is no signal → system fallback.
-    de.style.setProperty('color-scheme', 'normal')
-    stubSystem(true)
-    expect(detectTheme()).toBe('dark')
-  })
-
-  it('falls back to the host alias surface/foreground luminance', () => {
-    de.style.setProperty('--ds-alias-surface', '#ffffff')
-    expect(detectTheme()).toBe('light')
-    de.style.setProperty('--ds-alias-surface', '#141414')
-    expect(detectTheme()).toBe('dark')
-    // Surface absent → foreground is the second key.
-    de.style.removeProperty('--ds-alias-surface')
-    de.style.setProperty('--ds-alias-foreground', '#ffffff')
-    expect(detectTheme()).toBe('light')
-  })
-
-  it('falls back to the system preference when nothing else resolves', () => {
-    stubSystem(true)
-    expect(detectTheme()).toBe('dark')
-    stubSystem(false)
-    expect(detectTheme()).toBe('light')
+    const [lightLines, darkLines] = blocks.map((block) =>
+      block.split('\n').filter((l) => /^\s*--dsh-devops-/.test(l)),
+    ) as [string[], string[]]
+    expect(lightLines.length).toBe(darkLines.length)
+    expect(lightLines.length).toBeGreaterThanOrEqual(30)
+    for (const lines of [lightLines, darkLines]) {
+      for (const line of lines) {
+        const name = line.trim().split(':')[0] ?? ''
+        if (selfOwned.has(name)) {
+          expect(line).toMatch(/:\s*(#[0-9a-f]+|rgba?\()/)
+          continue
+        }
+        // Font scale: base/secondary bridge the host's content font tokens,
+        // micro and display steps are delta-linked so a host font-size
+        // adjustment scales the console too. Identical in both blocks.
+        if (/--dsh-devops-font(-[a-z0-9]+)?$/.test(name)) {
+          expect(line).toMatch(
+            /:\s*(var\(--dsh-content-font-size(?:-secondary)?, 1[34]px\)|calc\((11|18)px \+ var\(--dsh-content-font-delta, 0px\)\));$/,
+          )
+          continue
+        }
+        // `var(<host token>, <fallback>)` — the raw fallback keeps the
+        // console styled in token-less environments (jsdom, old hosts).
+        expect(line).toMatch(/:\s*var\(--ds[a-z0-9-]*,\s*\S/)
+      }
+    }
   })
 })
 
 describe('initDevopsTheme', () => {
-  function clearInjections(): void {
-    document.head
-      .querySelectorAll(`style[${STALE_CSS_ATTR}="1"]`)
-      .forEach((s) => s.remove())
-    document.documentElement.removeAttribute(THEME_ATTR)
-  }
-
-  beforeEach(() => {
-    document.documentElement.removeAttribute('data-theme')
-    document.documentElement.removeAttribute('data-ds-theme-source')
-    document.documentElement.style.removeProperty('color-scheme')
-    document.body.removeAttribute('data-theme')
-    clearInjections()
-  })
-
   afterEach(() => {
-    clearInjections()
-    vi.unstubAllGlobals()
+    document.head
+      .querySelectorAll(`style[${CSS_ATTR}="1"]`)
+      .forEach((s) => s.remove())
     vi.resetModules()
   })
 
-  it('injects the stylesheet exactly once (idempotent) and applies the theme', async () => {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({
-        matches: true,
-        media: '(prefers-color-scheme: dark)',
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    )
+  it('injects the bridge stylesheet exactly once and writes no theme attribute', async () => {
     const { initDevopsTheme, THEME_CSS } = await import('../../src/client/theme.ts')
     initDevopsTheme()
     initDevopsTheme()
-    const tags = document.head.querySelectorAll('style[data-dsh-devops-theme-css="1"]')
+    const tags = injectedTags()
     expect(tags).toHaveLength(1)
     expect(tags.item(0)?.textContent).toBe(THEME_CSS)
-    expect(document.documentElement.getAttribute(THEME_ATTR)).toBe('dark')
+    // The host's own body[data-ds-dark-theme] attribute drives the theme —
+    // the plugin must not paint its own marker anywhere.
+    expect(document.documentElement.hasAttribute('data-dsh-devops-theme')).toBe(false)
+    expect(document.body.hasAttribute('data-dsh-devops-theme')).toBe(false)
   })
 
-  it('replaces a stale injected stylesheet', async () => {
+  it('replaces a stale stylesheet left by an older plugin version', async () => {
     const pre = document.createElement('style')
-    pre.setAttribute(STALE_CSS_ATTR, '1')
+    pre.setAttribute(CSS_ATTR, '1')
     pre.textContent = 'stale'
     document.head.appendChild(pre)
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({
-        matches: false,
-        media: '(prefers-color-scheme: dark)',
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    )
     const { initDevopsTheme, THEME_CSS } = await import('../../src/client/theme.ts')
     initDevopsTheme()
-    const tags = document.head.querySelectorAll('style[data-dsh-devops-theme-css="1"]')
+    const tags = injectedTags()
     expect(tags).toHaveLength(1)
     expect(tags.item(0)?.textContent).toBe(THEME_CSS)
-  })
-
-  it('re-detects when the host flips its theme markers (MutationObserver)', async () => {
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn(() => ({
-        matches: false,
-        media: '(prefers-color-scheme: dark)',
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-      })),
-    )
-    const { initDevopsTheme } = await import('../../src/client/theme.ts')
-    initDevopsTheme()
-    const root = document.documentElement
-    expect(root.getAttribute(THEME_ATTR)).toBe('light')
-
-    root.setAttribute('data-theme', 'dark')
-    await flush()
-    expect(root.getAttribute(THEME_ATTR)).toBe('dark')
-
-    root.removeAttribute('data-theme')
-    document.body.setAttribute('data-theme', 'light')
-    await flush()
-    expect(root.getAttribute(THEME_ATTR)).toBe('light')
-
-    // The host's own marker: flipping data-ds-theme-source re-detects too.
-    document.body.removeAttribute('data-theme')
-    root.setAttribute('data-ds-theme-source', 'dark')
-    await flush()
-    expect(root.getAttribute(THEME_ATTR)).toBe('dark')
-  })
-
-  it('re-detects when the system preference changes (matchMedia change)', async () => {
-    let dark = true
-    const changeListeners: EventListener[] = []
-    vi.stubGlobal(
-      'matchMedia',
-      vi.fn((media: string) => ({
-        matches: dark,
-        media,
-        onchange: null,
-        addEventListener: (type: string, cb: EventListener) => {
-          if (type === 'change') changeListeners.push(cb)
-        },
-        removeEventListener: vi.fn(),
-      })),
-    )
-    const { initDevopsTheme } = await import('../../src/client/theme.ts')
-    initDevopsTheme()
-    expect(document.documentElement.getAttribute(THEME_ATTR)).toBe('dark')
-    expect(changeListeners.length).toBeGreaterThan(0)
-
-    dark = false
-    changeListeners.forEach((cb) => cb(new Event('change')))
-    expect(document.documentElement.getAttribute(THEME_ATTR)).toBe('light')
   })
 })

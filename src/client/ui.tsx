@@ -70,7 +70,6 @@ export function Select({
   onChange,
   disabled,
   placeholder,
-  compact,
   t,
 }: {
   options: (string | SelectOption)[]
@@ -78,7 +77,6 @@ export function Select({
   onChange: (value: string) => void
   disabled?: boolean
   placeholder?: string
-  compact?: boolean
   /** Optional translate fn for the built-in search/empty strings (falls back to zh). */
   t?: (key: string, vars?: Record<string, unknown>) => string
 }) {
@@ -169,7 +167,7 @@ export function Select({
   if (disabled) {
     return (
       <div className={css.searchWrap}>
-        <button type="button" className={`${css.searchTrigger}${compact ? ` ${css.searchTriggerCompact}` : ''} ${css.searchTriggerDisabled}`} disabled>
+        <button type="button" className={`${css.searchTrigger} ${css.searchTriggerDisabled}`} disabled>
           <span className={css.searchTriggerValue}>{selected?.label ?? placeholder ?? ''}</span>
           <span className={css.searchCaret}>▾</span>
         </button>
@@ -190,7 +188,7 @@ export function Select({
     >
       <button
         type="button"
-        className={`${css.searchTrigger}${compact ? ` ${css.searchTriggerCompact}` : ''}`}
+        className={css.searchTrigger}
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
       >
@@ -216,14 +214,10 @@ export function Select({
               <div className={css.searchEmpty}>{emptyText}</div>
             ) : (
               filtered.map((o, i) => {
-                let cls = `${css.searchOption}${compact ? ` ${css.searchOptionCompact}` : ''}`
-                if (o.disabled) cls += ` ${css.searchOptionDisabled}`
-                else if (i === active) cls += ` ${css.searchOptionActive}`
-                if (o.value === value) cls += ` ${css.searchOptionSelected}`
                 return (
                   <div
                     key={o.value}
-                    className={cls}
+                    className={`${css.searchOption}${o.disabled ? ` ${css.searchOptionDisabled}` : i === active ? ` ${css.searchOptionActive}` : ''}${o.value === value ? ` ${css.searchOptionSelected}` : ''}`}
                     onMouseEnter={() => {
                       if (!o.disabled) setActive(i)
                     }}
@@ -334,7 +328,7 @@ export function Status({ status, msg }: { status?: string; msg?: string }) {
   const cls = status === 'ok' ? css.statusOk : status === 'error' ? css.statusError : css.statusIdle
   return (
     <div className={`${css.status} ${cls}`}>
-      <span style={{ fontSize: 14 }}>{status === 'ok' ? '✓' : status === 'error' ? '✗' : '⏳'}</span>
+      <span style={{ fontSize: 'var(--dsh-devops-font)' }}>{status === 'ok' ? '✓' : status === 'error' ? '✗' : '⏳'}</span>
       <span>{msg ?? ''}</span>
     </div>
   )
@@ -456,8 +450,8 @@ export function SecHeader({
 }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-      <span style={{ fontSize: 13 }}>{icon}</span>
-      <span style={{ fontSize: 13, fontWeight: 600 }}>{title}</span>
+      <span style={{ fontSize: 'var(--dsh-devops-font-2)' }}>{icon}</span>
+      <span style={{ fontSize: 'var(--dsh-devops-font-2)', fontWeight: 600 }}>{title}</span>
       {badge != null ? <Badge tone={badgeTone}>{badge}</Badge> : null}
       <span style={{ flex: 1 }} />
       {right}
@@ -525,16 +519,16 @@ export function SwitchCard({
   return (
     <div className={css.switchCard}>
       <div className={css.switchCardHeader}>
-        <span style={{ fontSize: 12 }}>{icon}</span>
+        <span style={{ fontSize: 'var(--dsh-devops-font-2)' }}>{icon}</span>
         <span className={css.switchCardTitle}>{title}</span>
         <span style={{ flex: 1 }} />
         {st ? (
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: st.tone === 'ok' ? 'var(--dsh-devops-ok)' : 'var(--dsh-devops-err-strong)' }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 'var(--dsh-devops-font-3)', color: st.tone === 'ok' ? 'var(--dsh-devops-ok)' : 'var(--dsh-devops-err-strong)' }}>
             <Dot tone={st.tone} pulse={st.tone === 'err'} />
             {st.text}
           </span>
         ) : (
-          <span style={{ fontSize: 10, color: 'var(--dsh-devops-fg-4)' }}>{status === '' ? t('detecting') : t('notConfigured')}</span>
+          <span style={{ fontSize: 'var(--dsh-devops-font-3)', color: 'var(--dsh-devops-fg-4)' }}>{status === '' ? t('detecting') : t('notConfigured')}</span>
         )}
       </div>
       {children}
@@ -544,14 +538,12 @@ export function SwitchCard({
 
 export function Toast({ toast }: { toast: { msg: string; tone: string } | null }) {
   if (!toast) return null
-  const bg = toast.tone === 'err' ? 'rgba(255,69,58,0.12)' : toast.tone === 'warn' ? 'rgba(251,191,36,0.12)' : 'rgba(52,199,89,0.12)'
-  const border = toast.tone === 'err' ? 'rgba(255,69,58,0.4)' : toast.tone === 'warn' ? 'rgba(251,191,36,0.4)' : 'rgba(52,199,89,0.4)'
   const fg =
     toast.tone === 'err' ? 'var(--dsh-devops-err)' : toast.tone === 'warn' ? 'var(--dsh-devops-warn)' : 'var(--dsh-devops-ok)'
   return (
-    <div className={css.toast} style={{ background: bg, border: `1px solid ${border}` }}>
+    <div className={css.toast}>
       <span style={{ color: fg }}>{toast.tone === 'err' ? '✗' : toast.tone === 'warn' ? '!' : '✓'}</span>
-      <span style={{ color: 'var(--dsh-devops-fg-2)' }}>{toast.msg}</span>
+      <span className={css.toastMsg}>{toast.msg}</span>
     </div>
   )
 }
