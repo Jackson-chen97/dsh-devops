@@ -1,5 +1,38 @@
 # 变更记录 / Changelog
 
+## v0.3.9 — 桌面宿主兼容：RPC 通道可注册（设置/仪表盘恢复取数）
+
+### 问题
+- dsh-desktop（0.2.1-rc.3）宿主的 Connection 服务 scope 是 `inject: [webStartup]`（渲染端走应用 IPC 桥），而浏览器式 Web 宿主是 `inject: [webRuntime]` + `webServer`。插件 `cordis.patch.yml` 的 `inject: [webRuntime, webServer]` 行在逐行按 key 整体替换的合并语义下，把桌面宿主的基线行替换成了该宿主不存在的服务名 → `connection`（required）拿不到依赖 → **整个应用启动失败**（9 个插件处于 waiting 状态）
+- 启动恢复后，设置页与仪表盘仍取不到数据：`/dsh-devops-read`、`/dsh-devops-write` 在桌面宿主返回 **404**。配置本身没丢（`~/.dsh-devops/config.json` 完好），丢的是通道——Connection 的 `rpc.handle` 内部经 `owner.webServer` 注册路由，而 `owner` 取自**读取方** scope。插件此前只 `inject(['connection'])`，那次读取落在 Connection 自身的 provider scope 上，桌面宿主该 scope 里没有 `webServer` → 读取抛错、两条通道都没注册（同宿主上的 dsh-mnemon 用「注入 + 携带 webServer」写法，通道正常可挂载）
+
+### 修复
+- **RPC 通道注册携带 webServer**（对齐 dsh-mnemon）：`src/host/rpc.ts` 改为 `ctx.inject(['connection', 'webServer'], ...)`，并以 `Context.is(webContext) ? webContext.extend({ webServer: webContext.get('webServer') }).connection : webContext?.connection` 读取 Connection 服务——把显式注入的 web server 挂在自己 scope 上，Connection 延迟注册路由时就能读到；effect 生命周期仍归插件的注入 fiber（卸载即摘除路由）
+- **保留容错**：两次 `connection.rpc.handle(...)` 仍在 try/catch 内——无法挂载的宿主（如 headless，注入条件不满足、回调根本不执行）只告警不阻断插件激活；第二条抛错时回滚已注册的第一条
+- **删掉无效的第三个参数**：`rpc.handle` 签名是 `(channel, handler)`，此前传入的 `{ authority: ... }` 宿主从不读取，去掉避免误导
+- **桌面 profile 补丁**（本机操作，非包内容）：`~/.dsh/profiles/desktop/cordis.patch.yml` 用户层追加 `connection` 行 `inject: [webStartup]`——用户层最后应用，覆盖插件 bundle 行、恢复宿主基线；web profile 不受影响（其宿主两侧服务齐备，插件行正常生效）
+
+### 测试
+- `pnpm verify` 全绿：typecheck + tsdown 双段构建 + vitest 125 例（`registerDevopsRpc` 通道注册 3 例：抛错不外泄且告警 / 第二条抛错时回滚第一条 / 桌面拓扑成功挂载）
+- 新增 `tests/host/rpc-mount.spec.ts`：用真实 cordis 4.0.5 搭出桌面宿主拓扑（`webServer` 与 `connection` 由**平级** plugin fiber 提供），断言两条通道最终进入 webServer 路由表。同一拓扑下旧的「只注入 connection + 直接读取」写法会抛 `cannot get property "webServer" without inject`（另行脚本验证），确保此测试能挡住回退
+- 桌面宿主实测：重启后 `/dsh-devops-read|write` 由 404 变为 401（路由已挂载、等待认证），与同宿主 `/api`、`/dsh-mnemon-*` 一致——设置页与仪表盘的取数通道恢复
+
+## v0.3.8 — 适配 DSH 宿主 0.2.1-rc.3（dsh-tools 0.2.1-rc.3 + cordis 4.0.5）
+
+### 变更
+- **依赖对齐新宿主栈**：`@deepseek-ai/dsh-tools` 精确 pin `0.2.1-rc.3`（devDependencies）；`@deepseek-ai/cordis` devDependencies 与 peerDependencies 提升至 `^4.0.5`（新 dsh-tools 的 peer 要求 `~4.0.5`）
+- **config schema 改用宿主同款 fork**：`src/config.ts` 从原始 `schemastery`（shigma 上游 3.18.0）切换到 `@deepseek-ai/schemastery`（宿主 0.2.x 依赖的 fork，3.18.5）。原因：新 fork 引入 `Mode`/`Volatile` 类型体系，其 d.ts 与旧包都声明全局 `Schemastery` 命名空间——两者同时进入 tsc 程序时全局 `Static` 重载合并，`Config` 注解的 `meta.default` 被污染为 `number | Volatile<number>`，typecheck 直接失败。切换后旧包不再被 import，冲突消除
+- **依赖替换**：dependencies 中 `schemastery` 替换为 `@deepseek-ai/schemastery`（`^3.18.5`）；tsdown `HOST_EXTERNALS` 早已保留该名称，宿主继续拥有运行时的模块版本（lib/index.js 产物 import 已核对）
+- dsh-tools 的 peer 下限保持 `>=0.1.5-rc.1` 不变：本插件只使用 `defineTool` 这一稳定 API 面，typecheck 在新旧两版上均通过
+
+### 测试
+- `pnpm verify` 全绿：typecheck + tsdown 双段构建 + vitest 13 文件 122 例
+- 产物运行时冒烟（真实 0.2.1-rc.3 依赖树）：`lib/index.js` 导入成功、`Config` schema 经新 fork 运行时构建并校验往返（含 `.default(30)` 默认值注入）、空配置干净加载
+- `pnpm peers check` 无 peer 冲突；lib/ 已重建提交
+
+### 注意
+- 本地全局宿主需同步更新到 0.2.1-rc.3 后做 UI 回归（设置 → DevOps 卡片式向导 + 会话 DevOps tab）；适配本身仅依赖树与类型层变化，无运行时行为改动
+
 ## v0.3.7 — 新建 MR 审批人未生效：改走 assignee_ids + 创建后校验
 
 ### 问题

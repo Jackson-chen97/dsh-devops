@@ -13,7 +13,7 @@
  * gate") which only enforces required fields when their section IS present.
  */
 
-import Schema from 'schemastery'
+import Schema from '@deepseek-ai/schemastery'
 
 export interface GitLabProjectConfig {
   id: string

@@ -6,6 +6,7 @@
  * Handlers return the ConnectionRpcResult envelope themselves:
  * `{ ok: true, value } | { ok: false, error: { code, message, details } }`.
  */
+import { Context } from '@deepseek-ai/cordis'
 import type {
   DevopsReadEndpoint,
   DevopsWriteEndpoint,
@@ -91,20 +92,44 @@ export interface DevopsRpcContext {
 /**
  * Mount the DevOps RPC channels on the Connection service.
  *
- * Uses `ctx.inject(['connection'], ...)` so headless profiles (no web
- * runtime) simply skip registration instead of failing to load.
+ * Both `connection` and `webServer` are injected: Connection mounts each
+ * channel through `owner.webServer`, where `owner` is derived from the
+ * *reading* scope, not from Connection's own provider scope. On hosts where
+ * Connection is not loaded below the web runtime (the desktop app) that read
+ * throws, leaving the channels unmounted (404) while the plugin still loads.
+ * Carrying the explicitly injected server on our own context makes the read
+ * resolve against this scope. Headless profiles provide no `webServer`, so the
+ * callback simply never runs.
  */
 export function registerDevopsRpc(ctx: DevopsRpcContext): void {
-  ctx.inject?.(['connection'], (webContext: any) => {
-    const connection = webContext?.connection
+  ctx.inject?.(['connection', 'webServer'], (webContext: any) => {
+    const connection = Context.is(webContext)
+      ? (webContext.extend({ webServer: webContext.get('webServer') }) as any).connection
+      : webContext?.connection
     if (!connection?.rpc?.handle) {
       console.warn('[dsh-devops] connection.rpc not available; web console disabled')
       return
     }
     const readHandler = createChannelHandler(READ_ENDPOINTS)
     const writeHandler = createChannelHandler(WRITE_ENDPOINTS)
-    const disposeRead = connection.rpc.handle(DEVOPS_READ_CHANNEL, readHandler, { authority: 'trusted-host' })
-    const disposeWrite = connection.rpc.handle(DEVOPS_WRITE_CHANNEL, writeHandler, { authority: 'loopback' })
+    let disposeRead: unknown
+    let disposeWrite: unknown
+    try {
+      disposeRead = connection.rpc.handle(DEVOPS_READ_CHANNEL, readHandler)
+      disposeWrite = connection.rpc.handle(DEVOPS_WRITE_CHANNEL, writeHandler)
+    } catch (err) {
+      try {
+        if (typeof disposeRead === 'function') disposeRead()
+      } catch {
+        /* read channel not registered yet */
+      }
+      console.warn(
+        `[dsh-devops] connection.rpc.handle unavailable on this host (${
+          err instanceof Error ? err.message : String(err)
+        }); web console disabled`,
+      )
+      return
+    }
     return () => {
       for (const dispose of [disposeRead, disposeWrite]) {
         try {

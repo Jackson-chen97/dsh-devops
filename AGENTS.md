@@ -31,7 +31,7 @@ pnpm verify          # typecheck + build + test 一次跑完
 8. **Config schema 禁用 `.required()`**：空配置必须能干净启动；`parseConfig` 先剥离空段再校验跨字段规则。配置优先级：cordis 覆盖 > `~/.dsh-devops/config.json`（设置页写入）。路径常量只在 `core/logging.ts` 定义。注意设置文件是 `servers[]`/`kubeconfigs[]` 形状，cordis config 是 schema 形状，两者不同。
 9. **客户端事件**：Select/Modal 等原语内部对 mousedown/click/keydown `stopPropagation()`，防止 DSH 全局处理器关闭下拉/弹窗——新增交互原语要沿用该模式。
 10. **i18n**：文案一律进 `src/client/locales.ts`（zh 为源，en 必须同键——有测试校验）；翻译函数经 `ctx.locale.bind('dsh-devops')` 注入组件，组件用 `useLocaleRevision` 响应语言切换。
-11. **依赖分层**：`schemastery`/`yaml` 是 dependencies；`@deepseek-ai/cordis`、`@deepseek-ai/dsh-tools`、`react` 是 peerDependencies；`dsh-tools` 精确 pin 与宿主一致的版本。
+11. **依赖分层**：`@deepseek-ai/schemastery`/`yaml` 是 dependencies；`@deepseek-ai/cordis`、`@deepseek-ai/dsh-tools`、`react` 是 peerDependencies；`dsh-tools` 精确 pin 与宿主一致的版本。config schema 必须用宿主同款 fork（`@deepseek-ai/schemastery`）构建——原始 `schemastery` 与新 fork 的 d.ts 都声明全局 `Schemastery` 命名空间，同时进入 tsc 程序会合并全局 `Static` 重载、污染 `Config` 注解类型（0.2.x 适配时踩过）。
 
 ## 测试
 

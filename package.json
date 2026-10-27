@@ -1,6 +1,6 @@
 {
   "name": "@jacksonchen/dsh-devops",
-  "version": "0.3.7",
+  "version": "0.3.9",
   "description": "GitLab + Kubernetes DevOps control plane for DeepSeek Harness: AI tools, Web console, webhooks, and alert monitor",
   "keywords": [
     "deepseek-harness",
@@ -53,18 +53,18 @@
     "verify": "pnpm run typecheck && pnpm run build && pnpm run test"
   },
   "dependencies": {
-    "schemastery": "^3.18.0",
+    "@deepseek-ai/schemastery": "^3.18.5",
     "yaml": "^2.4.0"
   },
   "peerDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/cordis": "^4.0.5",
     "@deepseek-ai/dsh-tools": ">=0.1.5-rc.1",
     "react": "^18.2.0"
   },
   "devDependencies": {
-    "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-tools": "0.1.5-rc.2",
-    "@deepseek-ai/schemastery": "^3.18.2",
+    "@deepseek-ai/cordis": "^4.0.5",
+    "@deepseek-ai/dsh-tools": "0.2.1-rc.3",
+    "@deepseek-ai/schemastery": "^3.18.5",
     "@testing-library/react": "^16.3.3",
     "@types/node": "^22.0.0",
     "@types/react": "^18.3.0",

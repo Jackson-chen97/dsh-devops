@@ -219,4 +219,48 @@ describe('registerDevopsRpc', () => {
     }
     expect(() => registerDevopsRpc(ctx)).not.toThrow()
   })
+
+  it('survives rpc.handle throwing (host that cannot mount channels)', () => {
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const ctx: DevopsRpcContext = {
+      inject: (_services, callback) => {
+        callback({
+          connection: {
+            rpc: {
+              handle: () => {
+                throw new Error('cannot get property "webServer" without inject')
+              },
+            },
+          },
+        })
+      },
+    }
+    expect(() => registerDevopsRpc(ctx)).not.toThrow()
+    expect(warnSpy.mock.calls.some((args) => String(args[0]).includes('connection.rpc.handle unavailable'))).toBe(true)
+    warnSpy.mockRestore()
+  })
+
+  it('rolls back the first channel when the second registration throws', () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const calls: string[] = []
+    const ctx: DevopsRpcContext = {
+      inject: (_services, callback) => {
+        callback({
+          connection: {
+            rpc: {
+              handle: (channel: string) => {
+                calls.push(channel)
+                if (channel === DEVOPS_WRITE_CHANNEL) throw new Error('no webServer')
+                return () => {
+                  calls.push('dispose-read')
+                }
+              },
+            },
+          },
+        })
+      },
+    }
+    expect(() => registerDevopsRpc(ctx)).not.toThrow()
+    expect(calls).toEqual([DEVOPS_READ_CHANNEL, DEVOPS_WRITE_CHANNEL, 'dispose-read'])
+  })
 })
