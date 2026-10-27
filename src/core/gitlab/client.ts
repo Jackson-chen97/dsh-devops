@@ -120,6 +120,28 @@ function mapMR(raw: RawMR): MergeRequest & {
   }
 }
 
+/** Split raw reviewer input (，/whitespace separated, optional `@` prefix) into usernames. */
+export function parseReviewerNames(raw?: string): string[] {
+  return (raw ?? '')
+    .split(/[,\uFF0C\s]+/)
+    .map((s) => s.trim().replace(/^@/, ''))
+    .filter(Boolean)
+}
+
+/**
+ * `createMR` result with the reviewer application outcome. Requested
+ * approvers are sent as BOTH `assignee_ids` (every GitLab version honors it)
+ * and `reviewer_ids` (only GitLab ≥ 12.8 honors it — older instances drop
+ * it silently), so `appliedUsernames` is the union of assignees and
+ * reviewers actually present on the created MR.
+ */
+export interface CreateMRResult extends MergeRequest {
+  /** Usernames actually applied on the created MR (assignees ∪ reviewers). */
+  appliedUsernames: string[]
+  /** Whether the instance's MR API exposes reviewers (GitLab ≥ 12.8). */
+  reviewerSupported: boolean
+}
+
 function mapPipeline(raw: RawPipeline): Pipeline & { updatedAt: string; duration: number | null } {
   return {
     id: raw.id,
@@ -268,7 +290,7 @@ export class GitLabClient {
     }))
   }
 
-  /** Resolve usernames to user ids (best-effort) for reviewer_ids. */
+  /** Resolve usernames to user ids (best-effort) for assignee_ids/reviewer_ids. */
   async resolveUserIds(names: string[]): Promise<number[]> {
     const ids: number[] = []
     for (const name of names) {
@@ -337,7 +359,7 @@ export class GitLabClient {
 
   // ─── Merge requests ─────────────────────────────────────────────────────────
 
-  /** Create a merge request. */
+  /** Create a merge request; reports whether the requested reviewers actually took effect. */
   async createMR(
     projectPath: string,
     sourceBranch: string,
@@ -345,7 +367,7 @@ export class GitLabClient {
     title: string,
     description?: string,
     reviewers?: string,
-  ): Promise<MergeRequest> {
+  ): Promise<CreateMRResult> {
     const body: Record<string, unknown> = {
       source_branch: sourceBranch,
       target_branch: targetBranch,
@@ -353,13 +375,32 @@ export class GitLabClient {
       remove_source_branch: true,
       ...(description !== undefined ? { description } : {}),
     }
-    if (reviewers) {
-      const names = reviewers.split(/[,\uFF0C\s]+/).map((s) => s.trim().replace(/^@/, '')).filter(Boolean)
+    const names = parseReviewerNames(reviewers)
+    if (names.length) {
       const ids = await this.resolveUserIds(names)
-      if (ids.length) body['reviewer_ids'] = ids
+      if (ids.length) {
+        // assignee_ids works on every GitLab version; reviewer_ids only on
+        // ≥ 12.8 (older instances drop it server-side) — send both so the
+        // selection takes effect either way.
+        body['assignee_ids'] = ids
+        body['reviewer_ids'] = ids
+      }
     }
     const raw = await this.request<RawMR>('POST', `/projects/${encodeURIComponent(projectPath)}/merge_requests`, body)
-    return mapMR(raw)
+    // GitLab < 12.8 responses have no `reviewers` field at all; `assignees`
+    // is the field that carries the applied users there.
+    const rawAssignees = Array.isArray(raw.assignees) ? (raw.assignees as { username?: string }[]) : []
+    const rawReviewers = Array.isArray(raw.reviewers) ? (raw.reviewers as { username?: string }[]) : null
+    const applied = new Map<string, string>()
+    for (const u of [...rawAssignees, ...(rawReviewers ?? [])]) {
+      const username = (u.username ?? '').trim()
+      if (username && !applied.has(username.toLowerCase())) applied.set(username.toLowerCase(), username)
+    }
+    return {
+      ...mapMR(raw),
+      appliedUsernames: [...applied.values()],
+      reviewerSupported: rawReviewers !== null,
+    }
   }
 
   /** Approve a merge request. */

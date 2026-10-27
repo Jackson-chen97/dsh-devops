@@ -1,5 +1,22 @@
 # 变更记录 / Changelog
 
+## v0.3.7 — 新建 MR 审批人未生效：改走 assignee_ids + 创建后校验
+
+### 问题
+- 新建 MR 时选择/填写的审批人（Reviewers）在部分 GitLab 上静默丢失：此前仅发送 `reviewer_ids`，而 **MR Reviewers 功能自 GitLab 12.8 起才提供**——12.8 以下的实例（如 11.11）创建 MR 时直接忽略 `reviewer_ids`，MR 正常创建但审批人列表为空，控制台与 AI 工具均无任何提示
+
+### 修复
+- **改走 assignee_ids**：`GitLabClient.createMR` 将解析出的审批人 id 同时写入 `assignee_ids`（所有 GitLab 版本均生效）与 `reviewer_ids`（≥ 12.8 生效），11.11 等老版本上审批人现在以 assignee 身份真实出现在 MR 页面上
+- **创建后校验**：返回值扩展为 `CreateMRResult`（`extends MergeRequest`）——新增 `appliedUsernames`（创建响应中 assignees ∪ reviewers 的实际生效用户名，大小写不敏感去重）与 `reviewerSupported`（响应是否含 `reviewers` 字段，识别 12.8 以下实例）
+- **控制台警告**：`gitlab-create-mr` 端点逐个核对请求与生效结果，未生效的审批人按需附加 `reviewerWarning`；`DevopsDashboard` 新建 MR 成功 toast 改为附带警告的 warn 色调提示，不再静默
+- **AI 工具回显**：`gitlab_mr_create` 工具在传了 reviewers 时，结果中附带 `reviewers_applied`（实际生效用户名）与 `reviewers_supported`（实例是否支持 Reviewers）
+- 新增 `parseReviewerNames`（核心层，供端点复用同一套拆分规则：`，`/逗号/空白分隔、`@` 前缀）
+
+### 测试
+- `tests/core/gitlab-client.spec.ts`：`parseReviewerNames` 拆分规则 2 例；`createMR` 审批人校验 4 例（现代 GitLab 同时发送两组 id / 12.8 以下经 assignees 生效 / 未请求审批人不发 id / 用户名全部解析失败不发 id）
+- `tests/host/endpoints.spec.ts`：`gitlab-create-mr` 警告路径 5 例（老版本经 assignee 生效无警告并断言请求体 / 解析失败警告 / 部分生效只报缺失项 / 全部生效无警告 / 未请求审批人无警告字段）
+- 全量测试通过（typecheck + build + vitest），lib/ 已重建；README 双份同步更新
+
 ## v0.3.6 — 控制台样式对齐 DSH 宿主原生设计
 
 ### 变更

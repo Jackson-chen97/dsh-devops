@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
-import { testGitLab, gitlabProjects } from '../../src/host/endpoints-gitlab.ts'
+import { testGitLab, gitlabProjects, gitlabCreateMR } from '../../src/host/endpoints-gitlab.ts'
 import { registerDevopsRpc, type DevopsRpcContext } from '../../src/host/rpc.ts'
 import { DEVOPS_READ_CHANNEL, DEVOPS_WRITE_CHANNEL } from '../../src/protocol.ts'
 
@@ -43,6 +43,117 @@ describe('GitLab RPC endpoints', () => {
     const r = await gitlabProjects({ baseUrl: 'https://gitlab.example.com', token: 't' })
     expect(r.ok).toBe(true)
     expect(r.projects).toEqual([{ id: '7', name: 'Proj', path: 'grp/proj', defaultBranch: 'main' }])
+  })
+
+  describe('gitlab-create-mr reviewer warning', () => {
+    const params = {
+      baseUrl: 'https://gitlab.example.com',
+      token: 't',
+      projectPath: 'grp/proj',
+      sourceBranch: 'feat/x',
+      targetBranch: 'main',
+      title: 't',
+    }
+    const mrOk = {
+      id: 1,
+      iid: 10,
+      title: 't',
+      state: 'opened',
+      source_branch: 'feat/x',
+      target_branch: 'main',
+      web_url: 'https://gitlab.example.com/grp/proj/-/merge_requests/10',
+    }
+
+    it('applies via assignees on GitLab < 12.8 (no reviewers field) without warning', async () => {
+      const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) =>
+        String(input).includes('/users?search=')
+          ? jsonResponse([{ id: 7, username: 'alice' }])
+          : jsonResponse({ ...mrOk, assignees: [{ id: 7, username: 'alice' }] }), // < 12.8: no `reviewers` key
+      )
+      vi.stubGlobal('fetch', fetchMock)
+      const r = await gitlabCreateMR({ ...params, reviewers: 'alice' })
+      if (!r.ok) throw new Error(r.message)
+      expect('reviewerWarning' in r).toBe(false)
+      // both id fields are sent: assignee_ids takes effect on every version
+      const postCall = fetchMock.mock.calls.find((c) => String(c[0]).includes('/merge_requests'))
+      expect(postCall).toBeDefined()
+      const body = JSON.parse(String(postCall![1]!.body)) as Record<string, unknown>
+      expect(body.assignee_ids).toEqual([7])
+      expect(body.reviewer_ids).toEqual([7])
+    })
+
+    it('warns with the missing usernames when a requested reviewer was not applied', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (input: RequestInfo | URL) =>
+          String(input).includes('/users?search=')
+            ? jsonResponse([]) // alice unresolvable -> no ids sent
+            : jsonResponse({ ...mrOk, assignees: [], reviewers: [] }),
+        ),
+      )
+      const r = await gitlabCreateMR({ ...params, reviewers: 'alice' })
+      if (!r.ok) throw new Error(r.message)
+      expect(r.reviewerWarning).toContain('alice')
+    })
+
+    it('warns only the missing subset when some requested reviewers were applied', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = String(input)
+          if (url.includes('/users?search=')) {
+            const name = decodeURIComponent(url.split('search=')[1]!.split('&')[0]!)
+            return jsonResponse(name === 'alice' ? [{ id: 7, username: 'alice' }] : [])
+          }
+          return jsonResponse({
+            ...mrOk,
+            assignees: [],
+            reviewers: [{ id: 7, username: 'alice' }], // bob never applied
+          })
+        }),
+      )
+      const r = await gitlabCreateMR({ ...params, reviewers: 'alice, bob' })
+      if (!r.ok) throw new Error(r.message)
+      expect(r.reviewerWarning).toContain('bob')
+      expect(r.reviewerWarning).not.toContain('alice')
+    })
+
+    it('stays silent when every requested reviewer was applied', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async (input: RequestInfo | URL) => {
+          const url = String(input)
+          if (url.includes('/users?search=')) {
+            const name = decodeURIComponent(url.split('search=')[1]!.split('&')[0]!)
+            return jsonResponse([{ id: name === 'alice' ? 7 : 8, username: name }])
+          }
+          return jsonResponse({
+            ...mrOk,
+            assignees: [
+              { id: 7, username: 'alice' },
+              { id: 8, username: 'bob' },
+            ],
+            reviewers: [
+              { id: 7, username: 'alice' },
+              { id: 8, username: 'bob' },
+            ],
+          })
+        }),
+      )
+      const r = await gitlabCreateMR({ ...params, reviewers: 'alice, bob' })
+      expect(r.ok).toBe(true)
+      expect('reviewerWarning' in r).toBe(false)
+    })
+
+    it('omits reviewerWarning entirely when no reviewers were requested', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn(async () => jsonResponse({ ...mrOk, assignees: [], reviewers: [] })),
+      )
+      const r = await gitlabCreateMR({ ...params })
+      expect(r.ok).toBe(true)
+      expect('reviewerWarning' in r).toBe(false)
+    })
   })
 })
 

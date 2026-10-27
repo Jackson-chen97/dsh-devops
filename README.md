@@ -166,7 +166,7 @@ An explicit `config:` block in the cordis patch entry still works as an override
 | Tool | Description |
 |------|-------------|
 | `devops_config` | List all configured GitLab servers/projects and K8s clusters (ids, labels, active selection) — call it first to map a name to a `project` / `cluster` id |
-| `gitlab_mr_create` | Create MR (optional reviewers, auto-triggers pipeline watch) |
+| `gitlab_mr_create` | Create MR (optional reviewers, auto-triggers pipeline watch). Approvers are sent as `assignee_ids` (honored by every GitLab version) plus `reviewer_ids` (GitLab ≥ 12.8); the tool echoes `reviewers_applied` / `reviewers_supported` and the console warns for any approver that didn't take effect |
 | `gitlab_mr_review` | Review MR (approve/request_changes/comment) |
 | `gitlab_mr_list` | List merge requests |
 | `gitlab_tag_create` | Create git tag |

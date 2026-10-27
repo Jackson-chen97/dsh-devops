@@ -489,7 +489,12 @@ export function DevopsDashboard({ connection, locale, t }: DevopsDashboardProps)
         reviewers,
       })
       if (r.ok && r.mergeRequest) {
-        setToast({ msg: t('mrCreated', { iid: r.mergeRequest.iid }), tone: 'ok' })
+        // 审批人未生效时（老版本 GitLab 不支持 Reviewers / 用户名解析失败）用警告提示，避免静默丢失
+        setToast(
+          r.reviewerWarning
+            ? { msg: `${t('mrCreated', { iid: r.mergeRequest.iid })}；${r.reviewerWarning}`, tone: 'warn' }
+            : { msg: t('mrCreated', { iid: r.mergeRequest.iid }), tone: 'ok' },
+        )
         setNewMrOpen(false)
         void fetchData(config)
       } else setToast({ msg: r.message || t('mrFail'), tone: 'err' })

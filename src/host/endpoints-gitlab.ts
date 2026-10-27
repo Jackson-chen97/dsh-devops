@@ -7,7 +7,7 @@
  * payload (soft failures carry a `message`) — the RPC layer wraps the value
  * into the ConnectionRpcResult envelope.
  */
-import { GitLabClient } from '../core/gitlab/client.ts'
+import { GitLabClient, parseReviewerNames } from '../core/gitlab/client.ts'
 
 /** Build a client from raw params; null when params are missing. */
 export function gitlabClientFrom(params: { baseUrl?: string; token?: string }): GitLabClient | null {
@@ -182,7 +182,22 @@ export async function gitlabCreateMR(params: {
       params.description,
       params.reviewers,
     )
-    return { ok: true, mergeRequest: { iid: mr.iid, title: mr.title, webUrl: mr.webUrl } }
+    const result: {
+      ok: true
+      mergeRequest: { iid: number; title: string; webUrl: string }
+      reviewerWarning?: string
+    } = { ok: true, mergeRequest: { iid: mr.iid, title: mr.title, webUrl: mr.webUrl } }
+    const requested = parseReviewerNames(params.reviewers)
+    if (requested.length) {
+      // 审批人经 assignee_ids（全版本）+ reviewer_ids（≥ 12.8）下发；逐个核对
+      // 创建响应里实际生效的用户名，未生效的必须明示，否则用户无从排查。
+      const applied = mr.appliedUsernames.map((u) => u.toLowerCase())
+      const missing = requested.filter((n) => !applied.includes(n.toLowerCase()))
+      if (missing.length) {
+        result.reviewerWarning = `以下审批人未生效：${missing.join('、')}（该 GitLab 上找不到对应用户名，或 token 权限不足）`
+      }
+    }
+    return result
   } catch (err) {
     if (isAbort(err)) return fail('Timed out')
     return fail(errorMessage(err))

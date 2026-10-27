@@ -167,7 +167,7 @@ pnpm add https://github.com/Jackson-chen97/dsh-devops.git  # GitHub
 | 工具 | 说明 |
 |------|------|
 | `devops_config` | 列出全部已配置的 GitLab 服务器/项目与 K8s 集群（id、label、激活项）——调用其他工具前先用它把名字映射为 `project` / `cluster` id |
-| `gitlab_mr_create` | 创建 MR（可指定 Reviewers，自动触发 Pipeline 监控） |
+| `gitlab_mr_create` | 创建 MR（可指定 Reviewers，自动触发 Pipeline 监控）。审批人同时以 `assignee_ids`（所有 GitLab 版本均生效）与 `reviewer_ids`（GitLab ≥ 12.8 生效）下发；工具回显 `reviewers_applied` / `reviewers_supported`，监控台对未生效者给出警告提示 |
 | `gitlab_mr_review` | 评审 MR（approve/request_changes/comment） |
 | `gitlab_mr_list` | 列出 Merge Request |
 | `gitlab_tag_create` | 创建 Git Tag |

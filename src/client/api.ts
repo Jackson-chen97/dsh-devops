@@ -110,7 +110,12 @@ export class DevopsClient {
     description?: string
     reviewers?: string
   }) {
-    return this.write<{ ok: boolean; mergeRequest?: { iid: number; title: string; webUrl: string }; message?: string }>(
+    return this.write<{
+      ok: boolean
+      mergeRequest?: { iid: number; title: string; webUrl: string }
+      reviewerWarning?: string
+      message?: string
+    }>(
       'gitlab-create-mr',
       params,
     )

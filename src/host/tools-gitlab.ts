@@ -74,6 +74,13 @@ export function registerGitLabTools(ctx: DshToolContext & Partial<FollowupContex
         state: mr.state,
         web_url: mr.webUrl,
         watch: watchMsg,
+        // 仅当调用方指定了 reviewers 时回显应用结果，便于 AI 告知用户审批人是否生效
+        ...(Array.isArray(args.reviewers) && args.reviewers.length
+          ? {
+              reviewers_applied: mr.appliedUsernames,
+              reviewers_supported: mr.reviewerSupported,
+            }
+          : {}),
       }
     },
   })))
